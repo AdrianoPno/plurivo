@@ -1,6 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { JWT, VerifyOptions } from "@fastify/jwt";
+import { JWT } from "@fastify/jwt";
+import "@fastify/jwt";
 
+// Declaração de módulo para estender as interfaces do Fastify
 declare module "fastify" {
   interface FastifyInstance {
     authenticate: (
@@ -15,14 +17,21 @@ declare module "fastify" {
       options?: Parameters<JWT["sign"]>[1],
     ): Promise<string>;
   }
+}
 
-  interface FastifyRequest {
-    jwt: JWT;
-    jwtVerify(options?: VerifyOptions): Promise<void>;
-    user: {
+declare module "@fastify/jwt" {
+  interface FastifyJWT {
+    payload: {
       id: string;
       email: string;
-      // Outras propriedades do payload do JWT podem ser adicionadas aqui
-    };
+      role: "ADMIN" | "VIEWER" | "SUPER";
+      status: "ativo" | "inativo";
+    }; // payload type is used for signing
+    user: {
+      id: string; // uid do Firebase
+      email: string;
+      role: "ADMIN" | "VIEWER" | "SUPER";
+      status: "ativo" | "inativo";
+    }; // user type is the return type of `request.user`
   }
 }

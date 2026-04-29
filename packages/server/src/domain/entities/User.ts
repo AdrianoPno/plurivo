@@ -1,14 +1,13 @@
 export interface UserProps {
-  id: string;
+  uid: string; // ID único do Firebase Auth
+  nome: string;
   email: string;
-  passwordHash: string; // Senha já hashed
-  // Outras propriedades do usuário, como nome, roles, etc.
+  role: "ADMIN" | "VIEWER" | "SUPER";
+  status: "ativo" | "inativo";
 }
 
 export class User {
-  public readonly props: UserProps;
+  constructor(public props: UserProps) {}
 
-  constructor(props: UserProps) {
-    this.props = props;
-  }
+  // Métodos de negócio podem ser adicionados aqui, se necessário
 }

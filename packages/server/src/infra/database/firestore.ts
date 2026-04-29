@@ -19,28 +19,41 @@ if (!keyPath) {
 
 const resolvedPath = path.resolve(process.cwd(), keyPath);
 
-let app: App;
+let dbInstance: Firestore | null = null;
+let appInstance: App | null = null;
 
-export const getDatabase = (): Firestore => {
+const initializeFirebase = () => {
+  // Garante que a inicialização ocorra apenas uma vez.
+  if (appInstance) return;
+
   if (!getApps().length) {
-    app = initializeApp({
+    appInstance = initializeApp({
       credential: cert(resolvedPath),
     });
   } else {
-    app = getApps()[0];
+    appInstance = getApps()[0];
   }
 
-  const db = getFirestore(app);
+  const db = getFirestore(appInstance);
   db.settings({ ignoreUndefinedProperties: true });
+  dbInstance = db;
+};
 
-  return db;
+export const getDatabase = (): Firestore => {
+  if (!dbInstance) {
+    initializeFirebase();
+  }
+  return dbInstance!;
 };
 
 export const getBucket = () => {
+  if (!appInstance) {
+    initializeFirebase();
+  }
   if (!process.env.FIREBASE_STORAGE_BUCKET) {
     throw new Error(
       "A variável de ambiente FIREBASE_STORAGE_BUCKET não foi definida.",
     );
   }
-  return getStorage().bucket(process.env.FIREBASE_STORAGE_BUCKET);
+  return getStorage(appInstance!).bucket(process.env.FIREBASE_STORAGE_BUCKET);
 };

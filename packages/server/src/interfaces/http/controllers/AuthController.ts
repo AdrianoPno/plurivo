@@ -15,9 +15,14 @@ export class AuthController {
     try {
       const user = await this.loginUserUseCase.execute(request.body);
 
-      // Gera o token JWT interno da sua API
+      // Gera o token JWT interno da sua API, incluindo role e status
       const token = await reply.jwtSign(
-        { id: user.uid, email: user.email },
+        {
+          id: user.props.uid,
+          email: user.props.email,
+          role: user.props.role,
+          status: user.props.status,
+        },
         { expiresIn: "1h" }, // Token expira em 1 hora
       );
 

@@ -10,6 +10,7 @@ import {
 } from "fastify-type-provider-zod";
 import { researchRoutes } from "./interfaces/http/routes/research.routes";
 import { authRoutes } from "./interfaces/http/routes/auth.routes";
+import { userRoutes } from "./interfaces/http/routes/user.routes";
 import { storageRoutes } from "./interfaces/http/routes/storage.routes";
 import { DocumentNotFoundException } from "./infra/database/firestore";
 
@@ -75,6 +76,7 @@ fastify.register(swaggerUi, {
 // 5. Módulos de Negócio
 fastify.register(researchRoutes);
 fastify.register(authRoutes);
+fastify.register(userRoutes);
 fastify.register(storageRoutes);
 
 // Global Error Handler
