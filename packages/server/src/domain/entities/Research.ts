@@ -32,9 +32,11 @@ export interface ResearchProps {
 }
 
 export class Research {
+  public readonly id?: string;
   public readonly props: ResearchProps;
 
   constructor(props: ResearchProps, id?: string) {
+    this.id = id;
     this.props = {
       ...props,
       createdAt: props.createdAt ?? new Date(),
