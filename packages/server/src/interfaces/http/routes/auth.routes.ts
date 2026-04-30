@@ -3,11 +3,13 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { AuthController } from "../controllers/AuthController";
 import { authSchemas } from "../schemas/auth.schema";
 import { LoginUser } from "@/application/use-cases/LoginUser";
+import { FirestoreUserRepository } from "@/infra/database/FirestoreUserRepository";
 
 export async function authRoutes(fastify: FastifyInstance) {
   const app = fastify.withTypeProvider<ZodTypeProvider>();
 
-  const loginUserUseCase = new LoginUser();
+  const userRepository = new FirestoreUserRepository();
+  const loginUserUseCase = new LoginUser(userRepository);
   const controller = new AuthController(loginUserUseCase);
 
   app.post(
