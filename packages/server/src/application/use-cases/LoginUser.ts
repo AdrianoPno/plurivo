@@ -34,6 +34,8 @@ export class LoginUser {
       }
       return user;
     } catch (error) {
+      // Log do erro original do Firebase para melhor depuração
+      console.error("Falha na verificação do token de ID do Firebase:", error);
       // O token é inválido (expirado, malformado, etc.)
       throw new InvalidCredentialsError();
     }

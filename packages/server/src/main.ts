@@ -12,11 +12,16 @@ import { researchRoutes } from "./interfaces/http/routes/research.routes";
 import { authRoutes } from "./interfaces/http/routes/auth.routes";
 import { userRoutes } from "./interfaces/http/routes/user.routes";
 import { storageRoutes } from "./interfaces/http/routes/storage.routes";
-import { DocumentNotFoundException } from "./infra/database/firestore";
+import {
+  DocumentNotFoundException,
+  initializeFirebaseAdmin,
+} from "./infra/database/firestore";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("A variável de ambiente JWT_SECRET não foi definida.");
 }
+
+initializeFirebaseAdmin(); // Garante que o Firebase Admin SDK seja inicializado na inicialização.
 
 const fastify = Fastify({ logger: true });
 

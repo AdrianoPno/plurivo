@@ -22,7 +22,7 @@ const resolvedPath = path.resolve(process.cwd(), keyPath);
 let dbInstance: Firestore | null = null;
 let appInstance: App | null = null;
 
-const initializeFirebase = () => {
+export const initializeFirebaseAdmin = () => {
   // Garante que a inicialização ocorra apenas uma vez.
   if (appInstance) return;
 
@@ -41,14 +41,14 @@ const initializeFirebase = () => {
 
 export const getDatabase = (): Firestore => {
   if (!dbInstance) {
-    initializeFirebase();
+    initializeFirebaseAdmin();
   }
   return dbInstance!;
 };
 
 export const getBucket = () => {
   if (!appInstance) {
-    initializeFirebase();
+    initializeFirebaseAdmin();
   }
   if (!process.env.FIREBASE_STORAGE_BUCKET) {
     throw new Error(
