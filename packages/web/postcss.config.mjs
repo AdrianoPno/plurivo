@@ -1,7 +1,7 @@
-const config = {
+export default {
   plugins: {
-    "@tailwindcss/postcss": {},
+    // Force o uso do caminho relativo para garantir que ele ache o pacote
+    tailwindcss: {},
+    autoprefixer: {},
   },
 };
-
-export default config;

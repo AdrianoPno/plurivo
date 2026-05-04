@@ -3,6 +3,7 @@ import { z } from "zod";
 // Schema para a criação (Body)
 export const createResearchBodySchema = z.object({
   title: z.string().min(3),
+  description: z.string().min(10),
   objective: z.string(),
   status: z
     .enum(["em_andamento", "concluida", "pausada"])
@@ -22,15 +23,15 @@ export const createResearchBodySchema = z.object({
   location: z.string(),
   tags: z.array(z.string()),
   artifacts: z.array(z.string()).default([]),
+  insights: z.string().optional(),
 });
 
 // Schema para a resposta (Response)
-export const researchResponseSchema = z.object({
+export const researchResponseSchema = createResearchBodySchema.extend({
   id: z.string(),
-  title: z.string(),
-  status: z.string(),
-  createdAt: z.string().datetime().optional(),
-  updatedAt: z.string().datetime().optional(),
+  // Garante que os campos de data gerados pelo servidor existam na resposta
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
 });
 
 // Inferência de tipos para usar no Controller (Senior Practice)

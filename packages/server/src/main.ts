@@ -80,7 +80,7 @@ fastify.register(swaggerUi, {
 
 // 5. Módulos de Negócio
 fastify.register(researchRoutes);
-fastify.register(authRoutes);
+fastify.register(authRoutes, { prefix: "/auth" });
 fastify.register(userRoutes);
 fastify.register(storageRoutes);
 

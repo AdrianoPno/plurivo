@@ -1,7 +1,7 @@
-"use client";
-
-import { LoginForm } from "./login-form";
-
-export default function LoginPage() {
-  return <LoginForm />;
+export default function Page() {
+  return (
+    <section>
+      <h1>Vox Observatory Rodando</h1>
+    </section>
+  );
 }

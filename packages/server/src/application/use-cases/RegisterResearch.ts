@@ -6,15 +6,26 @@ export class RegisterResearch {
   constructor(private researchRepository: ResearchRepository) {}
 
   async execute(data: CreateResearchBody): Promise<Research> {
-    // Converte as strings de data do Zod para objetos Date do JS
+    // 1. Instanciação usando os termos em português do seu contrato
     const research = new Research({
-      ...data,
+      title: data.title,
+      description: data.description,
+      objective: data.objective,
+      status: data.status,
+      methodology: data.methodology,
       startDate: new Date(data.startDate),
       estimatedEndDate: new Date(data.estimatedEndDate),
       actualEndDate: data.actualEndDate ? new Date(data.actualEndDate) : null,
+      estimatedCost: data.estimatedCost,
+      actualCost: data.actualCost,
+      targetAudience: data.targetAudience,
+      location: data.location,
+      tags: data.tags,
+      artifacts: data.artifacts,
+      insights: data.insights,
     });
 
-    const savedResearch = await this.researchRepository.save(research);
-    return savedResearch;
+    // 2. Persistência via repositório de infra (Firestore)
+    return await this.researchRepository.save(research);
   }
 }

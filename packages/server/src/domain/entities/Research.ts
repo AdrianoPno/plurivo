@@ -7,6 +7,7 @@ export type Methodology =
 
 export interface ResearchProps {
   title: string;
+  description: string;
   objective: string;
   status: ResearchStatus;
   methodology: Methodology;
