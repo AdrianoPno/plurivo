@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import Cookies from "js-cookie";
+import { FirebaseError } from "firebase/app";
 import * as api from "@/lib/api";
 import { useAuthStore } from "@/store/use-auth-store";
 import { useLoadingStore } from "@/store/use-loading-store";
@@ -52,14 +53,18 @@ export function LoginForm() {
       setUser(apiUser);
 
       router.replace("/dashboard");
-    } catch (err: any) {
-      console.error("Auth Error:", err.code);
+    } catch (err: unknown) {
+      console.error("Auth Error:", err);
 
       // Tratamento de erro amigável
-      const message =
+      let message = "Ocorreu um erro ao tentar acessar a conta.";
+
+      if (
+        err instanceof FirebaseError &&
         err.code === "auth/invalid-credential"
-          ? "E-mail ou senha incorretos."
-          : "Ocorreu um erro ao tentar acessar a conta.";
+      ) {
+        message = "E-mail ou senha incorretos.";
+      }
 
       setError(message);
     } finally {

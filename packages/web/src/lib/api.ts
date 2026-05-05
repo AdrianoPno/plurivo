@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import Cookies from "js-cookie";
 import { useLoadingStore } from "@/store/use-loading-store";
 
@@ -34,20 +34,23 @@ api.interceptors.response.use(
     useLoadingStore.getState().stopLoading();
     return response;
   },
-  (error) => {
+  (error: unknown) => {
     useLoadingStore.getState().stopLoading();
-    const isUnauthorized = error.response?.status === 401;
-    const isAuthEndpoint = error.config?.url?.includes("/auth/sessions");
 
-    if (isUnauthorized && !isAuthEndpoint) {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("vox-api-token");
-        Cookies.remove("session", { path: "/" });
+    if (axios.isAxiosError(error)) {
+      const isUnauthorized = error.response?.status === 401;
+      const isAuthEndpoint = error.config?.url?.includes("/auth/sessions");
 
-        const isLoginPage = window.location.pathname.includes("/login");
+      if (isUnauthorized && !isAuthEndpoint) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("vox-api-token");
+          Cookies.remove("session", { path: "/" });
 
-        if (!isLoginPage) {
-          window.location.href = "/login?session=expired";
+          const isLoginPage = window.location.pathname.includes("/login");
+
+          if (!isLoginPage) {
+            window.location.href = "/login?session=expired";
+          }
         }
       }
     }

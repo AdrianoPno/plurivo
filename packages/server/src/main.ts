@@ -172,7 +172,7 @@ fastify.setErrorHandler((error, request, reply) => {
       message:
         "Ocorreu um erro de configuração no banco de dados. Um índice necessário não foi encontrado.",
       // A propriedade `details` do erro do gRPC contém o link para criar o índice
-      details: (error as any).details,
+      details: (error as { details?: string }).details,
     });
   }
 

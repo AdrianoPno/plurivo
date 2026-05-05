@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             const apiUser = await api.getMe();
             setUser(apiUser);
-          } catch (error: any) {
+          } catch (error: unknown) {
             console.error("Auth provider: Session sync failed.", error);
 
             // Sincronização em cadeia: Falhou na API? Mata o Firebase e o Token.

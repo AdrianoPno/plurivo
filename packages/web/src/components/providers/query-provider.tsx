@@ -1,5 +1,6 @@
 "use client";
 
+import { AxiosError } from "axios";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -14,8 +15,11 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
 
             // Trava de segurança: Se a API responder 401, não tenta de novo.
             // Isso impede que o React Query alimente o loop de redirecionamento.
-            retry: (failureCount, error: any) => {
-              if (error?.response?.status === 401) {
+            retry: (failureCount, error: unknown) => {
+              if (
+                error instanceof AxiosError &&
+                error.response?.status === 401
+              ) {
                 return false;
               }
               // Para outros erros (ex: rede), tenta apenas 2 vezes.

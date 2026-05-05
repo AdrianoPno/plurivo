@@ -5,7 +5,11 @@ import {
   Artifact,
 } from "../../domain/entities/Research";
 import { getDatabase, DocumentNotFoundException } from "./firestore";
-import { Timestamp, Query } from "firebase-admin/firestore";
+import {
+  Timestamp,
+  Query,
+  CollectionReference,
+} from "firebase-admin/firestore";
 import { ListResearchQuery } from "../../interfaces/http/schemas/research.schema";
 
 type FirestoreResearchData = Omit<
@@ -20,7 +24,9 @@ type FirestoreResearchData = Omit<
 };
 
 export class FirestoreResearchRepository implements ResearchRepository {
-  private collection = getDatabase().collection("researches");
+  private collection = getDatabase().collection(
+    "researches",
+  ) as CollectionReference<FirestoreResearchData>;
 
   async save(research: Research): Promise<Research> {
     const data = this.mapToDatabase(research.props);
@@ -86,9 +92,18 @@ export class FirestoreResearchRepository implements ResearchRepository {
       throw new DocumentNotFoundException(`Research with ID ${id} not found.`);
     }
 
-    const { startDate, estimatedEndDate, actualEndDate, ...restOfData } = data;
+    // Destrutura todos os campos de data para garantir que não sejam passados
+    // diretamente via 'restOfData', evitando conflitos de tipo (Date vs Timestamp).
+    const {
+      startDate,
+      estimatedEndDate,
+      actualEndDate,
+      createdAt, // Ignorado para impedir a atualização da data de criação.
+      updatedAt, // Ignorado pois será definido como Timestamp.now().
+      ...restOfData
+    } = data;
 
-    const dataToUpdate: { [key: string]: any } = {
+    const dataToUpdate: Partial<FirestoreResearchData> = {
       ...restOfData,
       updatedAt: Timestamp.now(),
     };
