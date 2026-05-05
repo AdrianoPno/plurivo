@@ -41,6 +41,7 @@ export const listResearchQuerySchema = z.object({
   status: z.enum(["em_andamento", "concluida", "pausada"]).optional(),
   tag: z.string().optional(),
   location: z.string().optional(),
+  title: z.string().optional(),
 });
 
 export type ListResearchQuery = z.infer<typeof listResearchQuerySchema>;

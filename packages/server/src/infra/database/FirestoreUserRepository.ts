@@ -1,6 +1,6 @@
 import { User, UserProps } from "@/domain/entities/User";
 import { UserRepository } from "@/domain/repositories/UserRepository";
-import { getDatabase } from "./firestore";
+import { DocumentNotFoundException, getDatabase } from "./firestore";
 
 export class FirestoreUserRepository implements UserRepository {
   private collection = getDatabase().collection("users");
@@ -19,6 +19,18 @@ export class FirestoreUserRepository implements UserRepository {
   async save(user: User): Promise<void> {
     // O UID do Firebase Auth será o ID do documento no Firestore
     await this.collection.doc(user.props.uid).set(user.props, { merge: true });
+  }
+
+  async update(uid: string, data: Partial<UserProps>): Promise<void> {
+    const docRef = this.collection.doc(uid);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      throw new DocumentNotFoundException(`User with UID ${uid} not found.`);
+    }
+
+    // Atualiza o documento com os novos dados
+    await docRef.update(data);
   }
 
   // Métodos de mapeamento (se necessário, para datas ou outros tipos complexos)

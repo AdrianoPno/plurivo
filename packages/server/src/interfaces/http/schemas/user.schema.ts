@@ -1,15 +1,20 @@
 import { z } from "zod";
 
-export const userSchema = z.object({
+export const userResponseSchema = z.object({
   uid: z.string(),
   nome: z.string(),
   email: z.string().email(),
   role: z.enum(["ADMIN", "VIEWER", "SUPER"]),
-  status: z.enum(["ativo", "inativo"]).default("ativo"),
+  status: z.enum(["ativo", "inativo"]),
 });
 
-export type UserType = z.infer<typeof userSchema>;
+export type UserType = z.infer<typeof userResponseSchema>;
 
-export const userSchemas = {
-  userSchema,
-};
+export const updateUserBodySchema = z.object({
+  nome: z
+    .string()
+    .min(3, "O nome deve ter pelo menos 3 caracteres.")
+    .optional(),
+});
+
+export type UpdateUserBody = z.infer<typeof updateUserBodySchema>;

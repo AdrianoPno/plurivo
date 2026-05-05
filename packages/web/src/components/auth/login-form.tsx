@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import Cookies from "js-cookie";
-import { exchangeFirebaseTokenForApiToken, getMe } from "@/lib/api";
+import * as api from "@/lib/api";
 import { useAuthStore } from "@/store/use-auth-store";
 
 import { Button } from "@/components/ui/button";
@@ -37,14 +37,15 @@ export function LoginForm() {
       const firebaseIdToken = await userCredential.user.getIdToken();
 
       // 2. Troca o token do Firebase pelo token da API interna
-      const apiToken = await exchangeFirebaseTokenForApiToken(firebaseIdToken);
+      const apiToken =
+        await api.exchangeFirebaseTokenForApiToken(firebaseIdToken);
 
       // 3. Armazena o token da API para ser usado pelo interceptor do Axios e pelo middleware
       localStorage.setItem("vox-api-token", apiToken);
       Cookies.set("session", apiToken, { expires: 7, path: "/" });
 
       // 4. Busca os dados completos do usuário (incluindo role) do backend
-      const apiUser = await getMe();
+      const apiUser = await api.getMe();
 
       // 5. Atualiza o estado global com os dados da API
       setUser(apiUser);
