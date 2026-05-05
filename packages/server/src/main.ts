@@ -21,7 +21,6 @@ import {
 
 import { ValidationException } from "./application/errors/ValidationException";
 
-// 🔹 Tipo parcial seguro (sem any)
 type ValidationIssue = {
   path?: string[];
   instancePath?: string;
@@ -154,6 +153,26 @@ fastify.setErrorHandler((error, request, reply) => {
       statusCode: 400,
       error: "Bad Request",
       message: error.message,
+    });
+  }
+
+  // 🔹 ERRO DE ÍNDICE DO FIRESTORE (gRPC status code 9)
+  // Este é um erro de configuração que precisa ser resolvido no console do Firebase.
+  if (
+    Number(error.code) === 9 &&
+    error.message?.includes("requires an index")
+  ) {
+    fastify.log.error(
+      error,
+      "ERRO: Índice composto do Firestore ausente. Crie o índice usando o link no erro.",
+    );
+    return reply.status(503).send({
+      statusCode: 503,
+      error: "Service Unavailable",
+      message:
+        "Ocorreu um erro de configuração no banco de dados. Um índice necessário não foi encontrado.",
+      // A propriedade `details` do erro do gRPC contém o link para criar o índice
+      details: (error as any).details,
     });
   }
 

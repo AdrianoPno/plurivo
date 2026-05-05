@@ -33,8 +33,6 @@ export class UpdateResearch {
       );
     }
 
-    // Mapeia o corpo da requisição (UpdateResearchBody) para o formato do repositório (Partial<ResearchProps>),
-    // convertendo as strings de data para objetos Date de forma segura e sem o uso de 'any'.
     const {
       startDate: startDateStr,
       estimatedEndDate: estimatedEndDateStr,

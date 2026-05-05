@@ -58,6 +58,14 @@ export class FirestoreResearchRepository implements ResearchRepository {
       query = query.where("tags", "array-contains", filters.tag);
     }
 
+    // Filtro de "começa com" para o título (case-sensitive)
+    // NOTA: Para busca case-insensitive, seria necessário um campo extra em minúsculas no documento.
+    if (filters?.title) {
+      query = query
+        .where("title", ">=", filters.title)
+        .where("title", "<=", filters.title + "\uf8ff");
+    }
+
     // Ordenação padrão por data de criação
     const snapshot = await query.orderBy("createdAt", "desc").get();
 

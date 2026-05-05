@@ -29,15 +29,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+
+const methodologyOptions = [
+  { value: "qualitativa", label: "Qualitativa" },
+  { value: "quantitativa", label: "Quantitativa" },
+  { value: "etnografica", label: "Etnográfica" },
+  { value: "teste_usabilidade", label: "Teste de usabilidade" },
+] as const;
+
+const statusOptions = [
+  { value: "em_andamento", label: "Em andamento" },
+  { value: "concluida", label: "Concluída" },
+  { value: "pausada", label: "Pausada" },
+] as const;
 
 const formSchema = z
   .object({
@@ -108,7 +114,17 @@ const defaultValues: FormValues = {
 function formatDateToInputValue(date?: string | Date | null) {
   if (!date) return "";
 
-  return new Date(date).toISOString().split("T")[0];
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "";
+  }
+
+  return parsedDate.toISOString().split("T")[0];
+}
+
+function dateInputToISOString(date: string) {
+  return new Date(`${date}T00:00:00.000Z`).toISOString();
 }
 
 export function CreateResearchForm({
@@ -194,6 +210,8 @@ export function CreateResearchForm({
   function onSubmit(values: FormValues) {
     const data = {
       ...values,
+      startDate: dateInputToISOString(values.startDate),
+      estimatedEndDate: dateInputToISOString(values.estimatedEndDate),
       tags: values.tags
         .split(",")
         .map((tag) => tag.trim())
@@ -340,33 +358,28 @@ export function CreateResearchForm({
                     control={form.control}
                     name="methodology"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="md:col-span-2">
                         <FormLabel>Metodologia</FormLabel>
-                        <Select
-                          disabled={isDisabled}
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione a metodologia" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="qualitativa">
-                              Qualitativa
-                            </SelectItem>
-                            <SelectItem value="quantitativa">
-                              Quantitativa
-                            </SelectItem>
-                            <SelectItem value="etnografica">
-                              Etnográfica
-                            </SelectItem>
-                            <SelectItem value="teste_usabilidade">
-                              Teste de usabilidade
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <div className="flex flex-wrap gap-2">
+                            {methodologyOptions.map((option) => (
+                              <Button
+                                key={option.value}
+                                type="button"
+                                size="sm"
+                                disabled={isDisabled}
+                                variant={
+                                  field.value === option.value
+                                    ? "default"
+                                    : "outline"
+                                }
+                                onClick={() => field.onChange(option.value)}
+                              >
+                                {option.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -376,26 +389,28 @@ export function CreateResearchForm({
                     control={form.control}
                     name="status"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="md:col-span-2">
                         <FormLabel>Status</FormLabel>
-                        <Select
-                          disabled={isDisabled}
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="em_andamento">
-                              Em andamento
-                            </SelectItem>
-                            <SelectItem value="concluida">Concluída</SelectItem>
-                            <SelectItem value="pausada">Pausada</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <div className="flex flex-wrap gap-2">
+                            {statusOptions.map((option) => (
+                              <Button
+                                key={option.value}
+                                type="button"
+                                size="sm"
+                                disabled={isDisabled}
+                                variant={
+                                  field.value === option.value
+                                    ? "default"
+                                    : "outline"
+                                }
+                                onClick={() => field.onChange(option.value)}
+                              >
+                                {option.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
