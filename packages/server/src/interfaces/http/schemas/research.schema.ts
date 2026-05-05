@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+// Schema para um artefato (arquivo, link, etc.)
+export const ArtifactSchema = z.object({
+  url: z.string().url("URL do artefato inválida."),
+  name: z.string().optional(),
+  type: z.string().optional(), // Ex: "image", "document", "link"
+});
+
 // Schema para a criação (Body)
 export const createResearchBodySchema = z.object({
   title: z.string().min(3),
@@ -22,16 +29,36 @@ export const createResearchBodySchema = z.object({
   targetAudience: z.string(),
   location: z.string(),
   tags: z.array(z.string()),
-  artifacts: z.array(z.string()).default([]),
+  artifacts: z.array(ArtifactSchema).optional(), // Agora espera um array de objetos Artifact
   insights: z.string().optional(),
 });
 
 // Schema para a resposta (Response)
-export const researchResponseSchema = createResearchBodySchema.extend({
+export const researchResponseSchema = z.object({
   id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  objective: z.string(),
+  methodology: z.enum([
+    "quantitativa",
+    "qualitativa",
+    "etnografica",
+    "teste_usabilidade",
+  ]),
+  startDate: z.string().datetime(),
+  estimatedEndDate: z.string().datetime(),
+  status: z.enum(["em_andamento", "concluida", "pausada"]),
+  targetAudience: z.string(),
+  location: z.string(),
+  estimatedCost: z.number().nonnegative(),
+  actualCost: z.number(), // Always a number due to default(0) in create schema
+  tags: z.array(z.string()),
+  insights: z.string().optional(),
+  artifacts: z.array(ArtifactSchema).optional(),
   // Garante que os campos de data gerados pelo servidor existam na resposta
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
+  actualEndDate: z.string().datetime().nullable().optional(),
 });
 
 // Inferência de tipos para usar no Controller (Senior Practice)
@@ -47,7 +74,12 @@ export const listResearchQuerySchema = z.object({
 export type ListResearchQuery = z.infer<typeof listResearchQuerySchema>;
 
 // Schema para atualização parcial (Body)
-export const updateResearchBodySchema = createResearchBodySchema.partial();
+export const updateResearchBodySchema = z
+  .object({
+    // All fields from createResearchBodySchema can be updated, and actualEndDate/actualCost can be added
+    ...createResearchBodySchema.shape,
+  })
+  .partial();
 
 export type UpdateResearchBody = z.infer<typeof updateResearchBodySchema>;
 

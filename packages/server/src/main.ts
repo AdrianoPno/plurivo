@@ -16,6 +16,7 @@ import {
   DocumentNotFoundException,
   initializeFirebaseAdmin,
 } from "./infra/database/firestore";
+import { ValidationException } from "./application/errors/ValidationException";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("A variável de ambiente JWT_SECRET não foi definida.");
@@ -94,6 +95,16 @@ fastify.setErrorHandler(function (error, request, reply) {
     });
     return;
   }
+
+  if (error instanceof ValidationException) {
+    reply.status(400).send({
+      statusCode: 400,
+      error: "Bad Request",
+      message: error.message,
+    });
+    return;
+  }
+
   reply.send(error);
 });
 

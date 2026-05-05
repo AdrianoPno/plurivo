@@ -19,6 +19,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Form,
   FormControl,
   FormDescription,
@@ -55,11 +66,16 @@ type FormValues = z.infer<typeof formSchema>;
 interface CreateResearchFormProps {
   onSuccess?: () => void;
   initialData?: api.Research | null;
+  // New props to control the AlertDialog
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function CreateResearchForm({
   onSuccess,
   initialData,
+  open,
+  onOpenChange,
 }: CreateResearchFormProps) {
   const isEditMode = !!initialData;
 
@@ -152,182 +168,217 @@ export function CreateResearchForm({
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="grid gap-4 max-h-[70vh] overflow-y-auto p-1"
-      >
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Título</FormLabel>
-              <FormControl>
-                <Input placeholder="Título da sua descoberta" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-2xl font-bold">
+            {isEditMode ? "Editar Descoberta" : "Registrar Nova Descoberta"}
+          </AlertDialogTitle>
+          {/* AlertDialogDescription is usually for critical alerts,
+              but can be used for a brief intro if desired.
+              For a form, it might be redundant or semantically off. */}
+          {/* <AlertDialogDescription>
+            Preencha os detalhes da sua pesquisa.
+          </AlertDialogDescription> */}
+        </AlertDialogHeader>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="grid gap-4 p-1" // Removed max-h and overflow-y-auto as AlertDialogContent handles it
+          >
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Título</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Título da sua descoberta" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Descreva a descoberta..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Descreva a descoberta..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="objective"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Objetivo</FormLabel>
-              <FormControl>
-                <Input placeholder="Qual o objetivo principal?" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="objective"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Objetivo</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Qual o objetivo principal?"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="methodology"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Metodologia</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a metodologia" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="quantitativa">Quantitativa</SelectItem>
-                  <SelectItem value="qualitativa">Qualitativa</SelectItem>
-                  <SelectItem value="etnografica">Etnográfica</SelectItem>
-                  <SelectItem value="teste_usabilidade">
-                    Teste de Usabilidade
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="methodology"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Metodologia</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a metodologia" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="quantitativa">Quantitativa</SelectItem>
+                      <SelectItem value="qualitativa">Qualitativa</SelectItem>
+                      <SelectItem value="etnografica">Etnográfica</SelectItem>
+                      <SelectItem value="teste_usabilidade">
+                        Teste de Usabilidade
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="startDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Data de Início</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="estimatedEndDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Data de Término (Estimada)</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data de Início</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="estimatedEndDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data de Término (Estimada)</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="targetAudience"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Público-Alvo</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ex: Usuários Mobile" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Localização</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ex: Remoto / Brasil" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="targetAudience"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Público-Alvo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Usuários Mobile" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Localização</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Remoto / Brasil" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        <FormField
-          control={form.control}
-          name="estimatedCost"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Custo Estimado</FormLabel>
-              <FormControl>
-                <Input type="number" step="0.01" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="estimatedCost"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Custo Estimado</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="0.01" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="tags"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tags</FormLabel>
-              <FormControl>
-                <Input placeholder="mobile, ux, fintech" {...field} />
-              </FormControl>
-              <FormDescription>Separe as tags por vírgula.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="tags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tags</FormLabel>
+                  <FormControl>
+                    <Input placeholder="mobile, ux, fintech" {...field} />
+                  </FormControl>
+                  <FormDescription>Separe as tags por vírgula.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={
-            createResearchMutation.isPending || updateResearchMutation.isPending
-          }
-        >
-          {createResearchMutation.isPending || updateResearchMutation.isPending
-            ? isEditMode
-              ? "Salvando..."
-              : "Criando..."
-            : isEditMode
-              ? "Salvar Alterações"
-              : "Criar Descoberta"}
-        </Button>
-      </form>
-    </Form>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                disabled={
+                  createResearchMutation.isPending ||
+                  updateResearchMutation.isPending
+                }
+              >
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                type="submit"
+                disabled={
+                  createResearchMutation.isPending ||
+                  updateResearchMutation.isPending
+                }
+              >
+                {createResearchMutation.isPending ||
+                updateResearchMutation.isPending
+                  ? isEditMode
+                    ? "Salvando..."
+                    : "Criando..."
+                  : isEditMode
+                    ? "Salvar Alterações"
+                    : "Criar Descoberta"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </form>
+        </Form>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

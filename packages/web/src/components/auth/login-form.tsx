@@ -6,6 +6,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import Cookies from "js-cookie";
 import * as api from "@/lib/api";
 import { useAuthStore } from "@/store/use-auth-store";
+import { useLoadingStore } from "@/store/use-loading-store";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,15 +17,15 @@ import { auth } from "@/lib/firebase";
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
+  const isLoading = useLoadingStore((state) => state.isLoading);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setIsLoading(true);
+    useLoadingStore.getState().startLoading();
     setError(null);
 
     try {
@@ -62,7 +63,7 @@ export function LoginForm() {
 
       setError(message);
     } finally {
-      setIsLoading(false);
+      useLoadingStore.getState().stopLoading();
     }
   }
 

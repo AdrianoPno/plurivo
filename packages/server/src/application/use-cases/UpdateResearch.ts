@@ -2,6 +2,7 @@ import { Research } from "@/domain/entities/Research";
 import { ResearchRepository } from "@/domain/repositories/ResearchRepository";
 import { UpdateResearchBody } from "@/interfaces/http/schemas/research.schema";
 import { DocumentNotFoundException } from "@/infra/database/firestore";
+import { ValidationException } from "../errors/ValidationException";
 import { ResearchProps } from "@/domain/entities/Research";
 
 export class UpdateResearch {
@@ -14,30 +15,52 @@ export class UpdateResearch {
       throw new DocumentNotFoundException(`Research with ID ${id} not found.`);
     }
 
-    // Objeto para armazenar os dados a serem atualizados, com datas convertidas para Date
-    const dataForRepository: Partial<ResearchProps> = {};
+    // Validação de data: usa a nova data se fornecida, senão, a existente.
+    const startDate = data.startDate
+      ? new Date(data.startDate)
+      : existingResearch.props.startDate;
+    const estimatedEndDate = data.estimatedEndDate
+      ? new Date(data.estimatedEndDate)
+      : existingResearch.props.estimatedEndDate;
 
-    // Itera sobre os dados recebidos (UpdateResearchBody) e converte tipos quando necessário
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        const value = data[key as keyof UpdateResearchBody];
+    if (
+      startDate &&
+      estimatedEndDate &&
+      estimatedEndDate.getTime() <= startDate.getTime()
+    ) {
+      throw new ValidationException(
+        "A data de término estimada deve ser posterior à data de início.",
+      );
+    }
 
-        // Converte strings de data para objetos Date
-        if (
-          (key === "startDate" ||
-            key === "estimatedEndDate" ||
-            key === "actualEndDate") &&
-          typeof value === "string"
-        ) {
-          (dataForRepository as any)[key] = new Date(value);
-        } else if (key === "actualEndDate" && value === null) {
-          // Garante que null seja passado corretamente para actualEndDate
-          (dataForRepository as any)[key] = null;
-        } else {
-          // Para outros campos, atribui diretamente
-          (dataForRepository as any)[key] = value;
-        }
-      }
+    // Mapeia o corpo da requisição (UpdateResearchBody) para o formato do repositório (Partial<ResearchProps>),
+    // convertendo as strings de data para objetos Date de forma segura e sem o uso de 'any'.
+    const {
+      startDate: startDateStr,
+      estimatedEndDate: estimatedEndDateStr,
+      actualEndDate: actualEndDateStr,
+      artifacts,
+      ...restOfData
+    } = data;
+
+    const dataForRepository: Partial<ResearchProps> = {
+      ...restOfData,
+    };
+
+    if (startDateStr) {
+      dataForRepository.startDate = new Date(startDateStr);
+    }
+    if (estimatedEndDateStr) {
+      dataForRepository.estimatedEndDate = new Date(estimatedEndDateStr);
+    }
+    if (actualEndDateStr) {
+      dataForRepository.actualEndDate = new Date(actualEndDateStr);
+    } else if (actualEndDateStr === null) {
+      dataForRepository.actualEndDate = null;
+    }
+
+    if (artifacts) {
+      dataForRepository.artifacts = artifacts.map((artifact) => artifact.url);
     }
 
     // Business rule: If status changes to 'concluída' and actualEndDate is empty, set it automatically
