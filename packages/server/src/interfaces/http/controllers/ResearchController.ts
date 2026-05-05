@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { RegisterResearch } from "@/application/use-cases/RegisterResearch";
 import { UpdateResearch } from "@/application/use-cases/UpdateResearch";
 import { DeleteResearch } from "@/application/use-cases/DeleteResearch";
+import { GetResearchById } from "@/application/use-cases/GetResearchById";
 import { Research } from "@/domain/entities/Research";
 import { ResearchRepository } from "@/domain/repositories/ResearchRepository";
 import {
@@ -16,6 +17,7 @@ export class ResearchController {
     private registerResearch: RegisterResearch,
     private updateResearch: UpdateResearch,
     private deleteResearch: DeleteResearch,
+    private getResearchById: GetResearchById,
   ) {}
 
   private toResponse(research: Research) {
@@ -50,6 +52,16 @@ export class ResearchController {
     const researches = await this.repository.listAll(request.query);
     const response = researches.map((r) => this.toResponse(r));
     return reply.send(response);
+  }
+
+  async getById(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply,
+  ) {
+    const { id } = request.params;
+    const research = await this.getResearchById.execute(id);
+
+    return reply.send(this.toResponse(research));
   }
 
   async update(

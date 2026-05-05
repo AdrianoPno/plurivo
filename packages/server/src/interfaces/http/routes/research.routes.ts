@@ -13,6 +13,7 @@ import { FirestoreResearchRepository } from "@/infra/database/FirestoreResearchR
 import { RegisterResearch } from "@/application/use-cases/RegisterResearch";
 import { UpdateResearch } from "@/application/use-cases/UpdateResearch";
 import { DeleteResearch } from "@/application/use-cases/DeleteResearch";
+import { GetResearchById } from "@/application/use-cases/GetResearchById";
 
 export async function researchRoutes(fastify: FastifyInstance) {
   const app = fastify.withTypeProvider<ZodTypeProvider>();
@@ -22,11 +23,13 @@ export async function researchRoutes(fastify: FastifyInstance) {
   const registerResearch = new RegisterResearch(repository);
   const updateResearch = new UpdateResearch(repository);
   const deleteResearch = new DeleteResearch(repository);
+  const getResearchById = new GetResearchById(repository);
   const controller = new ResearchController(
     repository,
     registerResearch,
     updateResearch,
     deleteResearch,
+    getResearchById,
   );
 
   app.post(
@@ -61,6 +64,23 @@ export async function researchRoutes(fastify: FastifyInstance) {
       preHandler: [app.authenticate],
     },
     controller.list.bind(controller),
+  );
+
+  app.get(
+    "/researches/:id",
+    {
+      schema: {
+        description: "Busca uma pesquisa específica pelo seu ID",
+        tags: ["Research"],
+        security: [{ bearerAuth: [] }],
+        params: researchIdParamsSchema,
+        response: {
+          200: researchResponseSchema,
+        },
+      },
+      preHandler: [app.authenticate],
+    },
+    controller.getById.bind(controller),
   );
 
   app.patch(

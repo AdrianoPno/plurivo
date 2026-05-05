@@ -60,7 +60,7 @@ export class UpdateResearch {
     }
 
     if (artifacts) {
-      dataForRepository.artifacts = artifacts.map((artifact) => artifact.url);
+      dataForRepository.artifacts = artifacts;
     }
 
     // Business rule: If status changes to 'concluída' and actualEndDate is empty, set it automatically

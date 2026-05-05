@@ -1,4 +1,4 @@
-import Fastify, { FastifyReply, FastifyRequest } from "fastify";
+import Fastify, { FastifyReply, FastifyRequest, FastifyError } from "fastify";
 import jwt from "@fastify/jwt";
 import cors from "@fastify/cors";
 import swagger from "@fastify/swagger";
@@ -8,47 +8,70 @@ import {
   serializerCompiler,
   jsonSchemaTransform,
 } from "fastify-type-provider-zod";
+
 import { researchRoutes } from "./interfaces/http/routes/research.routes";
 import { authRoutes } from "./interfaces/http/routes/auth.routes";
 import { userRoutes } from "./interfaces/http/routes/user.routes";
 import { storageRoutes } from "./interfaces/http/routes/storage.routes";
+
 import {
   DocumentNotFoundException,
   initializeFirebaseAdmin,
 } from "./infra/database/firestore";
+
 import { ValidationException } from "./application/errors/ValidationException";
+
+// 🔹 Tipo parcial seguro (sem any)
+type ValidationIssue = {
+  path?: string[];
+  instancePath?: string;
+  message?: string;
+};
 
 if (!process.env.JWT_SECRET) {
   throw new Error("A variável de ambiente JWT_SECRET não foi definida.");
 }
 
-initializeFirebaseAdmin(); // Garante que o Firebase Admin SDK seja inicializado na inicialização.
+initializeFirebaseAdmin();
 
 const fastify = Fastify({ logger: true });
 
-// 1. Configuração dos Compiladores do Zod
+// ==========================
+// ZOD CONFIG
+// ==========================
 fastify.setValidatorCompiler(validatorCompiler);
 fastify.setSerializerCompiler(serializerCompiler);
 
-// 2. Plugins de Infraestrutura
+// ==========================
+// PLUGINS
+// ==========================
 fastify.register(cors);
+
 fastify.register(jwt, {
   secret: process.env.JWT_SECRET,
 });
 
-// Adiciona um decorator para autenticação para ser usado como hook
+// ==========================
+// AUTH DECORATOR
+// ==========================
 fastify.decorate(
   "authenticate",
   async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       await request.jwtVerify();
-    } catch (err) {
-      reply.send(err);
+    } catch {
+      return reply.status(401).send({
+        statusCode: 401,
+        error: "Unauthorized",
+        message: "Token inválido ou ausente",
+      });
     }
   },
 );
 
-// 3. Configuração do Swagger (Core)
+// ==========================
+// SWAGGER
+// ==========================
 fastify.register(swagger, {
   openapi: {
     info: {
@@ -69,7 +92,6 @@ fastify.register(swagger, {
   transform: jsonSchemaTransform,
 });
 
-// 4. Configuração da Interface do Swagger
 fastify.register(swaggerUi, {
   routePrefix: "/docs",
   staticCSP: true,
@@ -79,42 +101,86 @@ fastify.register(swaggerUi, {
   },
 });
 
-// 5. Módulos de Negócio
+// ==========================
+// ROUTES
+// ==========================
 fastify.register(researchRoutes);
 fastify.register(authRoutes, { prefix: "/auth" });
 fastify.register(userRoutes);
 fastify.register(storageRoutes);
 
-// Global Error Handler
-fastify.setErrorHandler(function (error, request, reply) {
+// ==========================
+// GLOBAL ERROR HANDLER
+// ==========================
+fastify.setErrorHandler((error, request, reply) => {
+  // 🔹 VALIDAÇÃO
+  if (error.code === "FST_ERR_VALIDATION") {
+    const validation = (
+      error as FastifyError & {
+        validation?: unknown;
+      }
+    ).validation;
+
+    // 🔹 narrowing seguro
+    const issues: ValidationIssue[] = Array.isArray(validation)
+      ? (validation as ValidationIssue[])
+      : [];
+
+    fastify.log.warn(error);
+
+    return reply.status(400).send({
+      statusCode: 400,
+      error: "Bad Request",
+      message: "Um ou mais campos enviados são inválidos.",
+      details: issues.map((e) => ({
+        path: e.path?.join(".") || e.instancePath?.replace("/", "") || "",
+        message: e.message,
+      })),
+    });
+  }
+
+  // 🔹 NOT FOUND
   if (error instanceof DocumentNotFoundException) {
-    reply.status(404).send({
+    return reply.status(404).send({
       statusCode: 404,
       error: "Not Found",
       message: error.message,
     });
-    return;
   }
 
+  // 🔹 REGRA DE NEGÓCIO
   if (error instanceof ValidationException) {
-    reply.status(400).send({
+    return reply.status(400).send({
       statusCode: 400,
       error: "Bad Request",
       message: error.message,
     });
-    return;
   }
 
-  reply.send(error);
+  // 🔹 FALLBACK
+  fastify.log.error(error);
+
+  return reply.status(500).send({
+    statusCode: 500,
+    error: "Internal Server Error",
+    message: "Erro interno do servidor",
+  });
 });
 
+// ==========================
+// START SERVER
+// ==========================
 const start = async () => {
   try {
     const port = Number(process.env.PORT) || 3333;
-    await fastify.listen({ port, host: "0.0.0.0" });
 
-    fastify.log.info(` API: http://localhost:${port}`);
-    fastify.log.info(` Docs: http://localhost:${port}/docs`);
+    await fastify.listen({
+      port,
+      host: "0.0.0.0",
+    });
+
+    fastify.log.info(`API: http://localhost:${port}`);
+    fastify.log.info(`Docs: http://localhost:${port}/docs`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

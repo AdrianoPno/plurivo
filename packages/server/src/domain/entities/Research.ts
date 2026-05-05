@@ -5,6 +5,12 @@ export type Methodology =
   | "etnografica"
   | "teste_usabilidade";
 
+export interface Artifact {
+  url: string;
+  name?: string;
+  type?: string;
+}
+
 export interface ResearchProps {
   title: string;
   description: string;
@@ -26,7 +32,7 @@ export interface ResearchProps {
 
   // Conteúdo
   insights?: string;
-  artifacts: string[]; // URLs das fotos/PDFs no Storage
+  artifacts: Artifact[]; // Agora armazena o objeto completo do artefato
 
   createdAt?: Date;
   updatedAt?: Date;

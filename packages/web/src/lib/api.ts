@@ -118,8 +118,8 @@ export type Research = CreateResearchData & {
   createdAt: string;
   updatedAt: string;
   actualEndDate?: string;
-  actualCost?: number;
-  artifacts: any[];
+  actualCost: number; // Agora sempre um número, conforme o backend
+  artifacts: Artifact[]; // Agora corretamente tipado como array de Artifact
 };
 
 export interface ListResearchesFilters {
@@ -172,6 +172,11 @@ export async function getResearches(
   const response = await api.get("/researches", {
     params: filters,
   });
+  return response.data;
+}
+
+export async function getResearchById(id: string): Promise<Research> {
+  const response = await api.get(`/researches/${id}`);
   return response.data;
 }
 

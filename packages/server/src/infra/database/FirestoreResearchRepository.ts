@@ -1,8 +1,23 @@
 import { ResearchRepository } from "../../domain/repositories/ResearchRepository";
-import { Research, ResearchProps } from "../../domain/entities/Research";
+import {
+  Research,
+  ResearchProps,
+  Artifact,
+} from "../../domain/entities/Research";
 import { getDatabase, DocumentNotFoundException } from "./firestore";
 import { Timestamp, Query } from "firebase-admin/firestore";
 import { ListResearchQuery } from "../../interfaces/http/schemas/research.schema";
+
+type FirestoreResearchData = Omit<
+  ResearchProps,
+  "startDate" | "estimatedEndDate" | "actualEndDate" | "createdAt" | "updatedAt"
+> & {
+  startDate: Timestamp;
+  estimatedEndDate: Timestamp;
+  actualEndDate: Timestamp | null;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
 
 export class FirestoreResearchRepository implements ResearchRepository {
   private collection = getDatabase().collection("researches");
@@ -20,7 +35,10 @@ export class FirestoreResearchRepository implements ResearchRepository {
 
     if (!doc.exists) return null;
 
-    return new Research(this.mapFromDatabase(doc.data() as any), doc.id);
+    return new Research(
+      this.mapFromDatabase(doc.data() as FirestoreResearchData),
+      doc.id,
+    );
   }
 
   async listAll(filters?: ListResearchQuery): Promise<Research[]> {
@@ -44,7 +62,11 @@ export class FirestoreResearchRepository implements ResearchRepository {
     const snapshot = await query.orderBy("createdAt", "desc").get();
 
     return snapshot.docs.map(
-      (doc) => new Research(this.mapFromDatabase(doc.data() as any), doc.id),
+      (doc) =>
+        new Research(
+          this.mapFromDatabase(doc.data() as FirestoreResearchData),
+          doc.id,
+        ),
     );
   }
 
@@ -56,14 +78,24 @@ export class FirestoreResearchRepository implements ResearchRepository {
       throw new DocumentNotFoundException(`Research with ID ${id} not found.`);
     }
 
-    // Map only the provided data fields to database format
-    const dataToUpdate: any = {};
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        dataToUpdate[key] = this.mapToDatabaseField(key, (data as any)[key]);
-      }
+    const { startDate, estimatedEndDate, actualEndDate, ...restOfData } = data;
+
+    const dataToUpdate: { [key: string]: any } = {
+      ...restOfData,
+      updatedAt: Timestamp.now(),
+    };
+
+    if (startDate) {
+      dataToUpdate.startDate = Timestamp.fromDate(startDate);
     }
-    dataToUpdate.updatedAt = Timestamp.now(); // Always update `updatedAt`
+    if (estimatedEndDate) {
+      dataToUpdate.estimatedEndDate = Timestamp.fromDate(estimatedEndDate);
+    }
+    if (data.hasOwnProperty("actualEndDate")) {
+      dataToUpdate.actualEndDate = actualEndDate
+        ? Timestamp.fromDate(actualEndDate)
+        : null;
+    }
 
     await docRef.update(dataToUpdate);
   }
@@ -93,7 +125,7 @@ export class FirestoreResearchRepository implements ResearchRepository {
     };
   }
 
-  private mapFromDatabase(data: any): ResearchProps {
+  private mapFromDatabase(data: FirestoreResearchData): ResearchProps {
     return {
       ...data,
       startDate: data.startDate.toDate(),
@@ -101,30 +133,13 @@ export class FirestoreResearchRepository implements ResearchRepository {
       actualEndDate: data.actualEndDate?.toDate() || null,
       createdAt: data.createdAt.toDate(),
       updatedAt: data.updatedAt.toDate(),
+      // Garante que artifacts seja sempre Artifact[], tratando dados legados (string[])
+      artifacts: Array.isArray(data.artifacts)
+        ? data.artifacts.map((artifact: string | Artifact) => {
+            // Se for string, converte para { url: string }, senão, usa o objeto existente
+            return typeof artifact === "string" ? { url: artifact } : artifact;
+          })
+        : [], // Se não houver artifacts ou não for array, retorna array vazio
     };
-  }
-
-  // Helper to map individual fields for partial updates
-  private mapToDatabaseField(key: string, value: any): any {
-    if (value instanceof Date) {
-      return Timestamp.fromDate(value);
-    }
-    // Specific handling for fields that might be Date objects
-    if (
-      [
-        "startDate",
-        "estimatedEndDate",
-        "actualEndDate",
-        "createdAt",
-        "updatedAt",
-      ].includes(key) &&
-      value
-    ) {
-      if (typeof value === "string") {
-        return Timestamp.fromDate(new Date(value));
-      }
-      return Timestamp.fromDate(value);
-    }
-    return value;
   }
 }

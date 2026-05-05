@@ -31,9 +31,7 @@ export class RegisterResearch {
       targetAudience: data.targetAudience,
       location: data.location,
       tags: data.tags,
-      artifacts: data.artifacts
-        ? data.artifacts.map((artifact) => artifact.url)
-        : [],
+      artifacts: data.artifacts || [],
       insights: data.insights,
       createdAt: new Date(),
       updatedAt: new Date(),
