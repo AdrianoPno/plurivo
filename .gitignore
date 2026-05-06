@@ -1,8 +1,39 @@
-node_modules/
-dist/
+# dependencies
+node_modules
+
+# next
+.next
+out
+
+# logs
+*.log
+
+# env
 .env
-.firebase/
-build/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# build
+dist
+build
+
+# coverage
+coverage
+
+# vscode
+.vscode
+
+# turbo
+.turbo
+
+# pnpm
+.pnpm-store
+
+# OS
 .DS_Store
 Thumbs.db
+
+# firebase
 firebase-key.json
