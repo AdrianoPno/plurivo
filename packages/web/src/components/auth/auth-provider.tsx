@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signOut,
+  User as FirebaseUser,
+} from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuthStore } from "@/store/use-auth-store";
-import { usePathname } from "next/navigation"; // Importante
+import { usePathname } from "next/navigation";
 import * as api from "@/lib/api";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -12,46 +16,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      const token = localStorage.getItem("vox-api-token");
-      const isPublicPage = pathname === "/login";
+    const handleAuthChange = async (firebaseUser: FirebaseUser | null) => {
+      const apiToken = localStorage.getItem("vox-api-token");
 
-      // TRAVA DE OURO: Se estivermos no login, limpa o estado e ignora o resto.
-      if (isPublicPage) {
-        // Se houver lixo de sessão, limpamos, mas não rodamos lógica de fetch.
-        if (!token && firebaseUser) await signOut(auth);
+      // Se o usuário está na página de login, não tentamos restaurar a sessão.
+      // Apenas garantimos que qualquer estado de sessão anterior seja limpo.
+      if (pathname === "/login") {
+        if (isAuthenticated || apiToken) {
+          setUser(null);
+          localStorage.removeItem("vox-api-token");
+        }
         return;
       }
 
-      // Cenário 1: Tentativa de restauração de sessão
-      if (firebaseUser && token) {
+      // Cenário 1: Sessão potencialmente válida.
+      // Temos um usuário no Firebase e um token da nossa API.
+      if (firebaseUser && apiToken) {
+        // Se o estado global ainda não foi preenchido, tentamos sincronizar.
         if (!isAuthenticated) {
           try {
+            // O interceptor do Axios já deve ter o token para esta chamada.
             const apiUser = await api.getMe();
-            setUser(apiUser);
+            setUser(apiUser); // Sincroniza o estado com os dados da nossa API.
           } catch (error: unknown) {
-            console.error("Auth provider: Session sync failed.", error);
-
-            // Sincronização em cadeia: Falhou na API? Mata o Firebase e o Token.
-            localStorage.removeItem("vox-api-token");
+            // Falha ao buscar usuário da API (token inválido, expirado, etc.).
+            console.error("Auth provider: Falha ao sincronizar sessão.", error);
+            // Limpeza completa da sessão em caso de falha.
             setUser(null);
+            localStorage.removeItem("vox-api-token");
             await signOut(auth);
           }
         }
-      }
-      // Cenário 2: Logout ou Sessão Inválida
-      else {
-        // Só rodamos o signOut se houver um usuário no Firebase para evitar loops inúteis
-        if (firebaseUser || token) {
-          localStorage.removeItem("vox-api-token");
+        // Se `isAuthenticated` já é `true`, a sessão está ativa e não fazemos nada.
+      } else {
+        // Cenário 2: Sessão inválida ou inexistente.
+        // Se não temos o par (firebaseUser, apiToken), o usuário está deslogado.
+        if (isAuthenticated || apiToken) {
           setUser(null);
-          if (firebaseUser) await signOut(auth);
+          localStorage.removeItem("vox-api-token");
         }
       }
-    });
+    };
 
+    const unsubscribe = onAuthStateChanged(auth, handleAuthChange);
     return () => unsubscribe();
-  }, [setUser, isAuthenticated, pathname]); // pathname precisa estar aqui
+  }, [pathname, isAuthenticated, setUser]);
 
   return <>{children}</>;
 }

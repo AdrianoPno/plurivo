@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, Trash2, UploadCloud } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import * as api from "@/lib/api";
-import { uploadFileToStorage } from "@/lib/storage";
+
+import { ResearchBasicInfoSection } from "./research-basic-info-section";
+import { ResearchPlanningSection } from "./research-planning-section";
+import { ResearchResultsSection } from "./research-results-section";
+import { ResearchArtifactsSection } from "./research-artifacts-section";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,24 +26,21 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 
-const methodologyOptions = [
+export const methodologyOptions = [
   { value: "qualitativa", label: "Qualitativa" },
   { value: "quantitativa", label: "Quantitativa" },
   { value: "etnografica", label: "Etnográfica" },
   { value: "teste_usabilidade", label: "Teste de usabilidade" },
 ] as const;
 
-const statusOptions = [
+export const statusOptions = [
   { value: "em_andamento", label: "Em andamento" },
   { value: "concluida", label: "Concluída" },
   { value: "pausada", label: "Pausada" },
@@ -112,7 +113,7 @@ const formSchema = z
     },
   );
 
-type FormValues = z.infer<typeof formSchema>;
+export type FormValues = z.infer<typeof formSchema>;
 
 interface CreateResearchFormProps {
   onSuccess?: () => void;
@@ -162,7 +163,6 @@ export function CreateResearchForm({
   onOpenChange,
 }: CreateResearchFormProps) {
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditMode = Boolean(initialData);
   const [isUploading, setIsUploading] = useState(false);
@@ -170,15 +170,6 @@ export function CreateResearchForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
-  });
-
-  const {
-    fields: artifactFields,
-    append: appendArtifact,
-    remove: removeArtifact,
-  } = useFieldArray({
-    control: form.control,
-    name: "artifacts",
   });
 
   useEffect(() => {
@@ -236,6 +227,7 @@ export function CreateResearchForm({
   });
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  // O `isDisabled` geral agora considera o estado de upload vindo da seção de artefatos
   const isDisabled = isSubmitting || isUploading;
 
   function onSubmit(values: FormValues) {
@@ -267,31 +259,6 @@ export function CreateResearchForm({
     createMutation.mutate(data);
   }
 
-  async function handleFileSelect(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-
-    if (!file) return;
-
-    setIsUploading(true);
-
-    try {
-      const { downloadURL } = await uploadFileToStorage(file, "researches");
-
-      appendArtifact({
-        url: downloadURL,
-        name: file.name,
-        type: file.type || "file",
-      });
-
-      toast.success(`Arquivo "${file.name}" enviado com sucesso.`);
-    } catch {
-      toast.error("Falha no upload do arquivo. Tente novamente.");
-    } finally {
-      setIsUploading(false);
-      event.target.value = "";
-    }
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden p-0">
@@ -308,467 +275,35 @@ export function CreateResearchForm({
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-8"
             >
-              <section className="space-y-5">
-                <div>
-                  <h3 className="text-base font-semibold">
-                    Informações principais
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Dados básicos para identificar e contextualizar a pesquisa.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Título</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: Pesquisa sobre jornada de compra"
-                            disabled={isDisabled}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Descrição</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            className="min-h-28 resize-none"
-                            placeholder="Descreva brevemente o contexto da descoberta."
-                            disabled={isDisabled}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="objective"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Objetivo principal</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            className="min-h-24 resize-none"
-                            placeholder="Explique o que essa pesquisa busca descobrir."
-                            disabled={isDisabled}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </section>
+              <ResearchBasicInfoSection
+                control={form.control}
+                isDisabled={isDisabled}
+              />
 
               <Separator />
 
-              <section className="space-y-5">
-                <div>
-                  <h3 className="text-base font-semibold">
-                    Classificação e planejamento
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Defina metodologia, status, datas e custos planejados.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="methodology"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Metodologia</FormLabel>
-                        <FormControl>
-                          <div className="flex flex-wrap gap-2">
-                            {methodologyOptions.map((option) => (
-                              <Button
-                                key={option.value}
-                                type="button"
-                                size="sm"
-                                disabled={isDisabled}
-                                variant={
-                                  field.value === option.value
-                                    ? "default"
-                                    : "outline"
-                                }
-                                onClick={() => field.onChange(option.value)}
-                              >
-                                {option.label}
-                              </Button>
-                            ))}
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Status</FormLabel>
-                        <FormControl>
-                          <div className="flex flex-wrap gap-2">
-                            {statusOptions.map((option) => (
-                              <Button
-                                key={option.value}
-                                type="button"
-                                size="sm"
-                                disabled={isDisabled}
-                                variant={
-                                  field.value === option.value
-                                    ? "default"
-                                    : "outline"
-                                }
-                                onClick={() => field.onChange(option.value)}
-                              >
-                                {option.label}
-                              </Button>
-                            ))}
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="startDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data de início</FormLabel>
-                        <FormControl>
-                          <Input type="date" disabled={isDisabled} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="estimatedEndDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Término estimado</FormLabel>
-                        <FormControl>
-                          <Input type="date" disabled={isDisabled} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="estimatedCost"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Custo estimado (R$)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            placeholder="0,00"
-                            disabled={isDisabled}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="targetAudience"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Público-alvo</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: Usuários mobile"
-                            disabled={isDisabled}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Localização</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: Brasil / Remoto"
-                            disabled={isDisabled}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="tags"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tags</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="ux, pesquisa, mobile"
-                            disabled={isDisabled}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Separe as tags por vírgula.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </section>
+              <ResearchPlanningSection
+                control={form.control}
+                isDisabled={isDisabled}
+              />
 
               {isEditMode && (
                 <>
                   <Separator />
-
-                  <section className="space-y-5">
-                    <div>
-                      <h3 className="text-base font-semibold">
-                        Resultados e encerramento
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Registre os valores reais para comparar planejamento e
-                        execução.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                      <FormField
-                        control={form.control}
-                        name="actualEndDate"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Data real de término</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="date"
-                                disabled={isDisabled}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="actualCost"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Custo real (R$)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min={0}
-                                step="0.01"
-                                placeholder="0,00"
-                                disabled={isDisabled}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Use para comparar com o custo estimado.
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="insights"
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-2">
-                            <FormLabel>Insights finais</FormLabel>
-                            <FormControl>
-                              <Textarea
-                                className="min-h-32 resize-none"
-                                placeholder="Documente aprendizados, resultados, recomendações e impactos da pesquisa."
-                                disabled={isDisabled}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Essas informações ajudam na análise histórica e
-                              tomada de decisão.
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </section>
+                  <ResearchResultsSection
+                    control={form.control}
+                    isDisabled={isDisabled}
+                  />
                 </>
               )}
 
               <Separator />
 
-              <section className="space-y-5">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 className="text-base font-semibold">
-                      Artefatos e evidências
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Adicione links, documentos, protótipos, vídeos ou
-                      relatórios relacionados.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={isDisabled}
-                      onClick={() =>
-                        appendArtifact({ url: "", name: "", type: "link" })
-                      }
-                    >
-                      <Plus className="mr-2 size-4" />
-                      Adicionar link
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      disabled={isDisabled}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      {isUploading ? (
-                        <Loader2 className="mr-2 size-4 animate-spin" />
-                      ) : (
-                        <UploadCloud className="mr-2 size-4" />
-                      )}
-                      Upload
-                    </Button>
-
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileSelect}
-                    />
-                  </div>
-                </div>
-
-                {artifactFields.length === 0 ? (
-                  <div className="rounded-xl border border-dashed bg-muted/20 p-6 text-center text-sm text-muted-foreground">
-                    Nenhum artefato adicionado até o momento.
-                  </div>
-                ) : (
-                  <div className="grid gap-3">
-                    {artifactFields.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="grid gap-3 rounded-xl border bg-card p-4 shadow-sm md:grid-cols-[1fr_1fr_auto]"
-                      >
-                        <FormField
-                          control={form.control}
-                          name={`artifacts.${index}.url`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-xs uppercase text-muted-foreground">
-                                URL
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="https://..."
-                                  disabled={isDisabled}
-                                  readOnly={field.value?.startsWith(
-                                    "https://firebasestorage",
-                                  )}
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name={`artifacts.${index}.name`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-xs uppercase text-muted-foreground">
-                                Nome
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Ex: Protótipo Figma"
-                                  disabled={isDisabled}
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div className="flex items-end">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            disabled={isDisabled}
-                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => removeArtifact(index)}
-                            aria-label="Remover artefato"
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </section>
+              <ResearchArtifactsSection
+                control={form.control}
+                isDisabled={isSubmitting}
+                onUploadingChange={setIsUploading}
+              />
             </form>
           </Form>
         </div>

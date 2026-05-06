@@ -47,7 +47,7 @@ export default function AnalyticsPage() {
     if (!researches) return [];
 
     return researches.filter((research) => {
-      const researchDate = new Date(research.createdAt);
+      const researchDate = new Date(research.createdAt ?? "");
       const fromDate = dateRange.from ? new Date(dateRange.from) : null;
       const toDate = dateRange.to ? new Date(dateRange.to) : null;
 

@@ -12,6 +12,7 @@ type FirestoreResearchData = Omit<
   ResearchProps,
   "startDate" | "estimatedEndDate" | "actualEndDate" | "createdAt" | "updatedAt"
 > & {
+  titleNormalized: string;
   startDate: Timestamp;
   estimatedEndDate: Timestamp;
   actualEndDate: Timestamp | null;
@@ -23,6 +24,14 @@ export class FirestoreResearchRepository implements ResearchRepository {
   private collection = getDatabase().collection(
     "researches",
   ) as CollectionReference<FirestoreResearchData>;
+
+  private normalizeString(str: string): string {
+    if (!str) return "";
+    return str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
 
   async save(research: Research): Promise<Research> {
     const data = this.mapToDatabase(research.props);
@@ -67,12 +76,12 @@ export class FirestoreResearchRepository implements ResearchRepository {
       query = query.where("tags", "array-contains", filters.tag);
     }
 
-    // Filtro de "começa com" para o título (case-sensitive)
-    // NOTA: Para busca case-insensitive, seria necessário um campo extra em minúsculas no documento.
+    // Filtro "começa com" para o título, case-insensitive e accent-insensitive
     if (filters?.title) {
+      const normalizedTitle = this.normalizeString(filters.title);
       query = query
-        .where("title", ">=", filters.title)
-        .where("title", "<=", filters.title + "\uf8ff");
+        .where("titleNormalized", ">=", normalizedTitle)
+        .where("titleNormalized", "<=", normalizedTitle + "\uf8ff");
     }
 
     // Ordenação padrão por data de criação
@@ -137,6 +146,10 @@ export class FirestoreResearchRepository implements ResearchRepository {
       updatedAt: Timestamp.now(),
     };
 
+    if (data.title) {
+      dataToUpdate.titleNormalized = this.normalizeString(data.title);
+    }
+
     if (startDate) {
       dataToUpdate.startDate = Timestamp.fromDate(startDate);
     }
@@ -165,6 +178,7 @@ export class FirestoreResearchRepository implements ResearchRepository {
   private mapToDatabase(props: ResearchProps) {
     return {
       ...props,
+      titleNormalized: this.normalizeString(props.title),
       startDate: Timestamp.fromDate(props.startDate),
       estimatedEndDate: Timestamp.fromDate(props.estimatedEndDate),
       actualEndDate: props.actualEndDate
