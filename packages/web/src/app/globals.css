@@ -4,65 +4,101 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 240 20% 97%;
+    --foreground: 248 29% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 248 29% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 248 29% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 248 29% 20%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 249 54% 33%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 245 24% 94%;
+    --muted-foreground: 246 12% 42%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 248 100% 90%;
+    --accent-foreground: 248 29% 20%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 245 24% 88%;
+    --input: 245 24% 88%;
+    --ring: 249 54% 33%;
 
-    --radius: 0.5rem;
+    --radius: 0.875rem;
+
+    --sidebar-background: 248 29% 20%;
+    --sidebar-foreground: 245 35% 90%;
+    --sidebar-muted: 245 24% 72%;
+    --sidebar-accent: 249 54% 33%;
+    --sidebar-accent-foreground: 0 0% 100%;
+
+    --status-ongoing-bg: 249 54% 33%;
+    --status-ongoing-fg: 0 0% 100%;
+
+    --status-completed-bg: 55 54% 31%;
+    --status-completed-fg: 55 70% 94%;
+
+    --status-paused-bg: 248 100% 90%;
+    --status-paused-fg: 248 29% 20%;
+
+    --highlight: 54 50% 69%;
+    --highlight-foreground: 248 29% 12%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 248 29% 10%;
+    --foreground: 245 35% 94%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 248 29% 14%;
+    --card-foreground: 245 35% 94%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 248 29% 14%;
+    --popover-foreground: 245 35% 94%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 248 100% 90%;
+    --primary-foreground: 248 29% 12%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 249 54% 42%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 248 25% 18%;
+    --muted-foreground: 245 18% 72%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 249 54% 33%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 217.2 32.6% 17.5%;
+    --border: 248 20% 24%;
+    --input: 248 20% 24%;
+    --ring: 248 100% 90%;
+
+    --sidebar-background: 248 29% 12%;
+    --sidebar-foreground: 245 35% 92%;
+    --sidebar-muted: 245 18% 70%;
+    --sidebar-accent: 249 54% 33%;
+    --sidebar-accent-foreground: 0 0% 100%;
+
+    --status-ongoing-bg: 249 54% 42%;
+    --status-ongoing-fg: 0 0% 100%;
+
+    --status-completed-bg: 55 54% 38%;
+    --status-completed-fg: 55 70% 94%;
+
+    --status-paused-bg: 248 70% 82%;
+    --status-paused-fg: 248 29% 12%;
+
+    --highlight: 54 50% 69%;
+    --highlight-foreground: 248 29% 12%;
   }
 }
 
@@ -70,10 +106,20 @@
   * {
     @apply border-border;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
+  }
+
+  ::selection {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
   }
 }

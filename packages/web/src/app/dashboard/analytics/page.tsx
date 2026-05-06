@@ -3,95 +3,121 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
+  BarChart3,
   DollarSign,
   ListChecks,
   Loader,
   PauseCircle,
   Package,
+  X,
 } from "lucide-react";
 
 import * as api from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { StatusDistributionChart } from "./status-distribution-chart";
-import { CostPerResearchChart } from "./cost-per-research-chart";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CostPerResearchChart } from "./cost-per-research-chart";
+import { StatusDistributionChart } from "./status-distribution-chart";
+
+const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
+
+function formatCurrency(value: number) {
+  return currencyFormatter.format(value);
+}
+
+function MetricCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  accentClassName,
+}: {
+  title: string;
+  value: string | number;
+  description: string;
+  icon: React.ElementType;
+  accentClassName: string;
+}) {
+  return (
+    <Card className="overflow-hidden rounded-[28px] border-border/60 bg-card/80 shadow-sm">
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
+        <div className="space-y-1">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            {title}
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">{description}</p>
+        </div>
+
+        <div
+          className={`flex size-11 items-center justify-center rounded-2xl ${accentClassName}`}
+        >
+          <Icon className="size-5" />
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        <div className="text-3xl font-bold tracking-tight">{value}</div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AnalyticsPage() {
+  const [dateRange, setDateRange] = useState<{ from?: string; to?: string }>(
+    {},
+  );
+
   const {
     data: paginatedData,
     isLoading,
     isError,
   } = useQuery({
-    // Usamos uma chave de query diferente para não conflitar com a listagem paginada
     queryKey: ["researches-for-analytics"],
-    // Para analytics, buscamos um limite alto para simular "todos os dados".
-    // Uma solução ideal a longo prazo seria um endpoint de API dedicado.
-    queryFn: () => api.getResearches({ limit: 12 }),
+    queryFn: () => api.getResearches({ limit: 50 }),
   });
-
-  const [dateRange, setDateRange] = useState<{
-    from?: string;
-    to?: string;
-  }>({});
-
-  function handleClearFilters() {
-    setDateRange({});
-  }
 
   const researches = paginatedData?.data ?? [];
 
   const filteredResearches = useMemo(() => {
-    if (!researches) return [];
-
     return researches.filter((research) => {
       const researchDate = new Date(research.createdAt ?? "");
+
+      if (Number.isNaN(researchDate.getTime())) {
+        return false;
+      }
+
       const fromDate = dateRange.from ? new Date(dateRange.from) : null;
       const toDate = dateRange.to ? new Date(dateRange.to) : null;
 
-      // Adjust fromDate to the start of the day in UTC
       if (fromDate) fromDate.setUTCHours(0, 0, 0, 0);
-
-      // Adjust toDate to the end of the day in UTC
       if (toDate) toDate.setUTCHours(23, 59, 59, 999);
 
       if (fromDate && researchDate < fromDate) return false;
       if (toDate && researchDate > toDate) return false;
+
       return true;
     });
   }, [researches, dateRange]);
 
   const analyticsData = useMemo(() => {
-    if (!filteredResearches || filteredResearches.length === 0) {
-      return {
-        totalResearches: 0,
-        statusCounts: {
-          em_andamento: 0,
-          concluida: 0,
-          pausada: 0,
-        },
-        totalEstimatedCost: 0,
-        averageCost: 0,
-      };
-    }
+    const statusCounts: Record<api.ResearchStatus, number> = {
+      em_andamento: 0,
+      concluida: 0,
+      pausada: 0,
+    };
 
-    const statusCounts = filteredResearches.reduce(
-      (acc, research) => {
-        acc[research.status] = (acc[research.status] || 0) + 1;
-        return acc;
-      },
-      { em_andamento: 0, concluida: 0, pausada: 0 } as Record<
-        api.Research["status"],
-        number
-      >,
-    );
+    const totalEstimatedCost = filteredResearches.reduce((acc, research) => {
+      return acc + (research.estimatedCost ?? 0);
+    }, 0);
 
-    const totalEstimatedCost = filteredResearches.reduce(
-      (acc, research) => acc + research.estimatedCost,
-      0,
-    );
+    filteredResearches.forEach((research) => {
+      statusCounts[research.status] += 1;
+    });
 
     const totalResearches = filteredResearches.length;
     const averageCost =
@@ -105,184 +131,205 @@ export default function AnalyticsPage() {
     };
   }, [filteredResearches]);
 
+  function handleClearFilters() {
+    setDateRange({});
+  }
+
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 md:p-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="text-muted-foreground">
-            Métricas e insights sobre suas pesquisas.
-          </p>
-        </header>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <main className="space-y-8 p-6 md:p-10">
+        <section className="rounded-[32px] border bg-card/70 p-8 shadow-sm">
+          <Skeleton className="h-10 w-64 rounded-2xl" />
+          <Skeleton className="mt-4 h-4 w-full max-w-lg rounded-xl" />
+        </section>
+
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Card key={index} className="rounded-[28px]">
+              <CardHeader>
                 <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-4 w-4 rounded-full" />
               </CardHeader>
               <CardContent>
-                <Skeleton className="h-8 w-12" />
+                <Skeleton className="h-9 w-20" />
               </CardContent>
             </Card>
           ))}
         </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          <Card>
+
+        <div className="grid gap-5 lg:grid-cols-2">
+          <Card className="rounded-[28px]">
             <CardHeader>
               <Skeleton className="h-5 w-48" />
             </CardHeader>
-            <CardContent className="flex items-center justify-center pt-6">
-              <Skeleton className="h-48 w-48 rounded-full" />
+            <CardContent>
+              <Skeleton className="h-64 w-full rounded-2xl" />
             </CardContent>
           </Card>
-          <Card>
+
+          <Card className="rounded-[28px]">
             <CardHeader>
               <Skeleton className="h-5 w-48" />
             </CardHeader>
-            <CardContent className="pt-6">
-              <Skeleton className="h-[192px] w-full" />
+            <CardContent>
+              <Skeleton className="h-64 w-full rounded-2xl" />
             </CardContent>
           </Card>
         </div>
-      </div>
+      </main>
     );
   }
 
   if (isError) {
     return (
-      <div className="container mx-auto p-8 text-destructive">
-        Falha ao carregar os dados de analytics.
-      </div>
+      <main className="p-6 md:p-10">
+        <div className="rounded-[28px] border border-destructive/20 bg-destructive/10 p-8">
+          <h1 className="text-xl font-semibold text-destructive">
+            Falha ao carregar analytics
+          </h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Não foi possível buscar os dados analíticos no momento.
+          </p>
+        </div>
+      </main>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-8">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-muted-foreground">
-          Métricas e insights sobre suas pesquisas.
-        </p>
-        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end">
+    <main className="space-y-8 p-6 md:p-10">
+      <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[hsl(var(--primary))] p-8 text-white shadow-2xl shadow-black/10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_35%)]" />
+
+        <div className="relative z-10 flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
+          <div className="max-w-2xl space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-sm backdrop-blur-sm">
+              <BarChart3 className="size-4" />
+              Analytics
+            </div>
+
+            <div className="space-y-3">
+              <h1 className="text-4xl font-bold tracking-tight">
+                Inteligência operacional
+              </h1>
+              <p className="text-base leading-relaxed text-white/75">
+                Acompanhe volume, status e investimento das pesquisas do Vox
+                Observatory.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
+            <p className="text-sm text-white/70">Pesquisas analisadas</p>
+            <p className="mt-1 text-3xl font-bold">
+              {analyticsData.totalResearches}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[28px] border bg-card/70 p-5 shadow-sm backdrop-blur-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
           <div className="grid gap-2">
             <Label htmlFor="date-from">De</Label>
             <Input
               id="date-from"
               type="date"
               value={dateRange.from || ""}
-              onChange={(e) =>
-                setDateRange((prev) => ({ ...prev, from: e.target.value }))
+              onChange={(event) =>
+                setDateRange((previous) => ({
+                  ...previous,
+                  from: event.target.value,
+                }))
               }
-              className="w-full sm:w-[200px]"
+              className="h-11 rounded-2xl bg-muted/70 sm:w-[220px]"
             />
           </div>
+
           <div className="grid gap-2">
             <Label htmlFor="date-to">Até</Label>
             <Input
               id="date-to"
               type="date"
               value={dateRange.to || ""}
-              onChange={(e) =>
-                setDateRange((prev) => ({ ...prev, to: e.target.value }))
+              onChange={(event) =>
+                setDateRange((previous) => ({
+                  ...previous,
+                  to: event.target.value,
+                }))
               }
-              className="w-full sm:w-[200px]"
+              className="h-11 rounded-2xl bg-muted/70 sm:w-[220px]"
             />
           </div>
+
           {(dateRange.from || dateRange.to) && (
-            <Button variant="ghost" onClick={handleClearFilters}>
-              Limpar
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleClearFilters}
+              className="h-11 rounded-2xl"
+            >
+              <X className="mr-2 size-4" />
+              Limpar filtros
             </Button>
           )}
         </div>
-      </header>
+      </section>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {analyticsData.totalResearches}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Em Andamento</CardTitle>
-            <Loader className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {analyticsData.statusCounts.em_andamento}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Concluídas</CardTitle>
-            <ListChecks className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {analyticsData.statusCounts.concluida}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pausadas</CardTitle>
-            <PauseCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {analyticsData.statusCounts.pausada}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          title="Total"
+          value={analyticsData.totalResearches}
+          description="Pesquisas no período"
+          icon={Package}
+          accentClassName="bg-primary/10 text-primary"
+        />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Custo Total Estimado
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(analyticsData.totalEstimatedCost)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Custo Médio por Pesquisa
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(analyticsData.averageCost)}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <MetricCard
+          title="Em andamento"
+          value={analyticsData.statusCounts.em_andamento}
+          description="Pesquisas ativas"
+          icon={Loader}
+          accentClassName="bg-[hsl(var(--status-ongoing-bg))]/10 text-[hsl(var(--status-ongoing-bg))]"
+        />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <MetricCard
+          title="Concluídas"
+          value={analyticsData.statusCounts.concluida}
+          description="Pesquisas finalizadas"
+          icon={ListChecks}
+          accentClassName="bg-[hsl(var(--status-completed-bg))]/10 text-[hsl(var(--status-completed-bg))]"
+        />
+
+        <MetricCard
+          title="Pausadas"
+          value={analyticsData.statusCounts.pausada}
+          description="Pesquisas interrompidas"
+          icon={PauseCircle}
+          accentClassName="bg-[hsl(var(--status-paused-bg))] text-[hsl(var(--status-paused-fg))]"
+        />
+      </section>
+
+      <section className="grid gap-5 md:grid-cols-2">
+        <MetricCard
+          title="Custo total estimado"
+          value={formatCurrency(analyticsData.totalEstimatedCost)}
+          description="Investimento planejado"
+          icon={DollarSign}
+          accentClassName="bg-[hsl(var(--highlight))]/30 text-[hsl(var(--highlight-foreground))]"
+        />
+
+        <MetricCard
+          title="Custo médio"
+          value={formatCurrency(analyticsData.averageCost)}
+          description="Média por pesquisa"
+          icon={DollarSign}
+          accentClassName="bg-accent text-accent-foreground"
+        />
+      </section>
+
+      <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <StatusDistributionChart data={analyticsData.statusCounts} />
         <CostPerResearchChart researches={filteredResearches} />
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

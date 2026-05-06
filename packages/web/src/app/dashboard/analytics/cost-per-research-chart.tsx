@@ -1,39 +1,67 @@
 "use client";
 
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import * as api from "@/lib/api";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface CostPerResearchChartProps {
   researches: api.Research[];
 }
 
+const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
+
+const compactCurrencyFormatter = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+  notation: "compact",
+});
+
+function formatCurrency(value: number) {
+  return currencyFormatter.format(value);
+}
+
+function formatCompactCurrency(value: number) {
+  return compactCurrencyFormatter.format(value);
+}
+
+function truncateLabel(value: string, maxLength = 16) {
+  if (value.length <= maxLength) return value;
+
+  return `${value.slice(0, maxLength)}...`;
+}
+
 export function CostPerResearchChart({
   researches,
 }: CostPerResearchChartProps) {
-  const chartData = researches.map((r) => ({
-    name: r.title.length > 15 ? `${r.title.substring(0, 15)}...` : r.title,
-    Custo: r.estimatedCost,
+  const chartData = researches.map((research) => ({
+    name: truncateLabel(research.title),
+    fullName: research.title,
+    estimatedCost: research.estimatedCost ?? 0,
   }));
 
   if (researches.length === 0) {
     return (
-      <Card>
+      <Card className="rounded-[28px] border-border/60 bg-card/80 shadow-sm">
         <CardHeader>
-          <CardTitle>Custo por Pesquisa</CardTitle>
+          <CardTitle>Custo por pesquisa</CardTitle>
         </CardHeader>
-        <CardContent className="flex h-[300px] items-center justify-center">
-          <p className="text-muted-foreground">
-            Nenhuma pesquisa para exibir os custos.
+
+        <CardContent className="flex h-[320px] items-center justify-center">
+          <p className="max-w-sm text-center text-sm text-muted-foreground">
+            Nenhuma pesquisa encontrada para exibir os custos estimados.
           </p>
         </CardContent>
       </Card>
@@ -41,40 +69,83 @@ export function CostPerResearchChart({
   }
 
   return (
-    <Card>
+    <Card className="rounded-[28px] border-border/60 bg-card/80 shadow-sm">
       <CardHeader>
-        <CardTitle>Custo por Pesquisa</CardTitle>
+        <CardTitle>Custo por pesquisa</CardTitle>
       </CardHeader>
+
       <CardContent>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer>
+        <div className="h-[320px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
-              margin={{ top: 5, right: 20, left: 30, bottom: 5 }}
+              margin={{
+                top: 8,
+                right: 12,
+                left: 8,
+                bottom: 8,
+              }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis
-                tickFormatter={(value) =>
-                  new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                    notation: "compact",
-                  }).format(value as number)
-                }
+              <CartesianGrid
+                stroke="hsl(var(--border))"
+                strokeDasharray="4 4"
+                vertical={false}
               />
-              <Tooltip
-                formatter={(value) => {
-                  if (typeof value === "number") {
-                    return new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(value);
-                  }
-                  return "N/A";
+
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{
+                  fill: "hsl(var(--muted-foreground))",
+                  fontSize: 12,
                 }}
               />
-              <Bar dataKey="Custo" fill="#3b82f6" />
+
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{
+                  fill: "hsl(var(--muted-foreground))",
+                  fontSize: 12,
+                }}
+                tickFormatter={(value) => formatCompactCurrency(Number(value))}
+              />
+
+              <Tooltip
+                cursor={{
+                  fill: "hsl(var(--muted))",
+                  radius: 12,
+                }}
+                contentStyle={{
+                  borderRadius: "16px",
+                  border: "1px solid hsl(var(--border))",
+                  background: "hsl(var(--popover))",
+                  color: "hsl(var(--popover-foreground))",
+                  boxShadow: "0 16px 40px rgba(0,0,0,0.08)",
+                }}
+                labelStyle={{
+                  color: "hsl(var(--foreground))",
+                  fontWeight: 600,
+                }}
+                formatter={(value) => [
+                  formatCurrency(Number(value)),
+                  "Custo estimado",
+                ]}
+                labelFormatter={(_, payload) => {
+                  const item = payload?.[0]?.payload;
+
+                  return item?.fullName ?? "Pesquisa";
+                }}
+              />
+
+              <Bar
+                dataKey="estimatedCost"
+                name="Custo estimado"
+                fill="hsl(var(--secondary))"
+                radius={[10, 10, 0, 0]}
+                maxBarSize={56}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
