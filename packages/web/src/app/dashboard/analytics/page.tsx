@@ -29,7 +29,7 @@ export default function AnalyticsPage() {
     queryKey: ["researches-for-analytics"],
     // Para analytics, buscamos um limite alto para simular "todos os dados".
     // Uma solução ideal a longo prazo seria um endpoint de API dedicado.
-    queryFn: () => api.getResearches({ limit: 999 }),
+    queryFn: () => api.getResearches({ limit: 12 }),
   });
 
   const [dateRange, setDateRange] = useState<{

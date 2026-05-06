@@ -1,4 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+
 import { RegisterResearch } from "@/application/use-cases/RegisterResearch";
 import { UpdateResearch } from "@/application/use-cases/UpdateResearch";
 import { DeleteResearch } from "@/application/use-cases/DeleteResearch";
@@ -6,9 +7,9 @@ import { GetResearchById } from "@/application/use-cases/GetResearchById";
 import { Research } from "@/domain/entities/Research";
 import { ResearchRepository } from "@/domain/repositories/ResearchRepository";
 import {
-  UpdateResearchBody,
   CreateResearchBody,
   ListResearchQuery,
+  UpdateResearchBody,
 } from "@/interfaces/http/schemas/research.schema";
 
 export class ResearchController {
@@ -20,8 +21,21 @@ export class ResearchController {
     private getResearchById: GetResearchById,
   ) {}
 
+  private toISOStringOrNull(date?: Date | null) {
+    if (!date) return null;
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return null;
+    }
+
+    return parsedDate.toISOString();
+  }
+
   private toResponse(research: Research) {
     const { props, id } = research;
+
     return {
       id,
       title: props.title,
@@ -32,19 +46,16 @@ export class ResearchController {
       targetAudience: props.targetAudience,
       location: props.location,
       estimatedCost: props.estimatedCost,
-      actualCost: props.actualCost,
-      tags: props.tags,
-      insights: props.insights,
-      artifacts: props.artifacts || [],
+      actualCost: props.actualCost ?? 0,
+      tags: props.tags ?? [],
+      insights: props.insights ?? undefined,
+      artifacts: props.artifacts ?? [],
 
-      // Garante que todas as datas sejam strings no formato ISO 8601
-      createdAt: props.createdAt?.toISOString() ?? null,
-      updatedAt: props.updatedAt?.toISOString() ?? null,
-      startDate: props.startDate.toISOString(),
-      estimatedEndDate: props.estimatedEndDate.toISOString(),
-      actualEndDate: props.actualEndDate
-        ? props.actualEndDate.toISOString()
-        : null,
+      createdAt: this.toISOStringOrNull(props.createdAt),
+      updatedAt: this.toISOStringOrNull(props.updatedAt),
+      startDate: this.toISOStringOrNull(props.startDate),
+      estimatedEndDate: this.toISOStringOrNull(props.estimatedEndDate),
+      actualEndDate: this.toISOStringOrNull(props.actualEndDate),
     };
   }
 
@@ -64,8 +75,15 @@ export class ResearchController {
     const { researches, nextCursor } = await this.repository.listAll(
       request.query,
     );
-    const responseData = researches.map((r) => this.toResponse(r));
-    return reply.send({ data: responseData, nextCursor });
+
+    const responseData = researches.map((research) =>
+      this.toResponse(research),
+    );
+
+    return reply.send({
+      data: responseData,
+      nextCursor,
+    });
   }
 
   async getById(
@@ -96,7 +114,9 @@ export class ResearchController {
     reply: FastifyReply,
   ) {
     const { id } = request.params;
+
     await this.deleteResearch.execute(id);
+
     return reply.status(204).send();
   }
 }

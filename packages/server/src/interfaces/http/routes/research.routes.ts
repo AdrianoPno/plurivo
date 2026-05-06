@@ -6,6 +6,7 @@ import {
   createResearchBodySchema,
   listResearchQuerySchema,
   researchIdParamsSchema,
+  listResearchResponseSchema, // Importa o esquema correto para a resposta da lista
   researchResponseSchema,
   updateResearchBodySchema,
 } from "../schemas/research.schema";
@@ -58,7 +59,8 @@ export async function researchRoutes(fastify: FastifyInstance) {
         security: [{ bearerAuth: [] }],
         querystring: listResearchQuerySchema,
         response: {
-          200: z.array(researchResponseSchema),
+          // Usa o esquema de resposta paginada
+          200: listResearchResponseSchema,
         },
       },
       preHandler: [app.authenticate],

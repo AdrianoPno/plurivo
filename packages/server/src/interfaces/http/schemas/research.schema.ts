@@ -96,7 +96,7 @@ export const listResearchQuerySchema = z.object({
   /**
    * Paginação
    */
-  limit: z.coerce.number().int().positive().max(50).optional(),
+  limit: z.coerce.number().int().positive().max(1000).optional(), // Aumentado o limite para acomodar requisições de analytics
 
   startAfter: z.string().optional(),
 });

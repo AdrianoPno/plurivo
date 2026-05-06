@@ -151,9 +151,9 @@ export interface UpdateResearchData extends Partial<CreateResearchData> {
 export type Research = Omit<CreateResearchData, "artifacts"> & {
   id: string;
 
-  createdAt: string | null;
+  createdAt: string; // createdAt não deve ser nulo
 
-  updatedAt: string | null;
+  updatedAt: string; // updatedAt não deve ser nulo
 
   actualEndDate?: string | null;
 

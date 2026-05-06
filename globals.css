@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /*
+      Direção Visual: "Enterprise Research Intelligence Platform"
+      - Fundo suave para reduzir a fadiga visual.
+      - Cor de texto escura, mas não preta, para melhor legibilidade.
+      - Paleta principal (roxo escuro) e acentos (roxo vibrante, oliva, lavanda)
+        para criar hierarquia e identidade.
+    */
+
+    /* Light Theme Tokens */
+    --background: 240 6% 96%; /* #F4F4F8 */
+    --foreground: 240 4% 11%; /* #1C1C1E */
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 4% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 4% 11%;
+
+    --primary: 251 25% 20%; /* #282442 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 251 55% 52%; /* #322782 - Roxo vibrante para acentos */
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 251 55% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --muted: 240 5% 90%;
+    --muted-foreground: 240 4% 46%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 251 55% 52%;
+
+    --radius: 0.75rem; /* 12px */
+
+    /* Custom Tokens */
+    --font-sans: "Inter", sans-serif;
+
+    --sidebar-background: 251 25% 20%; /* #282442 */
+    --sidebar-foreground: 230 20% 85%;
+
+    /* Status Colors from Palette */
+    --status-ongoing-bg: 251 55% 52%; /* #322782 */
+    --status-ongoing-fg: 251 55% 98%;
+
+    --status-completed-bg: 60 56% 33%; /* #827527 */
+    --status-completed-fg: 60 56% 95%;
+
+    --status-paused-bg: 230 100% 90%; /* #D2CCFF */
+    --status-paused-fg: 251 25% 20%;
+  }
+}
