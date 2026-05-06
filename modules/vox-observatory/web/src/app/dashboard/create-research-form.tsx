@@ -19,6 +19,7 @@ import { Button } from "@shared/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -261,73 +262,79 @@ export function CreateResearchForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden p-0">
-        <DialogHeader className="border-b bg-muted/30 px-6 py-5">
+      <DialogContent className="h-[90dvh] max-h-[90dvh] max-w-4xl p-0">
+        <DialogHeader className="shrink-0 border-b border-border bg-card px-6 py-5">
           <DialogTitle className="text-2xl font-semibold tracking-tight">
             {isEditMode ? "Editar descoberta" : "Registrar nova descoberta"}
           </DialogTitle>
+
+          <DialogDescription className="text-sm text-muted-foreground">
+            {isEditMode
+              ? "Atualize as informações da descoberta selecionada."
+              : "Preencha os dados principais para registrar uma nova descoberta na biblioteca."}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-y-auto px-6 py-6">
-          <Form {...form}>
-            <form
-              id="research-form"
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-8"
-            >
-              <ResearchBasicInfoSection
-                control={form.control}
-                isDisabled={isDisabled}
-              />
-
-              <Separator />
-
-              <ResearchPlanningSection
-                control={form.control}
-                isDisabled={isDisabled}
-              />
-
-              {isEditMode && (
-                <>
-                  <Separator />
-                  <ResearchResultsSection
-                    control={form.control}
-                    isDisabled={isDisabled}
-                  />
-                </>
-              )}
-
-              <Separator />
-
-              <ResearchArtifactsSection
-                control={form.control}
-                isDisabled={isSubmitting}
-                onUploadingChange={setIsUploading}
-              />
-            </form>
-          </Form>
-        </div>
-
-        <DialogFooter className="border-t bg-muted/30 px-6 py-4">
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={isDisabled}
-            onClick={() => onOpenChange(false)}
+        <Form {...form}>
+          <form
+            id="research-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex min-h-0 flex-1 flex-col bg-card text-card-foreground"
           >
-            Cancelar
-          </Button>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-card px-6 py-6">
+              <div className="space-y-8">
+                <ResearchBasicInfoSection
+                  control={form.control}
+                  isDisabled={isDisabled}
+                />
 
-          <Button
-            type="submit"
-            form="research-form"
-            disabled={isDisabled}
-            className="min-w-40"
-          >
-            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-            {isEditMode ? "Salvar alterações" : "Criar descoberta"}
-          </Button>
-        </DialogFooter>
+                <Separator />
+
+                <ResearchPlanningSection
+                  control={form.control}
+                  isDisabled={isDisabled}
+                />
+
+                {isEditMode && (
+                  <>
+                    <Separator />
+
+                    <ResearchResultsSection
+                      control={form.control}
+                      isDisabled={isDisabled}
+                    />
+                  </>
+                )}
+
+                <Separator />
+
+                <ResearchArtifactsSection
+                  control={form.control}
+                  isDisabled={isSubmitting}
+                  onUploadingChange={setIsUploading}
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="shrink-0 border-t border-border bg-card px-6 py-4">
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={isDisabled}
+                onClick={() => onOpenChange(false)}
+              >
+                Cancelar
+              </Button>
+
+              <Button type="submit" disabled={isDisabled} className="min-w-40">
+                {isSubmitting && (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                )}
+                {isEditMode ? "Salvar alterações" : "Criar descoberta"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

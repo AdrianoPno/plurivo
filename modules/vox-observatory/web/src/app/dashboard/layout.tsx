@@ -12,10 +12,12 @@ export default function DashboardLayout({
   return (
     <QueryProvider>
       <AuthProvider>
-        <div className="flex min-h-screen bg-background">
+        <div className="flex min-h-screen bg-background text-foreground">
           <Sidebar />
 
-          <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
+          <main className="h-screen min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background">
+            {children}
+          </main>
         </div>
 
         <GlobalSpinner />

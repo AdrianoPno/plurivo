@@ -8,8 +8,7 @@
       Direção Visual: "Enterprise Research Intelligence Platform"
       - Fundo suave para reduzir a fadiga visual.
       - Cor de texto escura, mas não preta, para melhor legibilidade.
-      - Paleta principal (roxo escuro) e acentos (roxo vibrante, oliva, lavanda)
-        para criar hierarquia e identidade.
+      - Paleta principal com roxo escuro, roxo vibrante, oliva e lavanda.
     */
 
     /* Light Theme Tokens */
@@ -25,7 +24,7 @@
     --primary: 251 25% 20%; /* #282442 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 251 55% 52%; /* #322782 - Roxo vibrante para acentos */
+    --secondary: 251 55% 52%; /* #322782 */
     --secondary-foreground: 0 0% 100%;
 
     --accent: 251 55% 52%;
@@ -41,15 +40,20 @@
     --input: 240 6% 90%;
     --ring: 251 55% 52%;
 
-    --radius: 0.75rem; /* 12px */
+    --radius: 0.75rem;
 
-    /* Custom Tokens */
+    /* Fonts */
     --font-sans: "Inter", sans-serif;
 
+    /* Sidebar Tokens */
     --sidebar-background: 251 25% 20%; /* #282442 */
-    --sidebar-foreground: 230 20% 85%;
+    --sidebar-foreground: 230 20% 88%;
 
-    /* Status Colors from Palette */
+    --sidebar-muted: 230 20% 72%;
+    --sidebar-accent: 0 0% 100%;
+    --sidebar-accent-foreground: 251 25% 20%;
+
+    /* Status Colors */
     --status-ongoing-bg: 251 55% 52%; /* #322782 */
     --status-ongoing-fg: 251 55% 98%;
 
@@ -58,5 +62,37 @@
 
     --status-paused-bg: 230 100% 90%; /* #D2CCFF */
     --status-paused-fg: 251 25% 20%;
+  }
+
+  html {
+    font-size: 14px;
+    scroll-behavior: smooth;
+  }
+
+  @media (min-width: 1536px) {
+    html {
+      font-size: 15px;
+    }
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    min-height: 100vh;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans), system-ui, sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
   }
 }

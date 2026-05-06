@@ -25,10 +25,10 @@ import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
 import {
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@shared/ui/card";
 import { Input } from "@shared/ui/input";
 import { Separator } from "@shared/ui/separator";
@@ -49,12 +49,22 @@ const methodologyLabels: Record<string, string> = {
   teste_usabilidade: "Teste de usabilidade",
 };
 
+const statusFilterOptions: Array<{
+  label: string;
+  value?: ResearchStatus;
+}> = [
+  { label: "Todos", value: undefined },
+  { label: "Em andamento", value: "em_andamento" },
+  { label: "Concluída", value: "concluida" },
+  { label: "Pausada", value: "pausada" },
+];
+
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
 });
 
-function formatResearchDate(date: string | Date | null) {
+function formatResearchDate(date: string | Date | null | undefined) {
   if (!date) return "Data indisponível";
 
   const parsedDate = new Date(date);
@@ -112,14 +122,14 @@ export default function LibraryPage() {
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["researches", filters],
+    initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
       api.getResearches({
         ...filters,
         limit: 12,
         startAfter: pageParam,
       }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
 
   const researches =
@@ -130,7 +140,7 @@ export default function LibraryPage() {
 
   if (showSkeleton) {
     return (
-      <main className="space-y-10 p-6 md:p-10">
+      <main className="space-y-10 bg-background p-6 text-foreground md:p-10">
         <div className="space-y-3">
           <div className="h-10 w-64 rounded-2xl bg-muted" />
           <div className="h-4 w-full max-w-lg rounded-xl bg-muted" />
@@ -147,7 +157,7 @@ export default function LibraryPage() {
 
   if (isError) {
     return (
-      <main className="p-6 md:p-10">
+      <main className="bg-background p-6 text-foreground md:p-10">
         <div className="rounded-3xl border border-destructive/20 bg-destructive/10 p-8">
           <h1 className="text-xl font-semibold text-destructive">
             Falha ao carregar a biblioteca
@@ -162,8 +172,8 @@ export default function LibraryPage() {
   }
 
   return (
-    <main className="space-y-10 p-6 md:p-10">
-      <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[hsl(var(--primary))] p-8 text-white shadow-2xl shadow-black/10">
+    <main className="space-y-10 bg-background p-6 text-foreground md:p-10">
+      <section className="relative overflow-hidden rounded-[32px] border border-border bg-[hsl(var(--primary))] p-8 text-primary-foreground shadow-2xl shadow-black/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_35%)]" />
 
         <div className="relative z-10 flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
@@ -187,7 +197,7 @@ export default function LibraryPage() {
           <Button
             onClick={() => setIsFormOpen(true)}
             size="lg"
-            className="h-12 rounded-2xl bg-white text-[hsl(var(--primary))] hover:bg-white/90"
+            className="h-12 rounded-2xl bg-white text-[hsl(var(--primary))] shadow-sm hover:bg-white/90"
           >
             <PlusCircle className="mr-2 size-4" />
             Nova descoberta
@@ -195,7 +205,7 @@ export default function LibraryPage() {
         </div>
       </section>
 
-      <section className="rounded-[28px] border bg-card/70 p-5 shadow-sm backdrop-blur-sm">
+      <section className="rounded-[28px] border border-border bg-card p-5 text-card-foreground shadow-sm">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex w-full max-w-2xl flex-col gap-4">
             <div className="relative">
@@ -205,38 +215,31 @@ export default function LibraryPage() {
                 placeholder="Buscar pesquisas..."
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                className="h-12 rounded-2xl border-0 bg-muted/70 pl-11 shadow-none focus-visible:ring-2"
+                className="h-12 rounded-2xl border border-input bg-background pl-11 text-foreground shadow-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {[
-                { label: "Todos", value: undefined },
-                { label: "Em andamento", value: "em_andamento" },
-                { label: "Concluída", value: "concluida" },
-                { label: "Pausada", value: "pausada" },
-              ].map((item) => {
-                const isActive = filters.status === item.value;
+              {statusFilterOptions.map((item) => {
+                const isAllFilter = !item.value;
+                const isActive = isAllFilter
+                  ? !filters.status
+                  : filters.status === item.value;
 
                 return (
                   <Button
                     key={item.label}
                     size="sm"
-                    variant={
-                      isActive || (!item.value && !filters.status)
-                        ? "default"
-                        : "outline"
-                    }
+                    variant={isActive ? "default" : "outline"}
                     className={cn(
                       "rounded-xl",
                       !isActive &&
-                        item.value &&
-                        "border-border/60 bg-background hover:bg-muted",
+                        "border-border bg-card text-card-foreground hover:bg-muted",
                     )}
                     onClick={() =>
                       setFilters((previousFilters) => ({
                         ...previousFilters,
-                        status: item.value as ResearchStatus | undefined,
+                        status: item.value,
                       }))
                     }
                   >
@@ -250,7 +253,7 @@ export default function LibraryPage() {
       </section>
 
       {!hasResearches ? (
-        <section className="flex min-h-[320px] items-center justify-center rounded-[28px] border border-dashed bg-card/40 p-8 text-center">
+        <section className="flex min-h-[320px] items-center justify-center rounded-[28px] border border-dashed border-border bg-card p-8 text-center text-card-foreground shadow-sm">
           <div className="max-w-md space-y-3">
             <h2 className="text-xl font-semibold">
               Nenhuma descoberta encontrada
@@ -264,98 +267,105 @@ export default function LibraryPage() {
         </section>
       ) : (
         <section className="space-y-5">
-          {isFetching && (
+          {isFetching && !isFetchingNextPage && (
             <p className="text-sm text-muted-foreground">
               Atualizando resultados...
             </p>
           )}
 
           <div className="grid gap-6 md:grid-cols-2 2xl:grid-cols-3">
-            {researches.map((research) => (
-              <Card
-                key={research.id}
-                className="group overflow-hidden rounded-[28px] border border-border/60 bg-card/80 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/5"
-              >
-                <CardHeader className="space-y-5 pb-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <Badge
-                      className={cn(
-                        "rounded-full px-3 py-1 text-[11px] font-medium",
-                        getStatusStyles(research.status),
-                      )}
-                    >
-                      {statusLabels[research.status as ResearchStatus]}
-                    </Badge>
+            {researches.map((research) => {
+              const status = research.status as ResearchStatus;
 
-                    <span className="font-mono text-[10px] text-muted-foreground">
-                      {research.id.slice(0, 8)}
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    <CardTitle className="line-clamp-2 text-2xl leading-tight tracking-tight">
-                      {research.title}
-                    </CardTitle>
-
-                    <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                      {research.description}
-                    </p>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-5">
-                  <div className="flex flex-wrap gap-2">
-                    <Badge
-                      variant="outline"
-                      className="rounded-full border-border/60 bg-primary/5"
-                    >
-                      {methodologyLabels[research.methodology]}
-                    </Badge>
-
-                    {research.tags?.slice(0, 3).map((tag) => (
+              return (
+                <Card
+                  key={research.id}
+                  className="group overflow-hidden rounded-[28px] border border-border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/5"
+                >
+                  <CardHeader className="space-y-5 pb-4">
+                    <div className="flex items-start justify-between gap-4">
                       <Badge
-                        key={tag}
-                        variant="secondary"
-                        className="rounded-full px-2.5 py-1 text-[11px]"
+                        className={cn(
+                          "rounded-full px-3 py-1 text-[11px] font-medium",
+                          getStatusStyles(research.status),
+                        )}
                       >
-                        #{tag}
+                        {statusLabels[status] ?? research.status}
                       </Badge>
-                    ))}
-                  </div>
 
-                  <Separator className="opacity-50" />
-
-                  <div className="grid gap-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="size-4 shrink-0" />
-                      <span>{formatResearchDate(research.startDate)}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <MapPin className="size-4 shrink-0" />
-                      <span className="truncate">{research.location}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="size-4 shrink-0" />
-                      <span>
-                        Investimento estimado:{" "}
-                        {formatCurrency(research.estimatedCost)}
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {research.id.slice(0, 8)}
                       </span>
                     </div>
-                  </div>
-                </CardContent>
 
-                <CardFooter className="pt-2">
-                  <Button asChild className="h-11 w-full rounded-2xl">
-                    <Link href={`/dashboard/researches/${research.id}`}>
-                      <Eye className="mr-2 size-4" />
-                      Ver detalhes
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+                    <div className="space-y-3">
+                      <CardTitle className="line-clamp-2 text-2xl leading-tight tracking-tight">
+                        {research.title}
+                      </CardTitle>
+
+                      <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                        {research.description}
+                      </p>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-5">
+                    <div className="flex flex-wrap gap-2">
+                      <Badge
+                        variant="outline"
+                        className="rounded-full border-border bg-background"
+                      >
+                        {methodologyLabels[research.methodology] ??
+                          research.methodology}
+                      </Badge>
+
+                      {research.tags?.slice(0, 3).map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="rounded-full px-2.5 py-1 text-[11px]"
+                        >
+                          #{tag}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <Separator className="opacity-50" />
+
+                    <div className="grid gap-3 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="size-4 shrink-0" />
+                        <span>{formatResearchDate(research.startDate)}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <MapPin className="size-4 shrink-0" />
+                        <span className="truncate">
+                          {research.location || "Localização não informada"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="size-4 shrink-0" />
+                        <span>
+                          Investimento estimado:{" "}
+                          {formatCurrency(research.estimatedCost)}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="pt-2">
+                    <Button asChild className="h-11 w-full rounded-2xl">
+                      <Link href={`/dashboard/researches/${research.id}`}>
+                        <Eye className="mr-2 size-4" />
+                        Ver detalhes
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
           </div>
 
           {hasNextPage && (

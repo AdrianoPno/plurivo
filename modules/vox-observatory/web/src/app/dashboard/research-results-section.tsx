@@ -38,9 +38,19 @@ export function ResearchResultsSection({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Data real de término</FormLabel>
+
               <FormControl>
-                <Input type="date" disabled={isDisabled} {...field} />
+                <Input
+                  type="date"
+                  disabled={isDisabled}
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                />
               </FormControl>
+
               <FormMessage />
             </FormItem>
           )}
@@ -52,22 +62,29 @@ export function ResearchResultsSection({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Custo real (R$)</FormLabel>
+
               <FormControl>
                 <Input
                   type="number"
                   min={0}
                   step="0.01"
+                  inputMode="decimal"
                   placeholder="0,00"
                   disabled={isDisabled}
-                  value={typeof field.value === "number" ? field.value : 0}
-                  onChange={field.onChange}
+                  value={field.value ?? ""}
+                  onChange={(event) => {
+                    field.onChange(event.target.value);
+                  }}
                   onBlur={field.onBlur}
                   name={field.name}
+                  ref={field.ref}
                 />
               </FormControl>
+
               <FormDescription>
                 Use para comparar com o custo estimado.
               </FormDescription>
+
               <FormMessage />
             </FormItem>
           )}
@@ -79,18 +96,25 @@ export function ResearchResultsSection({
           render={({ field }) => (
             <FormItem className="md:col-span-2">
               <FormLabel>Insights finais</FormLabel>
+
               <FormControl>
                 <Textarea
                   className="min-h-32 resize-none"
                   placeholder="Documente aprendizados, resultados, recomendações e impactos da pesquisa."
                   disabled={isDisabled}
-                  {...field}
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
                 />
               </FormControl>
+
               <FormDescription>
                 Essas informações ajudam na análise histórica e tomada de
                 decisão.
               </FormDescription>
+
               <FormMessage />
             </FormItem>
           )}
