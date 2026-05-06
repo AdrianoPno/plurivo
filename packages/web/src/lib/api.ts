@@ -1,5 +1,6 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import Cookies from "js-cookie";
+
 import { useLoadingStore } from "@/store/use-loading-store";
 
 const api = axios.create({
@@ -7,17 +8,20 @@ const api = axios.create({
 });
 
 /**
- * Interceptor de Requisição
+ * Interceptor de Request
  */
 api.interceptors.request.use(
   (config) => {
     useLoadingStore.getState().startLoading();
+
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("vox-api-token");
+
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
+
     return config;
   },
   (error) => {
@@ -27,7 +31,7 @@ api.interceptors.request.use(
 );
 
 /**
- * Interceptor de Resposta (Anti-Looping)
+ * Interceptor de Response
  */
 api.interceptors.response.use(
   (response) => {
@@ -41,16 +45,17 @@ api.interceptors.response.use(
       const isUnauthorized = error.response?.status === 401;
       const isAuthEndpoint = error.config?.url?.includes("/auth/sessions");
 
-      if (isUnauthorized && !isAuthEndpoint) {
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("vox-api-token");
-          Cookies.remove("session", { path: "/" });
+      if (isUnauthorized && !isAuthEndpoint && typeof window !== "undefined") {
+        localStorage.removeItem("vox-api-token");
 
-          const isLoginPage = window.location.pathname.includes("/login");
+        Cookies.remove("session", {
+          path: "/",
+        });
 
-          if (!isLoginPage) {
-            window.location.href = "/login?session=expired";
-          }
+        const isLoginPage = window.location.pathname.includes("/login");
+
+        if (!isLoginPage) {
+          window.location.href = "/login?session=expired";
         }
       }
     }
@@ -61,14 +66,33 @@ api.interceptors.response.use(
 
 export default api;
 
-// --- Interfaces ---
+/**
+ * USER TYPES
+ */
+export type UserRole = "ADMIN" | "VIEWER" | "SUPER";
 
+export type UserStatus = "ativo" | "inativo";
+
+/**
+ * RESEARCH TYPES
+ */
+export type ResearchStatus = "em_andamento" | "concluida" | "pausada";
+
+export type ResearchMethodology =
+  | "quantitativa"
+  | "qualitativa"
+  | "etnografica"
+  | "teste_usabilidade";
+
+/**
+ * USER
+ */
 export interface ApiUser {
   uid: string;
   nome: string;
   email: string;
-  role: "ADMIN" | "VIEWER" | "SUPER";
-  status: "ativo" | "inativo";
+  role: UserRole;
+  status: UserStatus;
 }
 
 export interface UpdateUserData {
@@ -76,28 +100,8 @@ export interface UpdateUserData {
 }
 
 /**
- * Interface base para criação, refletindo o JSON completo enviado.
+ * ARTIFACT
  */
-export interface CreateResearchData {
-  title: string;
-  description: string;
-  objective: string;
-  methodology:
-    | "quantitativa"
-    | "qualitativa"
-    | "etnografica"
-    | "teste_usabilidade";
-  startDate: string; // ISO Date String
-  estimatedEndDate: string; // ISO Date String
-  status: "em_andamento" | "concluida" | "pausada";
-  targetAudience: string;
-  location: string;
-  estimatedCost: number;
-  tags: string[];
-  insights?: string; // Novo campo do JSON
-  artifacts?: Artifact[]; // Adicionado para corresponder ao backend
-}
-
 export interface Artifact {
   url: string;
   name?: string;
@@ -105,57 +109,123 @@ export interface Artifact {
 }
 
 /**
- * Interface para atualização: permite editar custos reais e datas de término.
+ * CREATE RESEARCH
  */
-export interface UpdateResearchData extends Partial<CreateResearchData> {
-  actualEndDate?: string;
-  actualCost?: number;
-  artifacts?: Artifact[]; // Array de arquivos/links
+export interface CreateResearchData {
+  title: string;
+  description: string;
+  objective: string;
+
+  methodology: ResearchMethodology;
+
+  startDate: string;
+
+  estimatedEndDate: string;
+
+  status: ResearchStatus;
+
+  targetAudience: string;
+
+  location: string;
+
+  estimatedCost: number;
+
+  tags: string[];
+
+  insights?: string;
+
+  artifacts?: Artifact[];
 }
 
 /**
- * O objeto completo que vem da API (Response)
+ * UPDATE RESEARCH
  */
-export type Research = CreateResearchData & {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  actualEndDate?: string;
-  actualCost: number; // Agora sempre um número, conforme o backend
-  artifacts: Artifact[]; // Agora corretamente tipado como array de Artifact
-};
-
-export interface ListResearchesFilters {
-  status?: "em_andamento" | "concluida" | "pausada";
-  tag?: string;
-  location?: string;
-  title?: string;
+export interface UpdateResearchData extends Partial<CreateResearchData> {
+  actualEndDate?: string | null;
+  actualCost?: number;
 }
 
-// --- Funções de API ---
+/**
+ * RESEARCH RESPONSE
+ */
+export type Research = Omit<CreateResearchData, "artifacts"> & {
+  id: string;
 
+  createdAt: string | null;
+
+  updatedAt: string | null;
+
+  actualEndDate?: string | null;
+
+  actualCost?: number;
+
+  artifacts: Artifact[];
+};
+
+/**
+ * LIST FILTERS
+ */
+export interface ListResearchesFilters {
+  title?: string;
+
+  status?: ResearchStatus;
+
+  location?: string;
+
+  tag?: string;
+
+  limit?: number;
+
+  startAfter?: string;
+}
+
+/**
+ * LIST RESPONSE
+ */
+export interface ListResearchesResponse {
+  data: Research[];
+
+  nextCursor?: string;
+}
+
+/**
+ * AUTH
+ */
 export async function exchangeFirebaseTokenForApiToken(
   idToken: string,
 ): Promise<string> {
-  const response = await api.post("/auth/sessions", { idToken });
-  const { token } = response.data;
-  return token;
+  const response = await api.post<{
+    token: string;
+  }>("/auth/sessions", {
+    idToken,
+  });
+
+  return response.data.token;
 }
 
+/**
+ * USER
+ */
 export async function getMe(): Promise<ApiUser> {
-  const response = await api.get("/me");
+  const response = await api.get<ApiUser>("/me");
+
   return response.data;
 }
 
 export async function updateMe(data: UpdateUserData): Promise<ApiUser> {
-  const response = await api.patch("/me", data);
+  const response = await api.patch<ApiUser>("/me", data);
+
   return response.data;
 }
 
+/**
+ * RESEARCH
+ */
 export async function createResearch(
   data: CreateResearchData,
 ): Promise<Research> {
-  const response = await api.post("/researches", data);
+  const response = await api.post<Research>("/researches", data);
+
   return response.data;
 }
 
@@ -165,21 +235,38 @@ export async function updateResearch({
 }: {
   id: string;
   data: UpdateResearchData;
-}) {
+}): Promise<void> {
   await api.patch(`/researches/${id}`, data);
 }
 
 export async function getResearches(
   filters?: ListResearchesFilters,
-): Promise<Research[]> {
-  const response = await api.get("/researches", {
-    params: filters,
-  });
+): Promise<ListResearchesResponse> {
+  const response = await api.get<Research[] | ListResearchesResponse>(
+    "/researches",
+    {
+      params: filters,
+    },
+  );
+
+  /**
+   * Compatibilidade:
+   * Backend antigo -> retorna array
+   * Backend novo -> retorna objeto paginado
+   */
+  if (Array.isArray(response.data)) {
+    return {
+      data: response.data,
+      nextCursor: undefined,
+    };
+  }
+
   return response.data;
 }
 
 export async function getResearchById(id: string): Promise<Research> {
-  const response = await api.get(`/researches/${id}`);
+  const response = await api.get<Research>(`/researches/${id}`);
+
   return response.data;
 }
 

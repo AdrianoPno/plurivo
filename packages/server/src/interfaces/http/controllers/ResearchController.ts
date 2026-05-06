@@ -9,7 +9,7 @@ import {
   UpdateResearchBody,
   CreateResearchBody,
   ListResearchQuery,
-} from "../schemas/research.schema";
+} from "@/interfaces/http/schemas/research.schema";
 
 export class ResearchController {
   constructor(
@@ -21,18 +21,30 @@ export class ResearchController {
   ) {}
 
   private toResponse(research: Research) {
+    const { props, id } = research;
     return {
-      id: research.id,
-      ...research.props,
-      // Garante que as datas sejam strings no formato ISO
-      createdAt: research.props.createdAt?.toISOString(),
-      updatedAt: research.props.updatedAt?.toISOString(),
-      startDate: research.props.startDate?.toISOString(),
-      estimatedEndDate: research.props.estimatedEndDate?.toISOString(),
-      actualEndDate: research.props.actualEndDate
-        ? research.props.actualEndDate.toISOString()
+      id,
+      title: props.title,
+      description: props.description,
+      objective: props.objective,
+      methodology: props.methodology,
+      status: props.status,
+      targetAudience: props.targetAudience,
+      location: props.location,
+      estimatedCost: props.estimatedCost,
+      actualCost: props.actualCost,
+      tags: props.tags,
+      insights: props.insights,
+      artifacts: props.artifacts || [],
+
+      // Garante que todas as datas sejam strings no formato ISO 8601
+      createdAt: props.createdAt?.toISOString() ?? null,
+      updatedAt: props.updatedAt?.toISOString() ?? null,
+      startDate: props.startDate.toISOString(),
+      estimatedEndDate: props.estimatedEndDate.toISOString(),
+      actualEndDate: props.actualEndDate
+        ? props.actualEndDate.toISOString()
         : null,
-      artifacts: research.props.artifacts || [], // Garante que seja um array, mesmo que vazio
     };
   }
 
@@ -49,9 +61,11 @@ export class ResearchController {
     request: FastifyRequest<{ Querystring: ListResearchQuery }>,
     reply: FastifyReply,
   ) {
-    const researches = await this.repository.listAll(request.query);
-    const response = researches.map((r) => this.toResponse(r));
-    return reply.send(response);
+    const { researches, nextCursor } = await this.repository.listAll(
+      request.query,
+    );
+    const responseData = researches.map((r) => this.toResponse(r));
+    return reply.send({ data: responseData, nextCursor });
   }
 
   async getById(

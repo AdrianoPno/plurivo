@@ -1,16 +1,12 @@
-import { ResearchRepository } from "../../domain/repositories/ResearchRepository";
-import {
-  Research,
-  ResearchProps,
-  Artifact,
-} from "../../domain/entities/Research";
+import { ResearchRepository } from "@/domain/repositories/ResearchRepository";
+import { Research, ResearchProps, Artifact } from "@/domain/entities/Research";
 import { getDatabase, DocumentNotFoundException } from "./firestore";
 import {
   Timestamp,
   Query,
   CollectionReference,
 } from "firebase-admin/firestore";
-import { ListResearchQuery } from "../../interfaces/http/schemas/research.schema";
+import { ListResearchQuery } from "@/interfaces/http/schemas/research.schema";
 
 type FirestoreResearchData = Omit<
   ResearchProps,
@@ -33,7 +29,11 @@ export class FirestoreResearchRepository implements ResearchRepository {
 
     // Deixa o Firestore gerar o ID
     const docRef = await this.collection.add(data);
-    return new Research(research.props, docRef.id);
+
+    // Retorna uma nova instância de Research que reflete o estado salvo,
+    // incluindo as datas de criação/atualização geradas.
+    const savedProps = this.mapFromDatabase(data);
+    return new Research(savedProps, docRef.id);
   }
 
   async findById(id: string): Promise<Research | null> {
@@ -47,7 +47,10 @@ export class FirestoreResearchRepository implements ResearchRepository {
     );
   }
 
-  async listAll(filters?: ListResearchQuery): Promise<Research[]> {
+  async listAll(filters?: ListResearchQuery): Promise<{
+    researches: Research[];
+    nextCursor?: string;
+  }> {
     let query: Query = this.collection;
 
     // Filtros Dinâmicos
@@ -73,15 +76,41 @@ export class FirestoreResearchRepository implements ResearchRepository {
     }
 
     // Ordenação padrão por data de criação
-    const snapshot = await query.orderBy("createdAt", "desc").get();
+    query = query.orderBy("createdAt", "desc");
 
-    return snapshot.docs.map(
+    // Paginação com cursor
+    if (filters?.startAfter) {
+      const lastVisibleDoc = await this.collection
+        .doc(filters.startAfter)
+        .get();
+      if (lastVisibleDoc.exists) {
+        query = query.startAfter(lastVisibleDoc);
+      }
+    }
+
+    const limit = filters?.limit ?? 9; // Padrão de 9 para uma grade 3x3
+    query = query.limit(limit + 1); // Busca um item a mais para verificar se há próxima página
+
+    const snapshot = await query.get();
+
+    const hasNextPage = snapshot.docs.length > limit;
+    const docsToReturn = hasNextPage
+      ? snapshot.docs.slice(0, limit)
+      : snapshot.docs;
+
+    const researches = docsToReturn.map(
       (doc) =>
         new Research(
           this.mapFromDatabase(doc.data() as FirestoreResearchData),
           doc.id,
         ),
     );
+
+    const nextCursor = hasNextPage
+      ? docsToReturn[docsToReturn.length - 1].id
+      : undefined;
+
+    return { researches, nextCursor };
   }
 
   async update(id: string, data: Partial<ResearchProps>): Promise<void> {

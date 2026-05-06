@@ -52,23 +52,39 @@ const formSchema = z
       .string()
       .min(10, "A descrição deve ter pelo menos 10 caracteres."),
     objective: z.string().min(1, "O objetivo é obrigatório."),
+
     methodology: z.enum([
       "quantitativa",
       "qualitativa",
       "etnografica",
       "teste_usabilidade",
     ]),
-    startDate: z.string().min(1, "Data de início é obrigatória."),
-    estimatedEndDate: z.string().min(1, "Data de término é obrigatória."),
+
     status: z
       .enum(["em_andamento", "concluida", "pausada"])
       .default("em_andamento"),
+
+    startDate: z.string().min(1, "Data de início é obrigatória."),
+    estimatedEndDate: z.string().min(1, "Data de término é obrigatória."),
+
+    actualEndDate: z.string().optional(),
+
     targetAudience: z.string().min(1, "O público-alvo é obrigatório."),
     location: z.string().min(1, "A localização é obrigatória."),
+
     estimatedCost: z.coerce
       .number()
-      .nonnegative("O custo deve ser um valor positivo."),
+      .nonnegative("O custo estimado deve ser positivo."),
+
+    actualCost: z.coerce
+      .number()
+      .nonnegative("O custo real deve ser positivo.")
+      .optional(),
+
     tags: z.string().min(1, "Adicione pelo menos uma tag."),
+
+    insights: z.string().optional(),
+
     artifacts: z
       .array(
         z.object({
@@ -82,8 +98,17 @@ const formSchema = z
   .refine(
     (data) => new Date(data.estimatedEndDate) > new Date(data.startDate),
     {
-      message: "A data de término deve ser posterior ao início.",
+      message: "A data de término estimada deve ser posterior ao início.",
       path: ["estimatedEndDate"],
+    },
+  )
+  .refine(
+    (data) =>
+      !data.actualEndDate ||
+      new Date(data.actualEndDate) >= new Date(data.startDate),
+    {
+      message: "A data real de término deve ser igual ou posterior ao início.",
+      path: ["actualEndDate"],
     },
   );
 
@@ -104,10 +129,13 @@ const defaultValues: FormValues = {
   status: "em_andamento",
   startDate: new Date().toISOString().split("T")[0],
   estimatedEndDate: "",
+  actualEndDate: "",
   targetAudience: "",
   location: "",
   estimatedCost: 0,
+  actualCost: 0,
   tags: "",
+  insights: "",
   artifacts: [],
 };
 
@@ -165,10 +193,13 @@ export function CreateResearchForm({
         status: initialData.status ?? "em_andamento",
         startDate: formatDateToInputValue(initialData.startDate),
         estimatedEndDate: formatDateToInputValue(initialData.estimatedEndDate),
+        actualEndDate: formatDateToInputValue(initialData.actualEndDate),
         targetAudience: initialData.targetAudience ?? "",
         location: initialData.location ?? "",
         estimatedCost: initialData.estimatedCost ?? 0,
+        actualCost: initialData.actualCost ?? 0,
         tags: initialData.tags?.join(", ") ?? "",
+        insights: initialData.insights ?? "",
         artifacts: initialData.artifacts ?? [],
       });
 
@@ -212,6 +243,11 @@ export function CreateResearchForm({
       ...values,
       startDate: dateInputToISOString(values.startDate),
       estimatedEndDate: dateInputToISOString(values.estimatedEndDate),
+      actualEndDate: values.actualEndDate
+        ? dateInputToISOString(values.actualEndDate)
+        : null,
+      actualCost: values.actualCost ?? 0,
+      insights: values.insights?.trim() || undefined,
       tags: values.tags
         .split(",")
         .map((tag) => tag.trim())
@@ -349,7 +385,7 @@ export function CreateResearchForm({
                     Classificação e planejamento
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Defina metodologia, datas, custo e informações operacionais.
+                    Defina metodologia, status, datas e custos planejados.
                   </p>
                 </div>
 
@@ -446,6 +482,27 @@ export function CreateResearchForm({
 
                   <FormField
                     control={form.control}
+                    name="estimatedCost"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Custo estimado (R$)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            placeholder="0,00"
+                            disabled={isDisabled}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="targetAudience"
                     render={({ field }) => (
                       <FormItem>
@@ -482,27 +539,6 @@ export function CreateResearchForm({
 
                   <FormField
                     control={form.control}
-                    name="estimatedCost"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Custo estimado (R$)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            placeholder="0,00"
-                            disabled={isDisabled}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="tags"
                     render={({ field }) => (
                       <FormItem>
@@ -523,6 +559,91 @@ export function CreateResearchForm({
                   />
                 </div>
               </section>
+
+              {isEditMode && (
+                <>
+                  <Separator />
+
+                  <section className="space-y-5">
+                    <div>
+                      <h3 className="text-base font-semibold">
+                        Resultados e encerramento
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Registre os valores reais para comparar planejamento e
+                        execução.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="actualEndDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Data real de término</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                disabled={isDisabled}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="actualCost"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Custo real (R$)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={0}
+                                step="0.01"
+                                placeholder="0,00"
+                                disabled={isDisabled}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Use para comparar com o custo estimado.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="insights"
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-2">
+                            <FormLabel>Insights finais</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                className="min-h-32 resize-none"
+                                placeholder="Documente aprendizados, resultados, recomendações e impactos da pesquisa."
+                                disabled={isDisabled}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Essas informações ajudam na análise histórica e
+                              tomada de decisão.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </section>
+                </>
+              )}
 
               <Separator />
 

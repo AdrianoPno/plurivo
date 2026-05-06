@@ -9,10 +9,11 @@ import {
   MapPin,
   PlusCircle,
   Search,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import * as api from "@/lib/api";
 
@@ -111,29 +112,35 @@ export default function LibraryPage() {
   }, [searchTerm]);
 
   const {
-    data: researches = [],
+    data,
     isLoading,
     isError,
     isFetching,
-  } = useQuery<api.Research[]>({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["researches", filters],
-    queryFn: () => api.getResearches(filters),
-    placeholderData: (previousData) => previousData,
+    queryFn: ({ pageParam }) =>
+      api.getResearches({ ...filters, startAfter: pageParam }),
+    // A asserção de tipo aqui é crucial para guiar a inferência de tipo do TypeScript.
+    // Ela informa ao `useInfiniteQuery` que o `pageParam` pode ser uma string ou indefinido.
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
-  const showSkeleton = isLoading && researches.length === 0;
+  // Achata os resultados de todas as páginas em um único array para renderização
+  // O .filter(Boolean) é uma medida de segurança para remover quaisquer itens
+  // nulos ou indefinidos que possam vir da API, prevenindo o crash na renderização.
+  const researches =
+    data?.pages.flatMap((page) => page.data).filter(Boolean) ?? [];
+
+  const showSkeleton = isLoading && !data;
   const hasResearches = researches.length > 0;
 
   function handleOpenCreateForm() {
     setSelectedResearch(null);
     setIsFormOpen(true);
-  }
-
-  function handleStatusChange(value: string) {
-    setFilters((previousFilters) => ({
-      ...previousFilters,
-      status: value === "all" ? undefined : (value as ResearchStatus),
-    }));
   }
 
   if (showSkeleton) {
@@ -377,6 +384,21 @@ export default function LibraryPage() {
               </Card>
             ))}
           </div>
+
+          {hasNextPage && (
+            <div className="mt-8 flex justify-center">
+              <Button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="min-w-40"
+              >
+                {isFetchingNextPage ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                ) : null}
+                {isFetchingNextPage ? "Carregando..." : "Carregar mais"}
+              </Button>
+            </div>
+          )}
         </section>
       )}
 

@@ -21,12 +21,15 @@ import { Button } from "@/components/ui/button";
 
 export default function AnalyticsPage() {
   const {
-    data: researches = [],
+    data: paginatedData,
     isLoading,
     isError,
-  } = useQuery<api.Research[]>({
-    queryKey: ["researches"], // Busca todas as pesquisas sem filtros
-    queryFn: () => api.getResearches(),
+  } = useQuery({
+    // Usamos uma chave de query diferente para não conflitar com a listagem paginada
+    queryKey: ["researches-for-analytics"],
+    // Para analytics, buscamos um limite alto para simular "todos os dados".
+    // Uma solução ideal a longo prazo seria um endpoint de API dedicado.
+    queryFn: () => api.getResearches({ limit: 999 }),
   });
 
   const [dateRange, setDateRange] = useState<{
@@ -37,6 +40,8 @@ export default function AnalyticsPage() {
   function handleClearFilters() {
     setDateRange({});
   }
+
+  const researches = paginatedData?.data ?? [];
 
   const filteredResearches = useMemo(() => {
     if (!researches) return [];
