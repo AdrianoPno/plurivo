@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-200;
+  }
+
+  /*
+    Para um sistema de temas mais robusto como o do shadcn/ui,
+    você pode definir as variáveis de cor aqui e usá-las no seu tailwind.config.js.
+    Exemplo:
+    --background: 222.2 84% 4.9%;
+  */
+}

@@ -30,7 +30,7 @@ async function bootstrap() {
     secret: process.env.JWT_SECRET ?? "dev-secret",
   });
   await app.register(cors, {
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "http://localhost:3001"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

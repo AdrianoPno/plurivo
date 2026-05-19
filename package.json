@@ -5,9 +5,11 @@
     "modules/*/api"
   ],
   "scripts": {
-    "dev": "pnpm --filter web --filter api --parallel dev",
-    "dev:web": "pnpm --filter web dev",
-    "dev:api": "pnpm --filter api dev",
+    "dev:vox:api": "pnpm --filter ./modules/vox-observatory/api dev",
+    "dev:vox:web": "pnpm --filter ./modules/vox-observatory/web dev",
+    "dev:platform-shell": "pnpm --filter ./modules/platform-shell/web dev",
+    "dev:all": "pnpm --parallel --filter ./modules/vox-observatory/api --filter ./modules/vox-observatory/web --filter ./modules/platform-shell/web run dev",
+    "dev": "pnpm run dev:all",
     "build": "pnpm --filter web build",
     "typecheck": "pnpm --filter web typecheck"
   },

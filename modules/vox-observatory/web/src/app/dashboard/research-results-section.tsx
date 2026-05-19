@@ -73,7 +73,13 @@ export function ResearchResultsSection({
                   disabled={isDisabled}
                   value={field.value ?? ""}
                   onChange={(event) => {
-                    field.onChange(event.target.value);
+                    const v = event.target.value;
+                    if (v === "") {
+                      field.onChange(undefined);
+                      return;
+                    }
+                    const num = Number(v);
+                    field.onChange(Number.isNaN(num) ? undefined : num);
                   }}
                   onBlur={field.onBlur}
                   name={field.name}
