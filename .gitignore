@@ -37,3 +37,10 @@ Thumbs.db
 
 # firebase
 firebase-key.json
+
+.env
+.env.local
+.env.*
+
+# Secrets
+serviceAccountKey.json

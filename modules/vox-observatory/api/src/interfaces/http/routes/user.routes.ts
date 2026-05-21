@@ -32,7 +32,7 @@ export async function userRoutes(fastify: FastifyInstance) {
       },
       preHandler: [app.authenticate],
     },
-    controller.getProfile.bind(controller),
+    controller.getProfile.bind(controller) as any,
   );
 
   app.patch(
@@ -47,6 +47,6 @@ export async function userRoutes(fastify: FastifyInstance) {
       },
       preHandler: [app.authenticate],
     },
-    controller.updateProfile.bind(controller),
+    controller.updateProfile.bind(controller) as any,
   );
 }

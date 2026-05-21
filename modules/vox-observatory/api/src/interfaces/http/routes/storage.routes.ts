@@ -14,6 +14,6 @@ export async function storageRoutes(fastify: FastifyInstance) {
       schema: getUploadUrlSchema,
       preHandler: [app.authenticate],
     },
-    controller.getUploadUrl.bind(controller),
+    controller.getUploadUrl.bind(controller) as any,
   );
 }

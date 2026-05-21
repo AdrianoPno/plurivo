@@ -47,7 +47,7 @@ export async function researchRoutes(fastify: FastifyInstance) {
       },
       preHandler: [app.authenticate],
     },
-    controller.create.bind(controller),
+    controller.create.bind(controller) as any,
   );
 
   app.get(
@@ -64,7 +64,7 @@ export async function researchRoutes(fastify: FastifyInstance) {
       },
       preHandler: [app.authenticate],
     },
-    controller.list.bind(controller),
+    controller.list.bind(controller) as any,
   );
 
   app.get(
@@ -81,7 +81,7 @@ export async function researchRoutes(fastify: FastifyInstance) {
       },
       preHandler: [app.authenticate],
     },
-    controller.getById.bind(controller),
+    controller.getById.bind(controller) as any,
   );
 
   app.patch(
@@ -99,7 +99,7 @@ export async function researchRoutes(fastify: FastifyInstance) {
       },
       preHandler: [app.authenticate],
     },
-    controller.update.bind(controller),
+    controller.update.bind(controller) as any,
   );
 
   app.delete(
@@ -116,6 +116,6 @@ export async function researchRoutes(fastify: FastifyInstance) {
       },
       preHandler: [app.authenticate],
     },
-    controller.delete.bind(controller),
+    controller.delete.bind(controller) as any,
   );
 }

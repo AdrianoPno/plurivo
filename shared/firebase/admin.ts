@@ -1,57 +1,28 @@
-import path from "node:path";
+import admin from "firebase-admin";
 
-import { App, cert, getApps, initializeApp } from "firebase-admin/app";
-
-import { Firestore, getFirestore } from "firebase-admin/firestore";
-
-import { getStorage } from "firebase-admin/storage";
-
+/**
+ * Custom exception for when a Firestore document is not found.
+ */
 export class DocumentNotFoundException extends Error {
-  constructor(message: string) {
+  constructor(message = "Documento não encontrado.") {
     super(message);
-
     this.name = "DocumentNotFoundException";
   }
 }
-
-const keyPath = process.env.FIREBASE_KEY_PATH;
-
-if (!keyPath) {
-  throw new Error("A variável FIREBASE_KEY_PATH não foi definida.");
+/**
+ * Inicializa o Firebase Admin SDK de forma segura (singleton).
+ *
+ * O SDK procura automaticamente pela variável de ambiente `GOOGLE_APPLICATION_CREDENTIALS`
+ * que deve apontar para o seu arquivo de chave de serviço (firebase-key.json).
+ * Portanto, não é necessário passar credenciais explicitamente aqui.
+ */
+if (!admin.apps.length) {
+  admin.initializeApp();
 }
 
-const resolvedPath = path.resolve(process.cwd(), keyPath);
+export const auth = admin.auth();
+export const firestore = admin.firestore();
 
-let appInstance: App;
-
-if (!getApps().length) {
-  appInstance = initializeApp({
-    credential: cert(resolvedPath),
-
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  });
-} else {
-  appInstance = getApps()[0] as App;
-}
-
-const firestore = getFirestore(appInstance);
-
-firestore.settings({
-  ignoreUndefinedProperties: true,
-});
-
-const storage = getStorage(appInstance).bucket();
-
-export { appInstance };
-
-export { firestore };
-
-export { storage };
-
-export function getDatabase(): Firestore {
-  return firestore;
-}
-
-export function getBucket() {
-  return storage;
-}
+// This is likely a mistake in the consuming code, which should import `firestore`.
+/** @deprecated Use `firestore` for Firestore instances. */
+export const getDatabase = () => admin.firestore();

@@ -137,8 +137,17 @@ export function ResearchPlanningSection({
                   step="0.01"
                   placeholder="0,00"
                   disabled={isDisabled}
-                  value={typeof field.value === "number" ? field.value : 0}
-                  onChange={field.onChange}
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    // allow empty string for clearing the input
+                    if (v === "") {
+                      field.onChange(undefined);
+                      return;
+                    }
+                    const num = Number(v);
+                    field.onChange(Number.isNaN(num) ? undefined : num);
+                  }}
                   onBlur={field.onBlur}
                   name={field.name}
                 />

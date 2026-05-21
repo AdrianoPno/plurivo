@@ -16,21 +16,33 @@ import { researchRoutes } from "./interfaces/http/routes/research.routes.js";
 import { authRoutes } from "./interfaces/http/routes/auth.routes.js";
 import { userRoutes } from "./interfaces/http/routes/user.routes.js";
 import { storageRoutes } from "./interfaces/http/routes/storage.routes.js";
+import { healthRoutes } from "./interfaces/http/routes/health.routes.js";
 import jwt from "@fastify/jwt";
+import { errorHandler } from "../../../../shared/utils/error-handler.js";
 
 async function bootstrap() {
   const app = Fastify({
-    logger: true,
+    logger: {
+      transport: {
+        target: "pino-pretty",
+        options: {
+          translateTime: "SYS:HH:MM:ss.l",
+          ignore: "hostname",
+        },
+      },
+    },
   });
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
+  app.setErrorHandler(errorHandler);
+
   await app.register(jwt, {
     secret: process.env.JWT_SECRET ?? "dev-secret",
   });
   await app.register(cors, {
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "http://localhost:3006"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -66,6 +78,7 @@ async function bootstrap() {
     prefix: "/auth",
   });
 
+  await app.register(healthRoutes);
   await app.register(userRoutes);
   await app.register(researchRoutes);
   await app.register(storageRoutes);
@@ -76,8 +89,6 @@ async function bootstrap() {
     port: PORT,
     host: "0.0.0.0",
   });
-
-  console.log(`🚀 Vox Observatory API running on port ${PORT}`);
 }
 
 bootstrap().catch((err) => {
