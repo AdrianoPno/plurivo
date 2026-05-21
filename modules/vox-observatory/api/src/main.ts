@@ -36,7 +36,7 @@ async function bootstrap() {
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
-  app.setErrorHandler(errorHandler);
+  app.setErrorHandler(errorHandler as any);
 
   await app.register(jwt, {
     secret: process.env.JWT_SECRET ?? "dev-secret",
