@@ -10,16 +10,14 @@ import routes from "./routes.js";
 import { authPlugin } from "./plugins/auth.plugin.js";
 import { setupSwagger } from "./config/swagger.js";
 import { errorHandler } from "@shared/utils/error-handler.js";
-import logger from "./config/logger";
+import logger from "./config/logger.js";
 
 const app = Fastify({ logger });
 
 async function bootstrap() {
-  // Configuração de compiladores Zod para validação e serialização automática
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
-  // Middlewares Nativos do Fastify
   await app.register(helmet, { contentSecurityPolicy: false });
 
   await app.register(rateLimit, {
@@ -27,31 +25,29 @@ async function bootstrap() {
     timeWindow: "15m",
   });
 
+  // CORS atualizado refletindo a padronização sequencial dos Frontends
   await app.register(cors, {
-    origin: ["http://localhost:3003", "http://localhost:3000"],
+    origin: [
+      "http://localhost:3001", // Platform Shell Web
+      "http://localhost:3003", // Vox Observatory Web
+      "http://localhost:3005", // Coop Manager Web (Ímpar correspondente)
+    ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
 
-  // Plugin de Autenticação (Padrão Vox)
   await app.register(authPlugin);
 
-  // Configura a documentação Swagger no Fastify para seguir o padrão do vox-observatory
-  // A documentação estará disponível em /docs (em vez de /api-docs)
   await setupSwagger(app);
 
-  // Registro das Rotas (agora como plugins nativos do Fastify)
-  // Nota: Você precisará refatorar o arquivo 'src/routes.ts' e os arquivos de rotas
-  // individuais para usarem o padrão de plugin do Fastify: async (app) => { ... }
   await app.register(routes, { prefix: "/api" });
 
-  // Tratamento de erros global (Substituindo o errorMiddleware do Express)
   app.setErrorHandler(errorHandler as any);
 
+  // Alterado de 3002 para 3004 seguindo a sequência lógica (API do Coop)
   const PORT = Number(process.env.PORT || 3004);
 
   await app.listen({ port: PORT, host: "0.0.0.0" });
-  logger.info(`Servidor rodando na porta ${PORT}`);
 }
 
 bootstrap().catch((error) => {

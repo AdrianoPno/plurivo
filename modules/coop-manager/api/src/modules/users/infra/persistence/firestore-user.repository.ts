@@ -1,6 +1,6 @@
-import { db } from "../../../../config/firebase";
-import { IUser, IUpdateUserDTO } from "../../usuario.types";
+import { db } from "@/config/firebase.js";
 import { IUserRepository } from "../../domain/repositories/user.repository.js";
+import { IUpdateUserDTO, IUser } from "../../usuario.types.js";
 
 export class FirestoreUserRepository implements IUserRepository {
   private collection = db.collection("users");

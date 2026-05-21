@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAuth } from "firebase/auth";
+import { MODULE_URLS, MODULES } from "@shared/constants/modules.js";
 
 const api = axios.create({
   // Para Next.js, as variáveis de ambiente do lado do cliente devem usar process.env e ser prefixadas com NEXT_PUBLIC_
@@ -12,14 +12,11 @@ const api = axios.create({
  */
 api.interceptors.request.use(
   async (config) => {
-    const auth = getAuth();
-    const user = auth.currentUser;
+    // Agora buscamos o token único da plataforma gerenciado pelo Shell
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("platform-token");
 
-    if (user) {
-      // Busca o token JWT atualizado do Firebase
-      const token = await user.getIdToken();
-
-      if (config.headers) {
+      if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     }

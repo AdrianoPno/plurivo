@@ -1,6 +1,6 @@
-import { db } from "../../../../config/firebase";
-import { IUnidade, IUpdateUnidadeDTO } from "../../unidades.types";
-import { IUnidadeRepository } from "../../domain/repositories/unidade.repository";
+import { firestore as db } from "@shared/firebase/admin.js";
+import { IUnidade, IUpdateUnidadeDTO } from "../../unidades.types.js";
+import { IUnidadeRepository } from "../../domain/repositories/unidade.repository.js";
 
 export class FirestoreUnidadeRepository implements IUnidadeRepository {
   private collection = db.collection("unidades");

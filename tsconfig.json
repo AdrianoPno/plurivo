@@ -4,9 +4,10 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-
     "types": ["node"],
-
+    "paths": {
+      "@shared/*": ["./shared/*"]
+    },
     "strict": true
   }
 }

@@ -1,10 +1,10 @@
 import { db } from "../../config/firebase.js";
-import { AppError } from "../../../../../../shared/utils/AppError";
+import { AppError } from "../../../../../../shared/utils/AppError.js";
 import {
   IUnidade,
   ICreateUnidadeDTO,
   IUpdateUnidadeDTO,
-} from "./unidades.types";
+} from "./unidades.types.js";
 
 export class UnidadesService {
   private collection = db.collection("unidades");

@@ -1,7 +1,7 @@
-import { IUserRepository } from "../../domain/repositories/user.repository";
-import { IUser } from "../../usuario.types";
-import { AppError } from "@shared/utils/app-error";
-import { UserRole } from "@shared/types/user";
+import { IUserRepository } from "../../domain/repositories/user.repository.js";
+import { IUser } from "../../usuario.types.js";
+import { AppError } from "@shared/utils/app-error.js";
+import { UserRole } from "@shared/types/user.js";
 
 interface AuthUser {
   role: UserRole;

@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --env-file=.env src/main.ts",
-    "build": "tsc",
-    "start": "node dist/main.js"
+    "dev": "tsx watch --env-file=.env.local src/server.ts",
+    "build": "tsup src --out-dir dist",
+    "start": "node dist/server.js",
+    "lint": "eslint src --ext .ts --fix"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",

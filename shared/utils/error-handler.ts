@@ -1,14 +1,15 @@
-import type { FastifyInstance, FastifyError } from "fastify";
+import type { FastifyRequest, FastifyReply, FastifyError } from "fastify";
 import { ZodError } from "zod";
 import { AppError } from "./app-error.js";
 
-export const errorHandler: FastifyInstance["errorHandler"] = (
-  error,
-  request,
-  reply,
+/**
+ * Global Error Handler padronizado e compatível com as instâncias Fastify do monorepo.
+ */
+export const errorHandler = (
+  error: FastifyError | Error,
+  request: FastifyRequest<any, any, any, any, any, any, any>,
+  reply: FastifyReply<any, any, any, any, any>,
 ) => {
-  const fastifyError = error as FastifyError;
-
   // Erros de Validação do Zod
   if (error instanceof ZodError) {
     return reply.status(400).send({
@@ -23,14 +24,13 @@ export const errorHandler: FastifyInstance["errorHandler"] = (
     return reply.status(error.statusCode).send({
       success: false,
       message: error.message,
-      // Se for um erro de validação customizado, inclui os detalhes dos campos
       ...(error.name === "ValidationError"
         ? { errors: (error as any).errors }
         : {}),
     });
   }
 
-  // Fallback para erros genéricos com statusCode (compatibilidade)
+  const fastifyError = error as FastifyError;
   const statusCode = fastifyError.statusCode || 500;
 
   if (statusCode < 500) {
@@ -41,7 +41,7 @@ export const errorHandler: FastifyInstance["errorHandler"] = (
   }
 
   // Erros Críticos/Inesperados (500+)
-  request.log.error({ err: error }, fastifyError.message); // Log detalhado apenas para erros internos
+  request.log.error({ err: error }, fastifyError.message);
 
   return reply.status(500).send({
     success: false,

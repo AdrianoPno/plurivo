@@ -2,9 +2,8 @@
   "name": "coop-manager-web",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "next dev --port 3003",
+    "dev": "next dev --port 3005",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -34,7 +33,7 @@
     "@tailwindcss/postcss": "^4.2.4",
     "autoprefixer": "^10.5.0",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^15.5.16",
+    "eslint-config-next": "^15.5.7",
     "postcss": "^8.5.14",
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.0"

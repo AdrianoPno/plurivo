@@ -1,9 +1,9 @@
-import { adminAuth } from "../../../../config/firebase";
-import { AppError } from "@shared/utils/app-error";
-import { ICreateUserDTO, IUser } from "../../usuario.types";
-import { IUserRepository } from "../../domain/repositories/user.repository";
-import logger from "../../../../config/logger";
-import { UserRole } from "@shared/types/user";
+import { auth as adminAuth } from "@shared/firebase/admin.js";
+import { AppError } from "@shared/utils/app-error.js";
+import { ICreateUserDTO, IUser } from "../../usuario.types.js";
+import { IUserRepository } from "../../domain/repositories/user.repository.js";
+import logger from "../../../../config/logger.js";
+import { UserRole } from "@shared/types/user.js";
 
 interface AuthUser {
   role: UserRole;

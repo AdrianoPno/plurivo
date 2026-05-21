@@ -6,16 +6,19 @@
   ],
   "packageManager": "pnpm@10.33.3",
   "scripts": {
+    "dev:platform:api": "pnpm --filter ./modules/platform-shell/api dev",
+    "dev:platform:web": "pnpm --filter ./modules/platform-shell/web dev",
+    "dev:platform": "pnpm --stream --filter ./modules/platform-shell/api --filter ./modules/platform-shell/web run dev",
     "dev:vox:api": "pnpm --filter ./modules/vox-observatory/api dev",
     "dev:vox:web": "pnpm --filter ./modules/vox-observatory/web dev",
-    "dev:platform-shell": "pnpm --filter ./modules/platform-shell/web dev",
-    "dev:coop-manager:api": "pnpm --filter ./modules/coop-manager/api dev",
-    "dev:coop-manager:web": "pnpm --filter ./modules/coop-manager/web dev",
-    "dev:coop-manager": "pnpm --parallel --filter ./modules/coop-manager/api --filter ./modules/coop-manager/web run dev",
-    "dev:all": "pnpm --parallel --filter ./modules/vox-observatory/api --filter ./modules/vox-observatory/web --filter ./modules/platform-shell/web --filter ./modules/coop-manager/api --filter ./modules/coop-manager/web run dev",
+    "dev:vox": "pnpm --stream --filter ./modules/vox-observatory/api --filter ./modules/vox-observatory/web run dev",
+    "dev:coop:api": "pnpm --filter ./modules/coop-manager/api dev",
+    "dev:coop:web": "pnpm --filter ./modules/coop-manager/web dev",
+    "dev:coop": "pnpm --stream --filter ./modules/coop-manager/api --filter ./modules/coop-manager/web run dev",
+    "dev:all": "pnpm --stream --filter ./modules/platform-shell/* --filter ./modules/vox-observatory/* --filter ./modules/coop-manager/* run dev",
     "dev": "pnpm run dev:all",
-    "build": "pnpm --filter web build",
-    "typecheck": "pnpm --filter web typecheck"
+    "build": "pnpm --recursive run build",
+    "typecheck": "pnpm --recursive run typecheck"
   },
   "dependencies": {
     "@fastify/jwt": "^8.0.0",

@@ -1,7 +1,7 @@
-import { adminAuth } from "../../../../config/firebase";
-import { IUserRepository } from "../../user.repository";
-import { AppError } from "@shared/utils/app-error";
-import { UserRole } from "@shared/types/user";
+import { auth as adminAuth } from "@shared/firebase/admin.js";
+import { IUserRepository } from "../../domain/repositories/user.repository.js";
+import { AppError } from "@shared/utils/app-error.js";
+import { UserRole } from "@shared/types/user.js";
 
 interface AuthUser {
   role: UserRole;

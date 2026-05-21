@@ -1,8 +1,8 @@
 import Fastify from "fastify";
-
 import cors from "@fastify/cors";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
+import jwt from "@fastify/jwt";
 
 import {
   jsonSchemaTransform,
@@ -11,14 +11,12 @@ import {
 } from "fastify-type-provider-zod";
 
 import { authenticatePlugin } from "./interfaces/http/plugins/authenticate.js";
-
 import { researchRoutes } from "./interfaces/http/routes/research.routes.js";
 import { authRoutes } from "./interfaces/http/routes/auth.routes.js";
 import { userRoutes } from "./interfaces/http/routes/user.routes.js";
 import { storageRoutes } from "./interfaces/http/routes/storage.routes.js";
 import { healthRoutes } from "./interfaces/http/routes/health.routes.js";
-import jwt from "@fastify/jwt";
-import { errorHandler } from "../../../../shared/utils/error-handler.js";
+import { errorHandler } from "@shared/utils/error-handler.js";
 
 async function bootstrap() {
   const app = Fastify({
@@ -41,8 +39,14 @@ async function bootstrap() {
   await app.register(jwt, {
     secret: process.env.JWT_SECRET ?? "dev-secret",
   });
+
+  // CORS atualizado refletindo a padronização sequencial dos Frontends
   await app.register(cors, {
-    origin: ["http://localhost:3000", "http://localhost:3006"],
+    origin: [
+      "http://localhost:3001", // Platform Shell Web
+      "http://localhost:3003", // Vox Observatory Web (Ímpar correspondente)
+      "http://localhost:3005", // Coop Manager Web
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -83,7 +87,8 @@ async function bootstrap() {
   await app.register(researchRoutes);
   await app.register(storageRoutes);
 
-  const PORT = Number(process.env.PORT ?? 3333);
+  // Alterado de 3004 para 3002 seguindo a sequência lógica (API do Vox)
+  const PORT = Number(process.env.PORT ?? 3002);
 
   await app.listen({
     port: PORT,
