@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@shared/firebase/client.js";
-import { AppError } from "@shared/utils/app-error.js";
+import { useAuth } from "@shared/auth/auth-context.js";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -12,8 +10,17 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/";
+
+  useEffect(() => {
+    // Se o usuário já estiver autenticado e o carregamento inicial do auth tiver terminado, redireciona
+    if (!isAuthLoading && isAuthenticated) {
+      router.push(redirectTo);
+    }
+  }, [isAuthenticated, isAuthLoading, router, redirectTo]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,57 +30,18 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      // 1. Autenticação direta no cliente do Firebase
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-      const user = userCredential.user;
-
-      if (!user) {
-        throw new AppError("Falha na autenticação com o provedor.", 401);
-      }
-
-      // 2. Extração do ID Token (JWT) para enviar para a nossa API Fastify
-      const idToken = await user.getIdToken();
-      localStorage.setItem("platform-token", idToken);
-
-      const apiUrl = process.env.NEXT_PUBLIC_PLATFORM_API_URL;
-      if (!apiUrl) {
-        throw new AppError(
-          "Configuração do sistema inválida (API URL ausente).",
-          500,
-        );
-      }
-
-      // 3. Chamada à API para validação de RBAC/Sync de perfil
-      const response = await fetch(`${apiUrl}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new AppError(
-          errorData.message || "Falha ao carregar perfil de permissões.",
-          response.status,
-        );
-      }
-
-      const userData = await response.json();
-      localStorage.setItem("platform-user", JSON.stringify(userData.data));
-
-      // 4. Redirecionamento seguro pós-autenticação
-      const redirectTo = searchParams.get("redirectTo") || "/";
+      // A lógica de login agora está centralizada no AuthProvider
+      await login(email, password);
+      // O redirecionamento é tratado pelo useEffect acima
       router.push(redirectTo);
     } catch (err: any) {
       console.error("Auth Exception:", err);
 
-      if (err instanceof AppError) {
+      // O AppError vem do nosso AuthProvider agora
+      if (err.message) {
         setError(err.message);
       } else if (
+        // Erros específicos do Firebase Auth
         err.code === "auth/invalid-credential" ||
         err.code === "auth/user-not-found" ||
         err.code === "auth/wrong-password"
@@ -86,6 +54,13 @@ function LoginForm() {
       setIsLoading(false);
     }
   };
+
+  // Não renderiza o formulário se já estiver autenticado e prestes a redirecionar
+  if (isAuthLoading || isAuthenticated) {
+    return (
+      <div className="text-center text-gray-500">Verificando sessão...</div>
+    );
+  }
 
   return (
     <form onSubmit={handleLogin}>
