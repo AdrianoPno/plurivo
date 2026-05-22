@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "../utils/cn";
+import { cn } from "@shared/lib/utils";
 
 export function Card({
   className,
@@ -9,7 +9,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-card text-card-foreground shadow-sm",
+        "rounded-2xl border border-border/70 bg-card text-card-foreground shadow-sm",
         className,
       )}
       {...props}
@@ -23,7 +23,7 @@ export function CardHeader({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex flex-col space-y-1.5 p-5 pb-3", className)}
+      className={cn("flex flex-col space-y-1.5 p-6 pb-4", className)}
       {...props}
     />
   );
@@ -60,7 +60,7 @@ export function CardContent({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("p-5 pt-0", className)} {...props} />;
+  return <div className={cn("p-6 pt-0", className)} {...props} />;
 }
 
 export function CardFooter({
@@ -68,6 +68,6 @@ export function CardFooter({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex items-center p-5 pt-0", className)} {...props} />
+    <div className={cn("flex items-center p-6 pt-0", className)} {...props} />
   );
 }

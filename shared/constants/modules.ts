@@ -21,14 +21,14 @@ export const MODULE_CONFIGS: ModuleConfig[] = [
     id: MODULES.COOP_MANAGER,
     name: "Coop Manager",
     description: "Gerenciamento de cooperados e unidades operacionais.",
-    url: process.env.NEXT_PUBLIC_COOP_MANAGER_URL || "http://localhost:3003",
+    url: process.env.NEXT_PUBLIC_COOP_MANAGER_URL || "http://localhost:3005",
     Icon: Users,
   },
   {
     id: MODULES.VOX_OBSERVATORY,
     name: "Vox Observatory",
     description: "Inteligência de pesquisa e laboratório de dados.",
-    url: process.env.NEXT_PUBLIC_VOX_URL || "http://localhost:3006",
+    url: process.env.NEXT_PUBLIC_VOX_URL || "http://localhost:3006/dashboard",
     Icon: Factory,
   },
 ];
