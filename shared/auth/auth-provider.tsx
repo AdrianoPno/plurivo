@@ -16,9 +16,8 @@ import {
 } from "firebase/auth";
 import { auth } from "@shared/firebase/client.js";
 import { AppError } from "@shared/utils/app-error.js";
-
 import { AuthContext } from "./auth-context.js";
-import { IUser } from "../../modules/platform-shell/api/src/modules/users/types/usuario.types.js";
+import { IUser } from "@shared/types/user";
 
 interface AuthProviderProps {
   children: ReactNode;

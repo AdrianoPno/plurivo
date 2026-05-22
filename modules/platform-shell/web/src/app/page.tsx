@@ -1,10 +1,41 @@
 "use client";
 
+import { useMemo } from "react";
+import Link from "next/link";
 import { PrivateRoute } from "@shared/auth/private-route.js";
 import { useAuth } from "@shared/auth/auth-context.js";
+import { MODULE_CONFIGS, ModuleConfig } from "@shared/constants/modules.js";
+
+function ModuleCard({ module }: { module: ModuleConfig }) {
+  return (
+    <Link
+      href={module.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group block transform rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+    >
+      <module.Icon className="h-8 w-8 text-blue-600 transition-colors group-hover:text-blue-700" />
+      <h3 className="mt-4 text-lg font-bold text-gray-800">{module.name}</h3>
+      <p className="mt-1 text-sm text-gray-600">{module.description}</p>
+    </Link>
+  );
+}
 
 function Dashboard() {
   const { user, logout } = useAuth();
+
+  const availableModules = useMemo(() => {
+    if (!user) return [];
+
+    // Usuário SUPER tem acesso a todos os módulos
+    if (user.role === "SUPER") {
+      return MODULE_CONFIGS;
+    }
+
+    // Filtra os módulos com base nas permissões específicas do usuário
+    const userModuleIds = user.permissions.map((p) => p.moduleId);
+    return MODULE_CONFIGS.filter((module) => userModuleIds.includes(module.id));
+  }, [user]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
@@ -40,11 +71,17 @@ function Dashboard() {
           <h2 className="text-xl font-bold text-gray-800 mb-4">
             Módulos Disponíveis
           </h2>
-          <p className="text-gray-600">
-            Aqui serão listados os cards para acesso aos módulos que o usuário
-            tem permissão (Coop Manager, Vox Observatory, etc.).
-          </p>
-          {/* TODO: Implementar a lógica de renderização dos módulos baseada nas permissões do usuário */}
+          {availableModules.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {availableModules.map((module) => (
+                <ModuleCard key={module.id} module={module} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">
+              Você não tem permissão para acessar nenhum módulo no momento.
+            </p>
+          )}
         </div>
       </div>
     </div>
