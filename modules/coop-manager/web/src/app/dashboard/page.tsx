@@ -5,7 +5,6 @@ import { Card } from "@shared/ui/card";
 import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
 import api from "@/lib/api";
-import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 interface DashboardStats {
@@ -44,16 +43,16 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-[32px] border border-slate-800 bg-slate-900/80 p-8 shadow-soft">
+      <div className="rounded-[32px] border border-border bg-card p-8 text-card-foreground shadow-sm">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-emerald-400">
+            <p className="text-sm uppercase tracking-[0.28em] text-primary">
               Dashboard
             </p>
-            <h1 className="mt-4 text-3xl font-semibold text-white">
+            <h1 className="mt-4 text-3xl font-semibold text-foreground">
               Visão geral
             </h1>
-            <p className="mt-3 max-w-2xl text-slate-400">
+            <p className="mt-3 max-w-2xl text-muted-foreground">
               Controle rápido do sistema Coop Manager e seus principais
               indicadores.
             </p>
@@ -65,13 +64,13 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <Card className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6">
+        <Card className="rounded-3xl p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-slate-500">
+              <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
                 Cooperados
               </p>
-              <p className="mt-3 text-4xl font-semibold text-white">
+              <p className="mt-3 text-4xl font-semibold text-foreground">
                 {loading ? "..." : (stats?.overview.totalCooperados ?? "N/A")}
               </p>
             </div>
@@ -79,13 +78,13 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6">
+        <Card className="rounded-3xl p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-slate-500">
+              <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
                 Conformidade
               </p>
-              <p className="mt-3 text-4xl font-semibold text-white">
+              <p className="mt-3 text-4xl font-semibold text-foreground">
                 {loading ? "..." : (stats?.overview.complianceRate ?? "N/A")}%
               </p>
             </div>
@@ -93,13 +92,13 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6">
+        <Card className="rounded-3xl p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-slate-500">
+              <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground">
                 Novos este mês
               </p>
-              <p className="mt-3 text-4xl font-semibold text-white">
+              <p className="mt-3 text-4xl font-semibold text-foreground">
                 {loading
                   ? "..."
                   : (stats?.overview.newCooperadosThisMonth ?? "N/A")}
@@ -111,9 +110,11 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <Card className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6">
-          <h2 className="text-xl font-semibold text-white">Alertas críticos</h2>
-          <div className="mt-5 space-y-4 text-slate-300">
+        <Card className="rounded-3xl p-6">
+          <h2 className="text-xl font-semibold text-foreground">
+            Alertas críticos
+          </h2>
+          <div className="mt-5 space-y-4 text-muted-foreground">
             <p>
               Cooperados com documentação pendente:{" "}
               {loading ? "..." : (stats?.alerts.documentation ?? "N/A")}
@@ -129,8 +130,10 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6">
-          <h2 className="text-xl font-semibold text-white">Ações rápidas</h2>
+        <Card className="rounded-3xl p-6">
+          <h2 className="text-xl font-semibold text-foreground">
+            Ações rápidas
+          </h2>
           <div className="mt-5 grid gap-3">
             <Button asChild variant="outline" size="sm">
               <Link href="/dashboard/cooperados">Cooperados</Link>

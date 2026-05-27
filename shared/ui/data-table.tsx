@@ -52,7 +52,7 @@ export function DataTable<T extends Record<string, any>>({
           <TableRow>
             <TableCell
               colSpan={columns.length}
-              className="py-8 text-center text-zinc-500 font-medium animate-pulse"
+              className="py-8 text-center font-medium text-muted-foreground animate-pulse"
             >
               Carregando dados...
             </TableCell>
@@ -64,7 +64,7 @@ export function DataTable<T extends Record<string, any>>({
           <TableRow>
             <TableCell
               colSpan={columns.length}
-              className="py-8 text-center text-zinc-500"
+              className="py-8 text-center text-muted-foreground"
             >
               {emptyMessage}
             </TableCell>

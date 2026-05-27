@@ -8,7 +8,7 @@ export function Topbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="border-b border-slate-800 bg-slate-950/80 px-6 py-4 sm:px-10 backdrop-blur-sm">
+    <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 px-6 py-4 backdrop-blur-xl sm:px-10">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button
@@ -19,13 +19,13 @@ export function Topbar() {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <h2 className="text-lg font-semibold text-white">Dashboard</h2>
+          <h2 className="text-lg font-semibold text-foreground">Dashboard</h2>
         </div>
 
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" className="relative">
-            <Bell className="h-5 w-5 text-slate-400" />
-            <span className="absolute right-1 top-1 size-2 rounded-full bg-emerald-400" />
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            <span className="absolute right-1 top-1 size-2 rounded-full bg-primary" />
           </Button>
         </div>
       </div>

@@ -1,35 +1,7 @@
 @import "tailwindcss";
+@import "../../../../../shared/design/system.css";
+@import "../../../../../shared/design/themes/coop.css";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    --font-sans:
-      "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-      Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol";
-  }
-
-  html {
-    font-size: 14px;
-    scroll-behavior: smooth;
-  }
-
-  body {
-    min-height: 100vh;
-    background: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  button,
-  input,
-  textarea,
-  select {
-    font: inherit;
-  }
-}
-
-/* You can add global utility overrides or custom classes here */
+@source "../../../../../shared";
+@source "./**/*.{js,ts,jsx,tsx,mdx}";
+@source "../**/*.{js,ts,jsx,tsx,mdx}";

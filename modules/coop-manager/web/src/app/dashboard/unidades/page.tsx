@@ -32,17 +32,17 @@ export default function UnidadesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-[32px] border border-slate-800 bg-slate-900/80 p-8 shadow-soft">
-        <h1 className="text-3xl font-semibold text-white">Unidades</h1>
-        <p className="mt-3 text-slate-400">
+      <div className="rounded-[32px] border border-border bg-card p-8 text-card-foreground shadow-sm">
+        <h1 className="text-3xl font-semibold text-foreground">Unidades</h1>
+        <p className="mt-3 text-muted-foreground">
           Gerencie e visualize as unidades que fazem parte do sistema.
         </p>
       </div>
 
-      <Card className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/80 p-0 shadow-soft">
+      <Card className="overflow-hidden rounded-3xl p-0">
         <div className="overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-0 text-left text-sm text-slate-300">
-            <thead className="bg-slate-950/80 text-slate-400">
+          <table className="min-w-full border-separate border-spacing-0 text-left text-sm text-card-foreground">
+            <thead className="bg-muted text-muted-foreground">
               <tr>
                 <th className="px-6 py-4">Nome</th>
                 <th className="px-6 py-4">Sigla</th>
@@ -54,7 +54,7 @@ export default function UnidadesPage() {
                 <tr>
                   <td
                     colSpan={3}
-                    className="px-6 py-10 text-center text-slate-500"
+                    className="px-6 py-10 text-center text-muted-foreground"
                   >
                     Carregando unidades...
                   </td>
@@ -63,14 +63,14 @@ export default function UnidadesPage() {
                 <tr>
                   <td
                     colSpan={3}
-                    className="px-6 py-10 text-center text-slate-500"
+                    className="px-6 py-10 text-center text-muted-foreground"
                   >
                     Nenhuma unidade encontrada.
                   </td>
                 </tr>
               ) : (
                 unidades.map((item) => (
-                  <tr key={item.id} className="border-t border-slate-800">
+                  <tr key={item.id} className="border-t border-border">
                     <td className="px-6 py-4">{item.nome}</td>
                     <td className="px-6 py-4">{item.sigla}</td>
                     <td className="px-6 py-4">{item.status}</td>

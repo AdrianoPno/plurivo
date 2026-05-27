@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@shared/auth";
+import { Button } from "@shared/ui/button";
 import { cn } from "@shared/utils/cn";
 
 const navigation = [
@@ -41,20 +42,20 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden h-screen w-72 flex-col border-r border-white/10 bg-[hsl(var(--sidebar-background))] md:flex">
+    <aside className="hidden h-screen w-72 flex-col border-r border-primary-foreground/10 bg-[hsl(var(--sidebar-background))] text-primary-foreground md:flex">
       <div className="flex h-full flex-col">
-        <div className="border-b border-white/10 px-6 py-6">
+        <div className="border-b border-primary-foreground/10 px-6 py-6">
           <div className="flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white shadow-lg shadow-black/20">
-              <BotMessageSquare className="size-5 text-white" />
+            <div className="flex size-11 items-center justify-center rounded-2xl border border-primary-foreground/10 bg-primary-foreground/10 text-primary-foreground shadow-sm">
+              <BotMessageSquare className="size-5 text-primary-foreground" />
             </div>
 
             <div className="space-y-0.5">
-              <h1 className="text-sm font-semibold tracking-tight text-white">
+              <h1 className="text-sm font-semibold tracking-tight text-primary-foreground">
                 Vox Observatory
               </h1>
 
-              <p className="text-xs font-medium text-white/70">
+              <p className="text-xs font-medium text-primary-foreground/70">
                 Research Intelligence
               </p>
             </div>
@@ -63,7 +64,7 @@ export function Sidebar() {
 
         <div className="flex-1 px-4 py-6">
           <div className="mb-3 px-3">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/60">
               Navegação
             </span>
           </div>
@@ -81,16 +82,16 @@ export function Sidebar() {
                   className={cn(
                     "group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-white/12 text-white shadow-lg shadow-black/10 ring-1 ring-white/10"
-                      : "text-white/80 hover:bg-white/10 hover:text-white",
+                      ? "bg-primary-foreground/15 text-primary-foreground shadow-sm ring-1 ring-primary-foreground/10"
+                      : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground",
                   )}
                 >
                   <item.icon
                     className={cn(
                       "size-5 transition-all duration-200",
                       isActive
-                        ? "text-white"
-                        : "text-white/65 group-hover:scale-105 group-hover:text-white",
+                        ? "text-primary-foreground"
+                        : "text-primary-foreground/65 group-hover:scale-105 group-hover:text-primary-foreground",
                     )}
                   />
 
@@ -101,24 +102,27 @@ export function Sidebar() {
           </nav>
         </div>
 
-        <div className="space-y-4 border-t border-white/10 px-6 py-5">
-          <div className="rounded-2xl border border-white/10 bg-white/10 p-4 shadow-sm">
-            <p className="text-xs font-semibold text-white">Vox Platform</p>
+        <div className="space-y-4 border-t border-primary-foreground/10 px-6 py-5">
+          <div className="rounded-2xl border border-primary-foreground/10 bg-primary-foreground/10 p-4 shadow-sm">
+            <p className="text-xs font-semibold text-primary-foreground">
+              Vox Platform
+            </p>
 
-            <p className="mt-1.5 text-xs leading-relaxed text-white/70">
+            <p className="mt-1.5 text-xs leading-relaxed text-primary-foreground/70">
               Plataforma de inteligência e observabilidade de pesquisas.
             </p>
           </div>
 
-          <button
+          <Button
             type="button"
             onClick={handleLogout}
-            className="group flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white/85 transition-all duration-200 hover:border-red-300/20 hover:bg-red-500/15 hover:text-red-200"
+            variant="ghost"
+            className="group flex w-full items-center gap-3 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/10 px-4 py-3 text-sm font-semibold text-primary-foreground/85 transition-all duration-200 hover:border-red-300/20 hover:bg-red-500/15 hover:text-red-200"
           >
-            <LogOut className="size-5 text-white/70 transition-colors duration-200 group-hover:text-red-200" />
+            <LogOut className="size-5 text-primary-foreground/70 transition-colors duration-200 group-hover:text-red-200" />
 
             <span>Sair da plataforma</span>
-          </button>
+          </Button>
         </div>
       </div>
     </aside>

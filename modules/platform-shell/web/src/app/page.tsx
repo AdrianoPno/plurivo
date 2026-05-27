@@ -16,7 +16,16 @@ import { useAuth } from "@shared/auth/auth-context.js";
 import { MODULE_CONFIGS } from "@shared/constants/modules";
 import type { ModuleConfig } from "@shared/constants/modules";
 
+import {
+  AppContainer,
+  AppGradient,
+  AppHeader,
+  AppHeaderInner,
+  AppSection,
+  AppShell,
+} from "@shared/ui/app-layout";
 import { Button } from "@shared/ui/button";
+import { Card } from "@shared/ui/card";
 
 function getModuleUrl(module: ModuleConfig, token: string | null) {
   const baseUrl = new URL(module.url);
@@ -43,7 +52,7 @@ function ModuleCard({
       href={getModuleUrl(module, token)}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex min-h-[230px] flex-col overflow-hidden rounded-3xl border border-border/70 bg-card p-7 text-card-foreground shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-2xl"
+      className="group relative flex min-h-[230px] flex-col overflow-hidden rounded-3xl border border-border/70 bg-card p-7 text-card-foreground shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-accent/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
@@ -88,9 +97,9 @@ function Dashboard() {
   }, [user]);
 
   return (
-    <main className="min-h-screen bg-background">
-      <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-xl">
-        <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-6 px-6 py-4">
+    <AppShell>
+      <AppHeader>
+        <AppHeaderInner>
           <div className="flex items-center gap-4">
             <div className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm md:flex">
               <Building2 className="h-5 w-5" />
@@ -136,13 +145,13 @@ function Dashboard() {
               Sair
             </Button>
           </div>
-        </div>
-      </header>
+        </AppHeaderInner>
+      </AppHeader>
 
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.14),transparent_34rem),radial-gradient(circle_at_top_right,hsl(var(--accent)/0.12),transparent_30rem)]" />
+      <AppSection>
+        <AppGradient />
 
-        <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
+        <AppContainer>
           <div className="mb-10 max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary shadow-sm">
               <Sparkles className="h-3.5 w-3.5" />
@@ -166,7 +175,7 @@ function Dashboard() {
               ))}
             </div>
           ) : (
-            <div className="rounded-3xl border border-dashed border-border bg-card p-8 shadow-sm">
+            <Card className="rounded-3xl border-dashed p-8">
               <h3 className="text-lg font-semibold">
                 Nenhum módulo disponível
               </h3>
@@ -176,11 +185,11 @@ function Dashboard() {
                 Entre em contato com um administrador para revisar suas
                 permissões.
               </p>
-            </div>
+            </Card>
           )}
-        </div>
-      </section>
-    </main>
+        </AppContainer>
+      </AppSection>
+    </AppShell>
   );
 }
 
