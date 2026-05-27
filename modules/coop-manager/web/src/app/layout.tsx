@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { AuthProvider } from "./components/AuthProvider";
+import { Toaster } from "sonner";
+
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Coop Manager",
-  description: "Gestão de cooperados, unidades e usuários",
+  description: "Gestao de cooperados, unidades e usuarios",
 };
 
 export default function RootLayout({
@@ -18,7 +19,8 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
-        <AuthProvider>{children}</AuthProvider>
+        {children}
+        <Toaster position="top-right" />
       </body>
     </html>
   );

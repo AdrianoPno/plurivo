@@ -1,43 +1,31 @@
 import axios from "axios";
-import { firebaseAuth } from "@shared/firebase/auth";
+
+import { MODULE_URLS } from "@shared/constants/modules";
 
 const api = axios.create({
-  // Para Next.js, as variáveis de ambiente do lado do cliente devem usar process.env e ser prefixadas com NEXT_PUBLIC_
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005/api",
+  baseURL:
+    process.env.NEXT_PUBLIC_COOP_MANAGER_API_URL || MODULE_URLS.coopManager.api,
 });
 
-/**
- * Interceptor de Requisição:
- * Executa antes de cada chamada ao backend.
- */
-api.interceptors.request.use(
-  async (config) => {
-    // Aguarda o Firebase Auth inicializar para evitar requisições sem token ao recarregar a página (F5)
-    await firebaseAuth.authStateReady();
-    const user = firebaseAuth.currentUser;
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("platform-token");
 
-    if (user) {
-      const token = await user.getIdToken();
-      if (config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+  }
 
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      console.error(
-        "Sessão expirada ou não autorizada. Redirecionando para o login.",
-      );
-      if (typeof window !== "undefined")
-        window.dispatchEvent(new Event("coop-auth-error"));
+    if (typeof window !== "undefined" && error.response?.status === 401) {
+      window.dispatchEvent(new Event("auth-error"));
     }
+
     return Promise.reject(error);
   },
 );

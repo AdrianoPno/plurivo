@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
-import { adminAuth, db } from "../config/firebase";
-import { UserRole, ModulePermission } from "@shared/types/user";
-import { MODULES } from "@shared/constants/modules";
+import { adminAuth, db } from "../config/firebase.js";
+import { MODULE_IDS } from "@shared/constants/modules.js";
+import type { UserRole, ModulePermission } from "@shared/types/user.js";
 
 export const authPlugin = fp(async (app: FastifyInstance) => {
   app.decorate(
@@ -36,6 +36,14 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
         }
 
         const userData = userDoc.data();
+
+        if (userData?.ativo === false) {
+          return reply.status(403).send({
+            success: false,
+            message: "Usuario inativo.",
+          });
+        }
+
         const userEmail = decodedToken.email; // Email vem do token
         const permissions = (userData?.permissions || []) as ModulePermission[];
 
@@ -54,7 +62,7 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
 
         if (effectiveRole !== "SUPER") {
           const moduleAccess = permissions.find(
-            (p) => p.moduleId === MODULES.COOP_MANAGER,
+            (p) => p.moduleId === MODULE_IDS.COOP_MANAGER,
           );
 
           if (!moduleAccess) {
@@ -76,6 +84,7 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
           permissions,
           unidadeId: userData?.unidadeId,
           unidadeNome: unidadeNome,
+          ativo: userData?.ativo !== false,
         };
       } catch (error) {
         app.log.error(error, "Falha na verificação do token Firebase");

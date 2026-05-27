@@ -25,10 +25,10 @@ export const MODULE_URLS = {
 
   coopManager: {
     web:
-      process.env.NEXT_PUBLIC_COOP_MANAGER_WEB_URL || "http://localhost:3004",
+      process.env.NEXT_PUBLIC_COOP_MANAGER_WEB_URL || "http://localhost:3005",
     api:
       process.env.NEXT_PUBLIC_COOP_MANAGER_API_URL ||
-      "http://localhost:3005/api",
+      "http://localhost:3004/api",
   },
 } as const;
 

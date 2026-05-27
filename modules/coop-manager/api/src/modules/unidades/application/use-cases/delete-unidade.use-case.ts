@@ -1,6 +1,6 @@
 import { firestore as db } from "@shared/firebase/admin.js";
 import { IUnidadeRepository } from "../../domain/repositories/unidade.repository.js";
-import { AppError } from "@shared/utils/app-error";
+import { AppError } from "@shared/utils/app-error.js";
 
 export class DeleteUnidadeUseCase {
   constructor(private unidadeRepository: IUnidadeRepository) {}

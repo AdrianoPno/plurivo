@@ -7,6 +7,8 @@ export default async function dashboardRoutes(app: FastifyInstance) {
   const controller = new DashboardController();
   const typedApp = app.withTypeProvider<ZodTypeProvider>();
 
+  typedApp.addHook("preHandler", app.authenticate);
+
   typedApp.get(
     "/stats",
     {

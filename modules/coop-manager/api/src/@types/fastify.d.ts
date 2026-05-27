@@ -1,5 +1,5 @@
 import "fastify";
-import { UserRole, ModulePermission } from "@shared/types/user";
+import type { UserRole, ModulePermission } from "@shared/types/user.js";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -20,6 +20,7 @@ declare module "fastify" {
       nome?: string; // Adicionado
       unidadeNome?: string; // Adicionado
       permissions: ModulePermission[];
+      ativo: boolean;
       unidadeId?: string;
     };
   }

@@ -1,5 +1,5 @@
 import { adminAuth } from "../../config/firebase";
-import { AppError } from "@shared/utils/app-error";
+import { AppError } from "@shared/utils/app-error.js";
 import { IUser, ICreateUserDTO, IUpdateUserDTO } from "./usuario.types";
 import logger from "../../config/logger";
 import { UserRole, ModulePermission } from "@shared/types/user";

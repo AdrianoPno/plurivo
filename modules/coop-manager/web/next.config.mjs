@@ -10,6 +10,20 @@ const nextConfig = {
   typedRoutes: true,
   // Corrige o aviso de tracing no monorepo
   outputFileTracingRoot: path.join(__dirname, "../../"),
+  experimental: {
+    externalDir: true,
+  },
+  webpack: (config) => {
+    config.resolve.alias["@shared"] = path.resolve(
+      __dirname,
+      "../../../shared",
+    );
+    config.resolve.extensionAlias = {
+      ".js": [".ts", ".tsx", ".js", ".jsx"],
+    };
+
+    return config;
+  },
 };
 
 export default nextConfig;

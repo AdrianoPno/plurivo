@@ -1,5 +1,5 @@
 import { db } from "../../config/firebase.js";
-import { AppError } from "../../../../../../shared/utils/AppError.js";
+import { AppError } from "@shared/utils/app-error.js";
 import {
   IUnidade,
   ICreateUnidadeDTO,

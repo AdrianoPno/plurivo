@@ -1,5 +1,5 @@
 import { FastifyError, FastifyReply, FastifyRequest } from "fastify";
-import { AppError } from "../../../../../shared/utils/AppError";
+import { AppError } from "@shared/utils/app-error.js";
 import { ValidationError } from "../utils/ValidationError";
 
 export const errorMiddleware = (
