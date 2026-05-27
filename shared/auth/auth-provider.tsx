@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
-import type { IUser } from "@shared/types/user";
 import { MODULE_URLS } from "@shared/constants/modules";
+import type { IUser } from "@shared/types/user";
 
 import { AuthContext, type AuthContextValue } from "./auth-context.js";
 
@@ -18,13 +18,15 @@ export function AuthProvider({ children, profileUrl }: AuthProviderProps) {
   const [user, setUser] = useState<IUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const logout = () => {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setUser(null);
+    setAuthError(null);
 
-    window.location.href = MODULE_URLS.platformShell.web;
+    window.location.href = `${MODULE_URLS.platformShell.web}/login`;
   };
 
   useEffect(() => {
@@ -35,10 +37,12 @@ export function AuthProvider({ children, profileUrl }: AuthProviderProps) {
         if (!storedToken) {
           setToken(null);
           setUser(null);
+          setAuthError(null);
           return;
         }
 
         setToken(storedToken);
+        setAuthError(null);
 
         if (!profileUrl) {
           return;
@@ -51,26 +55,40 @@ export function AuthProvider({ children, profileUrl }: AuthProviderProps) {
         });
 
         if (!response.ok) {
-          throw new Error("Token inválido ou usuário não autorizado.");
+          const errorData = await response.json().catch(() => ({}));
+          const message =
+            typeof errorData.message === "string"
+              ? errorData.message
+              : "Token invalido ou usuario nao autorizado.";
+
+          if (response.status === 403) {
+            setUser(null);
+            setAuthError(message);
+            return;
+          }
+
+          throw new Error(message);
         }
 
         const result = await response.json();
-
         const authenticatedUser = result.data ?? result;
 
         if (authenticatedUser.ativo === false) {
-          throw new Error("Usuario inativo.");
+          setUser(null);
+          setAuthError("Usuario inativo.");
+          return;
         }
 
         setUser(authenticatedUser);
       } catch (error) {
-        console.error("Falha ao carregar usuário autenticado:", error);
+        console.error("Falha ao carregar usuario autenticado:", error);
 
         localStorage.removeItem(TOKEN_KEY);
         setToken(null);
         setUser(null);
+        setAuthError("Sessao invalida ou expirada.");
 
-        window.location.href = MODULE_URLS.platformShell.web;
+        window.location.href = `${MODULE_URLS.platformShell.web}/login`;
       } finally {
         setIsLoading(false);
       }
@@ -103,9 +121,10 @@ export function AuthProvider({ children, profileUrl }: AuthProviderProps) {
       token,
       isLoading,
       isAuthenticated: Boolean(user),
+      authError,
       logout,
     }),
-    [user, token, isLoading],
+    [user, token, isLoading, authError],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

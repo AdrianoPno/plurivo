@@ -1,27 +1,29 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
-import fastifyJwt, { JWT, VerifyOptions } from "@fastify/jwt";
-import { AppError } from "@shared/utils/app-error.js";
 
-/**
- * Define o formato esperado do payload dentro do JWT.
- * Este tipo deve ser consistente com o que o `platform-shell` gera.
- */
-export interface IUserPayload {
-  sub: string; // uid do usuário
-  name: string;
-  email: string;
-  role: "SUPER" | "ADMIN" | "USER" | "VIEWER";
+import { MODULE_IDS } from "@shared/constants/modules.js";
+import type { ModulePermission, UserRole } from "@shared/types/user.js";
+
+import { adminAuth, db } from "@/infra/config/firebase.js";
+
+export interface AuthenticatedUser {
+  id: string;
+  uid: string;
+  email?: string;
+  nome?: string;
+  role: UserRole;
+  globalRole: UserRole;
+  permissions: ModulePermission[];
+  ativo: boolean;
   unidadeId?: string;
+  unidadeNome?: string;
 }
 
-// Estende as interfaces do Fastify para incluir as novas propriedades
 declare module "fastify" {
   interface FastifyRequest {
-    jwt: JWT;
-    user: IUserPayload;
-    jwtVerify(options?: VerifyOptions): Promise<IUserPayload>;
+    user: AuthenticatedUser;
   }
+
   interface FastifyInstance {
     authenticate: (
       request: FastifyRequest,
@@ -30,30 +32,72 @@ declare module "fastify" {
   }
 }
 
-// Estende a interface do @fastify/jwt para tipar o payload
-declare module "@fastify/jwt" {
-  interface FastifyJWT {
-    payload: IUserPayload;
-    user: IUserPayload;
-  }
-}
-
-export const authenticatePlugin = fp(async (fastify: FastifyInstance) => {
-  // 1. Registra o plugin @fastify/jwt, que adiciona o método `jwtVerify` ao request
-  fastify.register(fastifyJwt, {
-    secret: process.env.JWT_SECRET as string,
-  });
-
-  // 2. Decora a instância do Fastify com um hook `authenticate`
-  fastify.decorate(
+export const authenticatePlugin = fp(async (app: FastifyInstance) => {
+  app.decorate(
     "authenticate",
     async (request: FastifyRequest, reply: FastifyReply) => {
+      const authHeader = request.headers.authorization;
+
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return reply.status(401).send({
+          success: false,
+          message: "Token de autenticacao nao fornecido.",
+        });
+      }
+
+      const token = authHeader.split(" ")[1];
+
       try {
-        // Agora o `jwtVerify` existe e está corretamente tipado
-        await request.jwtVerify();
-      } catch (err) {
-        // Lança um erro padronizado que será capturado pelo errorHandler global
-        throw new AppError("Token de autenticação inválido ou expirado.", 401);
+        const decodedToken = await adminAuth.verifyIdToken(token);
+        const userDoc = await db.collection("users").doc(decodedToken.uid).get();
+
+        if (!userDoc.exists) {
+          return reply.status(403).send({
+            success: false,
+            message: "Perfil de usuario nao encontrado no sistema.",
+          });
+        }
+
+        const userData = userDoc.data()!;
+
+        if (userData.ativo === false || userData.status === "inativo") {
+          return reply.status(403).send({
+            success: false,
+            message: "Usuario inativo.",
+          });
+        }
+
+        const globalRole = (userData.role || "USER") as UserRole;
+        const permissions = (userData.permissions || []) as ModulePermission[];
+        const moduleAccess = permissions.find(
+          (permission) => permission.moduleId === MODULE_IDS.VOX_OBSERVATORY,
+        );
+
+        if (globalRole !== "SUPER" && !moduleAccess) {
+          return reply.status(403).send({
+            success: false,
+            message: "Acesso negado ao modulo Vox Observatory.",
+          });
+        }
+
+        request.user = {
+          id: decodedToken.uid,
+          uid: decodedToken.uid,
+          email: decodedToken.email,
+          nome: userData.nome,
+          role: globalRole === "SUPER" ? "SUPER" : moduleAccess!.role,
+          globalRole,
+          permissions,
+          ativo: userData.ativo !== false,
+          unidadeId: userData.unidadeId,
+          unidadeNome: userData.unidadeNome,
+        };
+      } catch (error) {
+        app.log.error(error, "Falha na verificacao do token Firebase");
+        return reply.status(401).send({
+          success: false,
+          message: "Sessao invalida ou expirada.",
+        });
       }
     },
   );

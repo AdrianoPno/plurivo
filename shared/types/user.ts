@@ -17,6 +17,7 @@ export interface IUser {
   role: UserRole; // Global role
   permissions: ModulePermission[];
   ativo: boolean;
+  status?: "ativo" | "inativo";
   createdAt?: unknown; // Can be Firestore Timestamp or Date
   updatedAt?: unknown; // Can be Firestore Timestamp or Date
 }

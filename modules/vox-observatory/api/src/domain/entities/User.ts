@@ -2,8 +2,9 @@ export interface UserProps {
   uid: string;
   nome: string;
   email: string;
-  role: "ADMIN" | "VIEWER" | "SUPER";
+  role: "ADMIN" | "USER" | "VIEWER" | "SUPER";
   status: "ativo" | "inativo";
+  ativo: boolean;
 }
 
 export class User {

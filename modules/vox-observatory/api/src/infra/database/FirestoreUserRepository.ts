@@ -15,8 +15,16 @@ export class FirestoreUserRepository implements UserRepository {
       return null;
     }
 
-    const data = doc.data() as UserProps;
-    return new User(data);
+    const data = doc.data() as Partial<UserProps>;
+
+    return new User({
+      uid: data.uid ?? doc.id,
+      nome: data.nome ?? "",
+      email: data.email ?? "",
+      role: data.role ?? "USER",
+      status: data.status ?? (data.ativo === false ? "inativo" : "ativo"),
+      ativo: data.ativo !== false,
+    });
   }
 
   async save(user: User): Promise<void> {

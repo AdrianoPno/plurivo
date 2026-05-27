@@ -8,6 +8,7 @@ type AuthenticatedUser = {
   email?: string;
   role?: string;
   status?: string;
+  ativo?: boolean;
 };
 
 function getAuthenticatedUser(
@@ -39,7 +40,16 @@ export class UserController {
 
     const profile = await this.getUserProfileUseCase.execute(user.id);
 
-    return reply.send(profile.props);
+    return reply.send({
+      ...profile.props,
+      email: profile.props.email || user.email || "",
+      role: user.role ?? profile.props.role,
+      ativo: user.ativo ?? profile.props.ativo,
+      status:
+        user.ativo === false || profile.props.status === "inativo"
+          ? "inativo"
+          : "ativo",
+    });
   }
 
   async updateProfile(

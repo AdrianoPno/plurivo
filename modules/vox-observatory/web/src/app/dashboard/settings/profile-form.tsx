@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import * as api from "@/lib/api";
-import { useAuthStore } from "@/store/use-auth-store";
+import { useAuth } from "@shared/auth";
 
 import {
   Card,
@@ -56,7 +56,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export function ProfileForm() {
-  const { user, setUser } = useAuthStore();
+  const { user } = useAuth();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -69,7 +69,7 @@ export function ProfileForm() {
     mutationFn: api.updateMe,
     onSuccess: (updatedUser) => {
       toast.success("Perfil atualizado com sucesso.");
-      setUser(updatedUser);
+      form.reset({ nome: updatedUser.nome });
     },
     onError: (error) => {
       console.error("Failed to update profile:", error);

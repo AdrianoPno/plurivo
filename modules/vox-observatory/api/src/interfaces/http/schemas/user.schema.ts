@@ -4,8 +4,9 @@ export const userResponseSchema = z.object({
   uid: z.string(),
   nome: z.string(),
   email: z.string().email(),
-  role: z.enum(["ADMIN", "VIEWER", "SUPER"]),
+  role: z.enum(["ADMIN", "USER", "VIEWER", "SUPER"]),
   status: z.enum(["ativo", "inativo"]),
+  ativo: z.boolean(),
 });
 
 export type UserType = z.infer<typeof userResponseSchema>;

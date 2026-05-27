@@ -18,10 +18,29 @@ import type { ModuleConfig } from "@shared/constants/modules";
 
 import { Button } from "@shared/ui/button";
 
-function ModuleCard({ module }: { module: ModuleConfig }) {
+function getModuleUrl(module: ModuleConfig, token: string | null) {
+  const baseUrl = new URL(module.url);
+  baseUrl.pathname = "/dashboard";
+
+  if (token) {
+    baseUrl.hash = new URLSearchParams({
+      platform_token: token,
+    }).toString();
+  }
+
+  return baseUrl.toString();
+}
+
+function ModuleCard({
+  module,
+  token,
+}: {
+  module: ModuleConfig;
+  token: string | null;
+}) {
   return (
     <Link
-      href={module.url}
+      href={getModuleUrl(module, token)}
       target="_blank"
       rel="noopener noreferrer"
       className="group relative flex min-h-[230px] flex-col overflow-hidden rounded-3xl border border-border/70 bg-card p-7 text-card-foreground shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-2xl"
@@ -52,7 +71,7 @@ function ModuleCard({ module }: { module: ModuleConfig }) {
 }
 
 function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user, token, logout } = useAuth();
 
   const availableModules = useMemo(() => {
     if (!user) return [];
@@ -143,7 +162,7 @@ function Dashboard() {
           {availableModules.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               {availableModules.map((module) => (
-                <ModuleCard key={module.id} module={module} />
+                <ModuleCard key={module.id} module={module} token={token} />
               ))}
             </div>
           ) : (

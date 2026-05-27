@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import {
   BarChart3,
@@ -11,8 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 
-import Cookies from "js-cookie";
-import { useAuthStore } from "@/store/use-auth-store";
+import { useAuth } from "@shared/auth";
 import { cn } from "@shared/utils/cn";
 
 const navigation = [
@@ -35,20 +34,10 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const { clearAuth } = useAuthStore();
+  const { logout } = useAuth();
 
   function handleLogout() {
-    localStorage.removeItem("vox-api-token");
-
-    Cookies.remove("session", {
-      path: "/",
-    });
-
-    clearAuth();
-
-    router.push("/login");
+    logout();
   }
 
   return (

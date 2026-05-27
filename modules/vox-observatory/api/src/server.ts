@@ -77,7 +77,7 @@ async function bootstrap() {
   await app.register(authenticatePlugin);
 
   await app.register(healthRoutes);
-  await app.register(userRoutes);
+  await app.register(userRoutes, { prefix: "/users" });
   await app.register(researchRoutes);
   await app.register(storageRoutes);
 

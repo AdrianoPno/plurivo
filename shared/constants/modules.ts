@@ -17,10 +17,10 @@ export const MODULE_URLS = {
   voxObservatory: {
     web:
       process.env.NEXT_PUBLIC_VOX_OBSERVATORY_WEB_URL ||
-      "http://localhost:3002",
+      "http://localhost:3003",
     api:
       process.env.NEXT_PUBLIC_VOX_OBSERVATORY_API_URL ||
-      "http://localhost:3003/api",
+      "http://localhost:3002",
   },
 
   coopManager: {

@@ -9,6 +9,7 @@ export interface AuthContextValue {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  authError: string | null;
   logout: () => void;
 }
 
