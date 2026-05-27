@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from "react";
 import { FirebaseError } from "firebase/app";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useRouter } from "next/navigation";
 
 import { MODULE_URLS } from "@shared/constants/modules";
 import { firebaseAuth } from "@shared/firebase/auth.js";
@@ -32,7 +31,6 @@ function getErrorMessage(error: unknown) {
 }
 
 export function LoginForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -70,8 +68,7 @@ export function LoginForm() {
       }
 
       localStorage.setItem(TOKEN_KEY, idToken);
-      router.replace("/");
-      router.refresh();
+      window.location.assign("/");
     } catch (error) {
       localStorage.removeItem(TOKEN_KEY);
       setErrorMessage(getErrorMessage(error));
