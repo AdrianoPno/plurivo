@@ -1,7 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
+
 import { adminAuth, firestore } from "../config/firebase.js";
-import { UserRole, ModulePermission } from "@shared/types/user.js";
+import type { ModulePermission, UserRole } from "@shared/types/user.js";
 
 export const authPlugin = fp(async (app: FastifyInstance) => {
   app.decorate(
@@ -12,7 +13,7 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return reply.status(401).send({
           success: false,
-          message: "Token de autenticação não fornecido.",
+          message: "Token de autenticacao nao fornecido.",
         });
       }
 
@@ -29,27 +30,34 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
         if (!userDoc.exists) {
           return reply.status(403).send({
             success: false,
-            message: "Perfil de usuário não encontrado no sistema.",
+            message: "Perfil de usuario nao encontrado no sistema.",
           });
         }
 
         const userData = userDoc.data()!;
 
-        // Anexa o perfil GLOBAL do usuário ao request
+        if (userData.ativo === false) {
+          return reply.status(403).send({
+            success: false,
+            message: "Usuario inativo.",
+          });
+        }
+
         request.user = {
           uid: decodedToken.uid,
           email: decodedToken.email,
           nome: userData.nome,
-          role: userData.role as UserRole, // Papel global
+          role: userData.role as UserRole,
           permissions: (userData.permissions || []) as ModulePermission[],
+          ativo: userData.ativo !== false,
           unidadeId: userData.unidadeId,
           unidadeNome: userData.unidadeNome,
         };
       } catch (error) {
-        app.log.error(error, "Falha na verificação do token Firebase");
+        app.log.error(error, "Falha na verificacao do token Firebase");
         return reply.status(401).send({
           success: false,
-          message: "Sessão inválida ou expirada.",
+          message: "Sessao invalida ou expirada.",
         });
       }
     },
@@ -64,7 +72,7 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
         if (!user || !allowedRoles.includes(user.role)) {
           return reply.status(403).send({
             success: false,
-            message: "Acesso negado: permissões insuficientes.",
+            message: "Acesso negado: permissoes insuficientes.",
           });
         }
       },

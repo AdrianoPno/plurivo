@@ -13,7 +13,9 @@ import {
 
 import { PrivateRoute } from "@shared/auth/private-route.js";
 import { useAuth } from "@shared/auth/auth-context.js";
-import { MODULE_CONFIGS, ModuleConfig } from "@shared/constants/modules.js";
+import { MODULE_CONFIGS } from "@shared/constants/modules";
+import type { ModuleConfig } from "@shared/constants/modules";
+
 import { Button } from "@shared/ui/button";
 
 function ModuleCard({ module }: { module: ModuleConfig }) {

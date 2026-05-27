@@ -3,6 +3,7 @@
 import { useState, ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@shared/auth/auth-provider";
+import { MODULE_URLS } from "@shared/constants/modules";
 
 export function Providers({ children }: { children: ReactNode }) {
   // Mantém a instância do QueryClient isolada por requisição para evitar vazamento de cache no SSR
@@ -20,7 +21,9 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider profileUrl={`${MODULE_URLS.platformShell.api}/auth/me`}>
+        {children}
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

@@ -1,10 +1,10 @@
 "use client";
 
-import { ReactNode, useContext, useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 
-import { AuthContext } from "./auth-context";
 import { ROUTES } from "../constants/routes";
 import { Loading } from "../ui/loading";
+import { useAuth } from "./auth-context";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -15,19 +15,19 @@ export function ProtectedRoute({
   children,
   redirectTo = ROUTES.LOGIN,
 }: ProtectedRouteProps) {
-  const { loading, authenticated } = useContext(AuthContext);
+  const { isLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!loading && !authenticated) {
+    if (!isLoading && !isAuthenticated) {
       window.location.href = redirectTo;
     }
-  }, [loading, authenticated, redirectTo]);
+  }, [isLoading, isAuthenticated, redirectTo]);
 
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 
-  if (!authenticated) {
+  if (!isAuthenticated) {
     return null;
   }
 

@@ -21,6 +21,7 @@ declare module "fastify" {
       nome?: string;
       role: UserRole;
       permissions: ModulePermission[];
+      ativo: boolean;
       unidadeId?: string;
       unidadeNome?: string;
     };

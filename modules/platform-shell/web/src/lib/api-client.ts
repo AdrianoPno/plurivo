@@ -1,6 +1,6 @@
-import { IUser, UserRole } from "@shared/types/user.js";
-import { ModulePermission } from "@shared/types/user.js";
-import { AppError } from "@shared/utils/AppError.js";
+import { MODULE_URLS } from "@shared/constants/modules";
+import type { IUser, ModulePermission, UserRole } from "@shared/types/user.js";
+import { AppError } from "@shared/utils/app-error.js";
 
 export interface ICreateUserPayload {
   nome: string;
@@ -15,55 +15,51 @@ export type IUpdateUserPayload = Partial<
   Omit<ICreateUserPayload, "email" | "password"> & { ativo: boolean }
 >;
 
-const getApiUrl = () => {
-  const apiUrl = process.env.NEXT_PUBLIC_PLATFORM_API_URL;
-  if (!apiUrl) {
-    throw new AppError("URL da API não configurada.", 500);
-  }
-  return apiUrl;
-};
+const getApiUrl = () =>
+  process.env.NEXT_PUBLIC_PLATFORM_API_URL ?? MODULE_URLS.platformShell.api;
 
 const getHeaders = () => {
   const token = localStorage.getItem("platform-token");
+
   if (!token) {
-    throw new AppError("Token de autenticação não encontrado.", 401);
+    throw new AppError("Token de autenticacao nao encontrado.", 401);
   }
+
   return {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
   };
 };
 
-const handleResponse = async <T = any>(response: Response): Promise<T> => {
+const handleResponse = async <T = unknown>(response: Response): Promise<T> => {
   if (!response.ok) {
-    // Dispara um evento global que o AuthProvider pode ouvir para fazer logout
     if (response.status === 401) {
       window.dispatchEvent(new Event("auth-error"));
     }
+
     const errorData = await response.json().catch(() => ({}));
-    throw new AppError(
-      errorData.message || "Erro na requisição",
-      response.status,
-    );
+    const message =
+      typeof errorData.message === "string"
+        ? errorData.message
+        : "Erro na requisicao";
+
+    throw new AppError(message, response.status);
   }
 
   if (response.status === 204) {
-    return undefined as T; // Retorna undefined para respostas sem conteúdo
+    return undefined as T;
   }
 
   const successData = await response.json();
   return successData.data;
 };
 
-export const getUsers = async (): Promise<{
-  success: boolean;
-  data: IUser[];
-}> => {
+export const getUsers = async (): Promise<IUser[]> => {
   const response = await fetch(`${getApiUrl()}/users`, {
     headers: getHeaders(),
   });
-  // Passamos o tipo genérico para o handleResponse saber o que está validando
-  return handleResponse<{ success: boolean; data: IUser[] }>(response);
+
+  return handleResponse<IUser[]>(response);
 };
 
 export const createUser = async (
@@ -74,6 +70,7 @@ export const createUser = async (
     headers: getHeaders(),
     body: JSON.stringify(userData),
   });
+
   return handleResponse(response);
 };
 
@@ -89,6 +86,7 @@ export const updateUser = async ({
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
+
   return handleResponse(response);
 };
 
@@ -97,6 +95,6 @@ export const deleteUser = async (id: string): Promise<void> => {
     method: "DELETE",
     headers: getHeaders(),
   });
-  // Agora pode usar o handler genérico, que sabe lidar com respostas 204
+
   return handleResponse(response);
 };

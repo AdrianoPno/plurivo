@@ -1,108 +1,112 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useCallback,
-  ReactNode,
-  useTransition,
-} from "react";
-import { useRouter } from "next/navigation";
-import {
-  onAuthStateChanged,
-  signOut,
-  signInWithEmailAndPassword,
-  User as FirebaseUser,
-} from "firebase/auth";
-import { auth } from "@shared/firebase/client.js";
-import { AppError } from "@shared/utils/app-error.js";
-import { AuthContext } from "./auth-context.js";
-import { IUser } from "@shared/types/user";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+
+import type { IUser } from "@shared/types/user";
+import { MODULE_URLS } from "@shared/constants/modules";
+
+import { AuthContext, type AuthContextValue } from "./auth-context.js";
+
+const TOKEN_KEY = "platform-token";
 
 interface AuthProviderProps {
   children: ReactNode;
+  profileUrl?: string;
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({ children, profileUrl }: AuthProviderProps) {
   const [user, setUser] = useState<IUser | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
-  const fetchUserProfile = async (
-    firebaseUser: FirebaseUser,
-  ): Promise<IUser> => {
-    const idToken = await firebaseUser.getIdToken();
-    const apiUrl = process.env.NEXT_PUBLIC_PLATFORM_API_URL;
-    if (!apiUrl) {
-      throw new AppError("URL da API não configurada.", 500);
-    }
+  const logout = () => {
+    localStorage.removeItem(TOKEN_KEY);
+    setToken(null);
+    setUser(null);
 
-    const response = await fetch(`${apiUrl}/auth/me`, {
-      headers: { Authorization: `Bearer ${idToken}` },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new AppError(
-        errorData.message || "Falha ao carregar perfil de permissões.",
-        response.status,
-      );
-    }
-
-    const profile = await response.json();
-    localStorage.setItem("platform-token", idToken);
-    localStorage.setItem("platform-user", JSON.stringify(profile.data));
-    return profile.data;
+    window.location.href = MODULE_URLS.platformShell.web;
   };
-
-  const logout = useCallback(() => {
-    startTransition(() => {
-      signOut(auth);
-      localStorage.removeItem("platform-token");
-      localStorage.removeItem("platform-user");
-      setUser(null);
-      router.push("/login");
-    });
-  }, [router]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const userProfile = await fetchUserProfile(firebaseUser);
-          setUser(userProfile);
-        } catch (error) {
-          console.error("Falha ao restaurar sessão:", error);
-          logout();
-        }
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
-    });
+    const fetchUser = async () => {
+      try {
+        const storedToken = localStorage.getItem(TOKEN_KEY);
 
-    window.addEventListener("auth-error", logout);
+        if (!storedToken) {
+          setToken(null);
+          setUser(null);
+          return;
+        }
+
+        setToken(storedToken);
+
+        if (!profileUrl) {
+          return;
+        }
+
+        const response = await fetch(profileUrl, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Token inválido ou usuário não autorizado.");
+        }
+
+        const result = await response.json();
+
+        const authenticatedUser = result.data ?? result;
+
+        if (authenticatedUser.ativo === false) {
+          throw new Error("Usuario inativo.");
+        }
+
+        setUser(authenticatedUser);
+      } catch (error) {
+        console.error("Falha ao carregar usuário autenticado:", error);
+
+        localStorage.removeItem(TOKEN_KEY);
+        setToken(null);
+        setUser(null);
+
+        window.location.href = MODULE_URLS.platformShell.web;
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUser();
+
+    const handleAuthError = () => {
+      logout();
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === TOKEN_KEY && !event.newValue) {
+        logout();
+      }
+    };
+
+    window.addEventListener("auth-error", handleAuthError);
+    window.addEventListener("storage", handleStorage);
 
     return () => {
-      unsubscribe();
-      window.removeEventListener("auth-error", logout);
+      window.removeEventListener("auth-error", handleAuthError);
+      window.removeEventListener("storage", handleStorage);
     };
-  }, [logout]);
+  }, [profileUrl]);
 
-  const login = async (email: string, pass: string) => {
-    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    const userProfile = await fetchUserProfile(userCredential.user);
-    setUser(userProfile);
-  };
-
-  const value = {
-    user,
-    isAuthenticated: !!user,
-    isLoading: isLoading || isPending,
-    login,
-    logout,
-  };
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      token,
+      isLoading,
+      isAuthenticated: Boolean(user),
+      logout,
+    }),
+    [user, token, isLoading],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

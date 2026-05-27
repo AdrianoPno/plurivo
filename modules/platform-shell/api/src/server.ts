@@ -1,5 +1,5 @@
 import "dotenv/config";
-import Fastify from "fastify";
+import Fastify, { FastifyError, FastifyReply, FastifyRequest } from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import swagger from "@fastify/swagger";
@@ -11,6 +11,7 @@ import {
 } from "fastify-type-provider-zod";
 import routes from "./routes.js";
 import { authPlugin } from "./plugins/auth.plugin.js";
+import { MODULE_URLS } from "@shared/constants/modules.js";
 import { errorHandler } from "@shared/utils/error-handler.js";
 
 const app = Fastify({
@@ -72,17 +73,19 @@ async function bootstrap() {
       persistAuthorization: true,
     },
     staticCSP: true,
-    transformStaticCSP: (header) => header,
+    transformStaticCSP: (header: string) => header,
   });
 
   await app.register(helmet, { contentSecurityPolicy: false });
 
+  const allowedOrigins = [
+    MODULE_URLS.platformShell.web,
+    MODULE_URLS.voxObservatory.web,
+    MODULE_URLS.coopManager.web,
+  ];
+
   await app.register(cors, {
-    origin: [
-      "http://localhost:3001",
-      "http://localhost:3003",
-      "http://localhost:3005",
-    ],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
@@ -91,7 +94,13 @@ async function bootstrap() {
 
   await app.register(routes, { prefix: "/api" });
 
-  app.setErrorHandler(errorHandler as any);
+  app.setErrorHandler(
+    (error: FastifyError, request: FastifyRequest, reply: FastifyReply) => {
+      // O `errorHandler` compartilhado é chamado aqui para centralizar a lógica de tratamento de erros.
+      // Este wrapper garante a compatibilidade de tipos com o Fastify.
+      errorHandler(error, request, reply);
+    },
+  );
 
   const PORT = Number(process.env.PORT || 3000);
 

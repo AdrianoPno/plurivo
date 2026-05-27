@@ -1,18 +1,16 @@
-import Fastify from "fastify";
+import Fastify, { FastifyError, FastifyRequest, FastifyReply } from "fastify";
 import cors from "@fastify/cors";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import jwt from "@fastify/jwt";
 
 import {
   jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
-
+import { MODULE_URLS } from "@shared/constants/modules.js";
 import { authenticatePlugin } from "./interfaces/http/plugins/authenticate.js";
 import { researchRoutes } from "./interfaces/http/routes/research.routes.js";
-import { authRoutes } from "./interfaces/http/routes/auth.routes.js";
 import { userRoutes } from "./interfaces/http/routes/user.routes.js";
 import { storageRoutes } from "./interfaces/http/routes/storage.routes.js";
 import { healthRoutes } from "./interfaces/http/routes/health.routes.js";
@@ -34,21 +32,21 @@ async function bootstrap() {
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
-  app.setErrorHandler(errorHandler as any);
+  app.setErrorHandler(
+    (error: FastifyError, request: FastifyRequest, reply: FastifyReply) => {
+      errorHandler(error, request, reply);
+    },
+  );
 
-  await app.register(jwt, {
-    secret: process.env.JWT_SECRET ?? "dev-secret",
-  });
+  const allowedOrigins = [
+    MODULE_URLS.platformShell.web,
+    MODULE_URLS.voxObservatory.web,
+    MODULE_URLS.coopManager.web,
+  ];
 
-  // CORS atualizado refletindo a padronização sequencial dos Frontends
   await app.register(cors, {
-    origin: [
-      "http://localhost:3001", // Platform Shell Web
-      "http://localhost:3003", // Vox Observatory Web (Ímpar correspondente)
-      "http://localhost:3005", // Coop Manager Web
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
 
@@ -77,10 +75,6 @@ async function bootstrap() {
   });
 
   await app.register(authenticatePlugin);
-
-  await app.register(authRoutes, {
-    prefix: "/auth",
-  });
 
   await app.register(healthRoutes);
   await app.register(userRoutes);

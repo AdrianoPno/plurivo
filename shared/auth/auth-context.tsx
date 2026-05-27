@@ -1,16 +1,27 @@
 "use client";
 
-import { createContext } from "react";
-import type { User } from "firebase/auth";
+import { createContext, useContext } from "react";
+
+import type { IUser } from "@shared/types/user";
 
 export interface AuthContextValue {
-  user: User | null;
-  loading: boolean;
-  authenticated: boolean;
+  user: IUser | null;
+  token: string | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextValue>({
-  user: null,
-  loading: true,
-  authenticated: false,
-});
+export const AuthContext = createContext<AuthContextValue | undefined>(
+  undefined,
+);
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth deve ser usado dentro de um AuthProvider.");
+  }
+
+  return context;
+}

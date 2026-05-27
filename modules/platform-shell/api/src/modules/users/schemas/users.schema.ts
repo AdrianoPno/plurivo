@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { MODULES } from "@shared/constants/modules.js";
+
+import { MODULE_IDS } from "@shared/constants/modules.js";
 
 const UserRoleEnum = z.enum(["SUPER", "ADMIN", "USER"]);
 
 const permissionSchema = z.object({
-  moduleId: z.nativeEnum(MODULES),
+  moduleId: z.nativeEnum(MODULE_IDS),
   role: z.enum(["ADMIN", "VIEWER", "USER"]),
 });
 
@@ -20,7 +21,6 @@ const userResponseSchema = z.object({
   updatedAt: z.string().optional(),
 });
 
-// Envolva as propriedades explicitamente para o Type Provider do Zod ler
 export const getUserSchema = {
   schema: {
     security: [{ bearerAuth: [] }],

@@ -25,7 +25,7 @@ function UsersPageContent() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<IUser | null>(null);
 
-  const { data: responseData, isLoading } = useQuery({
+  const { data: usersList = [], isLoading } = useQuery({
     queryKey: ["users", user?.unidadeId],
     queryFn: apiClient.getUsers,
     enabled: !!user,
@@ -91,11 +91,6 @@ function UsersPageContent() {
       </main>
     );
   }
-
-  const usersList =
-    responseData?.data && Array.isArray(responseData.data)
-      ? responseData.data
-      : [];
 
   return (
     <main className="min-h-screen bg-background">

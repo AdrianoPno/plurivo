@@ -1,7 +1,8 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+
 import { useAuth } from "./auth-context.js";
 
 interface PrivateRouteProps {
@@ -9,22 +10,25 @@ interface PrivateRouteProps {
 }
 
 export function PrivateRoute({ children }: PrivateRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
+    if (!isLoading && !user) {
+      router.replace("/login");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, user, router]);
 
-  if (isLoading || !isAuthenticated) {
-    // Renderiza um estado de carregamento enquanto verifica a autenticação
+  if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        Carregando...
-      </div>
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Carregando...</p>
+      </main>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return <>{children}</>;

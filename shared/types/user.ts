@@ -1,7 +1,6 @@
-import { MODULES } from "../constants/modules";
+import type { ModuleId } from "../constants/modules";
 
 export type UserRole = "SUPER" | "ADMIN" | "USER" | "VIEWER";
-export type ModuleId = (typeof MODULES)[keyof typeof MODULES];
 
 export interface ModulePermission {
   moduleId: ModuleId;

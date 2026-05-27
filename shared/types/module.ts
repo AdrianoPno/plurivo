@@ -1,5 +1,7 @@
+import { ModuleId } from "@shared/constants/modules";
+
 export interface PlatformModule {
-  id: string;
+  id: ModuleId;
   name: string;
   description?: string;
   path: string;
