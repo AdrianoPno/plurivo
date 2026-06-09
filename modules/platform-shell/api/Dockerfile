@@ -7,7 +7,9 @@ FROM base AS build
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm --filter=platform-shell-api build
+
+# Forca o build das dependencias internas antes do app principal
+RUN pnpm --filter=platform-shell-api... build
 
 FROM base AS runner
 WORKDIR /usr/src/app
