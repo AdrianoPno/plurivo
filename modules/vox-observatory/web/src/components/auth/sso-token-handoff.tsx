@@ -28,7 +28,7 @@ export function SsoTokenHandoff({ children }: SsoTokenHandoffProps) {
       window.history.replaceState(null, "", nextUrl);
     }
 
-    setIsReady(true);
+    setIsReady(!token || localStorage.getItem(TOKEN_KEY) === token);
   }, []);
 
   if (!isReady) {
