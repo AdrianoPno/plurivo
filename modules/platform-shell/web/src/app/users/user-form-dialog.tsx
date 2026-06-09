@@ -6,6 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { KeyRound, Mail, ShieldCheck, User } from "lucide-react";
 import * as z from "zod";
 
+import { MODULE_CONFIGS } from "@shared/constants/modules";
+import type { IUser, ModulePermission } from "@shared/types/user.js";
+import { Button } from "@shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,8 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@shared/ui/dialog";
-import { Button } from "@shared/ui/button";
-import { Input } from "@shared/ui/input";
 import {
   Form,
   FormControl,
@@ -24,6 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@shared/ui/form";
+import { Input } from "@shared/ui/input";
 import {
   Select,
   SelectContent,
@@ -32,12 +34,22 @@ import {
   SelectValue,
 } from "@shared/ui/select";
 
+const moduleIdSchema = z.enum(["coop-manager", "vox-observatory"]);
+const moduleRoleSchema = z.enum(["ADMIN", "USER", "VIEWER"]);
+const globalRoleSchema = z.enum(["SUPER", "ADMIN", "USER"]);
+
 const userFormSchema = z
   .object({
-    nome: z.string().min(2, "O nome é obrigatório."),
-    email: z.string().email("Por favor, insira um e-mail válido."),
+    nome: z.string().min(2, "O nome e obrigatorio."),
+    email: z.string().email("Informe um e-mail valido."),
     password: z.string().optional(),
-    role: z.string({ required_error: "A permissão é obrigatória." }),
+    role: globalRoleSchema,
+    permissions: z.array(
+      z.object({
+        moduleId: moduleIdSchema,
+        role: moduleRoleSchema,
+      }),
+    ),
     isEditing: z.boolean(),
   })
   .superRefine((data, ctx) => {
@@ -45,25 +57,28 @@ const userFormSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["password"],
-        message: "A senha provisória deve ter no mínimo 6 caracteres.",
+        message: "A senha provisoria deve ter no minimo 6 caracteres.",
       });
     }
   });
 
-type UserFormData = z.infer<typeof userFormSchema>;
+export type UserFormData = z.infer<typeof userFormSchema>;
+
+type ModulePermissionRole = ModulePermission["role"];
+type ModuleRoleSelectValue = ModulePermissionRole | "NO_ACCESS";
 
 interface UserFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData?: Partial<UserFormData> | null;
-  onSuccess: () => void;
+  initialData?: IUser | null;
+  onSubmit: (data: UserFormData) => Promise<void>;
 }
 
 export function UserFormDialog({
   open,
   onOpenChange,
   initialData,
-  onSuccess,
+  onSubmit,
 }: UserFormDialogProps) {
   const isEditing = !!initialData;
 
@@ -74,6 +89,7 @@ export function UserFormDialog({
       email: "",
       password: "",
       role: "USER",
+      permissions: [],
       isEditing: false,
     },
   });
@@ -85,27 +101,52 @@ export function UserFormDialog({
       nome: initialData?.nome || "",
       email: initialData?.email || "",
       password: "",
-      role: initialData?.role || "USER",
+      role:
+        initialData?.role === "SUPER" ||
+        initialData?.role === "ADMIN" ||
+        initialData?.role === "USER"
+          ? initialData.role
+          : "USER",
+      permissions: initialData?.permissions || [],
       isEditing,
     });
   }, [form, initialData, isEditing, open]);
 
-  const onSubmit = (data: UserFormData) => {
-    const { isEditing, ...userData } = data;
+  const selectedPermissions = form.watch("permissions");
+  const isSubmitting = form.formState.isSubmitting;
 
-    if (isEditing && (!userData.password || userData.password.length === 0)) {
-      delete userData.password;
+  const getModuleRole = (
+    moduleId: ModulePermission["moduleId"],
+  ): ModuleRoleSelectValue =>
+    selectedPermissions.find((permission) => permission.moduleId === moduleId)
+      ?.role || "NO_ACCESS";
+
+  const setModuleRole = (
+    moduleId: ModulePermission["moduleId"],
+    value: ModuleRoleSelectValue,
+  ) => {
+    const nextPermissions = selectedPermissions.filter(
+      (permission) => permission.moduleId !== moduleId,
+    );
+
+    if (value !== "NO_ACCESS") {
+      nextPermissions.push({ moduleId, role: value });
     }
 
-    console.log("Dados para API:", userData);
+    form.setValue("permissions", nextPermissions, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
 
+  const handleSubmit = async (data: UserFormData) => {
+    await onSubmit(data);
     onOpenChange(false);
-    onSuccess();
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden border-border/70 p-0 shadow-2xl sm:max-w-[520px]">
+      <DialogContent className="max-h-[90vh] overflow-hidden border-border/70 p-0 shadow-2xl sm:max-w-[640px]">
         <DialogHeader className="border-b border-border/70 bg-muted/40 px-6 py-5">
           <div className="flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -118,12 +159,12 @@ export function UserFormDialog({
 
             <div>
               <DialogTitle className="text-xl">
-                {isEditing ? "Editar usuário" : "Criar novo usuário"}
+                {isEditing ? "Editar usuario" : "Criar novo usuario"}
               </DialogTitle>
 
               <DialogDescription className="mt-1">
                 {isEditing
-                  ? "Atualize as informações e permissões deste usuário."
+                  ? "Atualize as informacoes e permissoes deste usuario."
                   : "Preencha os dados para cadastrar um novo acesso."}
               </DialogDescription>
             </div>
@@ -131,7 +172,10 @@ export function UserFormDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="px-6 py-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="max-h-[calc(90vh-7rem)] overflow-y-auto px-6 py-6"
+          >
             <div className="space-y-5">
               <FormField
                 control={form.control}
@@ -143,7 +187,7 @@ export function UserFormDialog({
                       <div className="relative">
                         <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                          placeholder="Nome do usuário"
+                          placeholder="Nome do usuario"
                           className="pl-9"
                           {...field}
                         />
@@ -167,6 +211,7 @@ export function UserFormDialog({
                           type="email"
                           placeholder="email@recicleiros.com.br"
                           className="pl-9"
+                          disabled={isEditing}
                           {...field}
                         />
                       </div>
@@ -182,13 +227,13 @@ export function UserFormDialog({
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Senha provisória</FormLabel>
+                      <FormLabel>Senha provisoria</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                           <Input
                             type="password"
-                            placeholder="Mínimo de 6 caracteres"
+                            placeholder="Minimo de 6 caracteres"
                             className="pl-9"
                             {...field}
                           />
@@ -205,11 +250,11 @@ export function UserFormDialog({
                 name="role"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Permissão global</FormLabel>
+                    <FormLabel>Permissao global</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma permissão" />
+                          <SelectValue placeholder="Selecione uma permissao" />
                         </SelectTrigger>
                       </FormControl>
 
@@ -224,6 +269,63 @@ export function UserFormDialog({
                   </FormItem>
                 )}
               />
+
+              <div className="rounded-2xl border border-border bg-card p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <ShieldCheck className="h-4 w-4" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-card-foreground">
+                      Permissoes por modulo
+                    </h3>
+                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                      Defina o que este usuario pode acessar dentro de cada
+                      modulo da plataforma.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {MODULE_CONFIGS.map((module) => (
+                    <div
+                      key={module.id}
+                      className="flex flex-col gap-3 rounded-xl border border-border/70 bg-background/70 p-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground">
+                          {module.name}
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                          {module.description}
+                        </p>
+                      </div>
+
+                      <Select
+                        value={getModuleRole(module.id)}
+                        onValueChange={(value) =>
+                          setModuleRole(
+                            module.id,
+                            value as ModuleRoleSelectValue,
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-full sm:w-40">
+                          <SelectValue placeholder="Sem acesso" />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                          <SelectItem value="NO_ACCESS">Sem acesso</SelectItem>
+                          <SelectItem value="VIEWER">Viewer</SelectItem>
+                          <SelectItem value="USER">User</SelectItem>
+                          <SelectItem value="ADMIN">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <DialogFooter className="mt-8 gap-2 border-t border-border/70 pt-5 sm:gap-2">
@@ -231,12 +333,17 @@ export function UserFormDialog({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
               >
                 Cancelar
               </Button>
 
-              <Button type="submit">
-                {isEditing ? "Salvar alterações" : "Criar usuário"}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting
+                  ? "Salvando..."
+                  : isEditing
+                    ? "Salvar alteracoes"
+                    : "Criar usuario"}
               </Button>
             </DialogFooter>
           </form>

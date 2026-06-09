@@ -28,7 +28,7 @@ export class CreateUserUseCase {
 
     const finalUnidadeId =
       currentUser.role === "SUPER" ? data.unidadeId : currentUser.unidadeId;
-    if (!finalUnidadeId) {
+    if (currentUser.role !== "SUPER" && !finalUnidadeId) {
       throw new AppError("Unidade de destino não identificada.", 400);
     }
 

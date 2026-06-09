@@ -1,7 +1,12 @@
 "use client";
 
 import { MoreHorizontal } from "lucide-react";
+
+import { MODULE_CONFIGS } from "@shared/constants/modules";
+import type { IUser } from "@shared/types/user";
+import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
+import type { Column } from "@shared/ui/data-table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,12 +15,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@shared/ui/dropdown-menu";
-import { Badge } from "@shared/ui/badge";
-import { IUser } from "@shared/types/user";
-
-// 1. IMPORTAR O TIPO DO SEU DATA-TABLE COMPARTILHADO
-// (Mude o nome do import se no arquivo da UI ele for exportado com outro nome, ex: DataTableColumn)
-import { Column } from "@shared/ui/data-table";
 
 type UserActionsProps = {
   user: IUser;
@@ -33,7 +32,7 @@ function UserActions({ user, onEdit, onDelete }: UserActionsProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+        <DropdownMenuLabel>Acoes</DropdownMenuLabel>
         <DropdownMenuItem onClick={() => onEdit(user)}>Editar</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -47,11 +46,6 @@ function UserActions({ user, onEdit, onDelete }: UserActionsProps) {
   );
 }
 
-// 2. FORÇAR A INTERSEÇÃO DE TIPO COM O "actions" PARA PARAR A RECLAMAÇÃO DO COMPILADOR
-// O Omit e a união garantem que o tipo aceita as chaves de IUser MAIS a string fixada "actions"
-type FixedUserColumn = Omit<Column<IUser>, "key"> & {
-  key: keyof IUser | "actions";
-};
 export const getColumns = (
   actions: Omit<UserActionsProps, "user">,
 ): Column<IUser>[] => [
@@ -65,13 +59,46 @@ export const getColumns = (
   },
   {
     key: "role",
-    title: "Permissão Global",
+    title: "Permissao global",
     render: (_, user) => <Badge variant="outline">{user.role}</Badge>,
+  },
+  {
+    key: "permissions",
+    title: "Modulos",
+    render: (_, user) => {
+      if (user.role === "SUPER") {
+        return <Badge variant="outline">Todos</Badge>;
+      }
+
+      if (!user.permissions?.length) {
+        return <span className="text-sm text-muted-foreground">Sem acesso</span>;
+      }
+
+      return (
+        <div className="flex max-w-[320px] flex-wrap gap-1.5">
+          {user.permissions.map((permission) => {
+            const moduleConfig = MODULE_CONFIGS.find(
+              (module) => module.id === permission.moduleId,
+            );
+
+            return (
+              <Badge
+                key={permission.moduleId}
+                variant="secondary"
+                className="font-normal"
+              >
+                {moduleConfig?.name || permission.moduleId}: {permission.role}
+              </Badge>
+            );
+          })}
+        </div>
+      );
+    },
   },
   {
     key: "unidadeNome",
     title: "Unidade",
-    render: (_, user) => user.unidadeNome || "Não vinculada",
+    render: (_, user) => user.unidadeNome || "Nao vinculada",
   },
   {
     key: "ativo",
@@ -84,7 +111,7 @@ export const getColumns = (
   },
   {
     key: "actions",
-    title: "Ações",
+    title: "Acoes",
     render: (_, user) => <UserActions user={user} {...actions} />,
   },
 ];

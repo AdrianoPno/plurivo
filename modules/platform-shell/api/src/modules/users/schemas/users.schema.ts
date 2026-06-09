@@ -50,7 +50,9 @@ export const createUserSchema = {
     response: {
       201: z.object({
         success: z.boolean(),
-        data: userResponseSchema,
+        data: z.object({
+          uid: z.string(),
+        }),
         message: z.string(),
       }),
     },

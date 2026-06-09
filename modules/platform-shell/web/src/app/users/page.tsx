@@ -16,7 +16,7 @@ import { DataTable } from "@shared/ui/data-table";
 import { Card, CardContent } from "@shared/ui/card";
 
 import { getColumns } from "../columns";
-import { UserFormDialog } from "./user-form-dialog.js";
+import { UserFormDialog, type UserFormData } from "./user-form-dialog.js";
 
 function UsersPageContent() {
   const { user } = useAuth();
@@ -42,6 +42,28 @@ function UsersPageContent() {
     },
   });
 
+  const createMutation = useMutation({
+    mutationFn: apiClient.createUser,
+    onSuccess: () => {
+      toast.success("Usuario criado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Falha ao criar usuario.");
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: apiClient.updateUser,
+    onSuccess: () => {
+      toast.success("Usuario atualizado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Falha ao atualizar usuario.");
+    },
+  });
+
   const handleOpenForm = (userToEdit: IUser | null = null) => {
     setEditingUser(userToEdit);
     setIsFormOpen(true);
@@ -55,6 +77,24 @@ function UsersPageContent() {
     if (confirmed) {
       deleteMutation.mutate(userToDelete.uid);
     }
+  };
+
+  const handleSubmitUser = async (data: UserFormData) => {
+    const { isEditing, password, email, ...baseData } = data;
+
+    if (isEditing && editingUser) {
+      await updateMutation.mutateAsync({
+        id: editingUser.uid,
+        data: baseData,
+      });
+      return;
+    }
+
+    await createMutation.mutateAsync({
+      ...baseData,
+      email,
+      password,
+    });
   };
 
   const columns = getColumns({
@@ -172,9 +212,7 @@ function UsersPageContent() {
           }
         }}
         initialData={editingUser}
-        onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ["users"] });
-        }}
+        onSubmit={handleSubmitUser}
       />
     </main>
   );
