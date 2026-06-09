@@ -17,6 +17,7 @@
     "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
     "fastify": "^4.29.1",
+    "fastify-plugin": "^4.5.1",
     "fastify-type-provider-zod": "^1.2.0"
   },
   "peerDependencies": {
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "eslint": "^8.57.1",
+    "tsup": "^8.0.2",
     "typescript": "^6.0.0"
   }
 }

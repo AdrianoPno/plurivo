@@ -163,6 +163,9 @@ importers:
       '@types/node':
         specifier: ^20.11.0
         version: 20.19.39
+      tsup:
+        specifier: ^8.0.2
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.14)(tsx@4.21.0)(typescript@6.0.3)(yaml@2.8.4)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -190,9 +193,6 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
-      firebase:
-        specifier: ^12.12.1
-        version: 12.12.1
       lucide-react:
         specifier: ^0.447.0
         version: 0.447.0(react@18.3.1)
@@ -353,16 +353,11 @@ importers:
         specifier: ^6.0.0
         version: 6.0.3
 
-  modules/template-new-modules/web: {}
-
   modules/vox-observatory/api:
     dependencies:
       '@fastify/cors':
         specifier: ^9.0.1
         version: 9.0.1
-      '@fastify/jwt':
-        specifier: ^8.0.0
-        version: 8.0.1
       '@fastify/multipart':
         specifier: ^8.3.1
         version: 8.3.1
@@ -381,6 +376,9 @@ importers:
       fastify:
         specifier: ^4.29.1
         version: 4.29.1
+      fastify-plugin:
+        specifier: ^4.5.1
+        version: 4.5.1
       fastify-type-provider-zod:
         specifier: ^1.2.0
         version: 1.2.0(fastify@4.29.1)(zod@3.25.76)
@@ -394,6 +392,9 @@ importers:
       eslint:
         specifier: ^8.57.1
         version: 8.57.1
+      tsup:
+        specifier: ^8.0.2
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.14)(tsx@4.21.0)(typescript@6.0.3)(yaml@2.8.4)
       typescript:
         specifier: ^6.0.0
         version: 6.0.3
@@ -9616,6 +9617,34 @@ snapshots:
     optionalDependencies:
       postcss: 8.5.14
       typescript: 5.9.3
+    transitivePeerDependencies:
+      - jiti
+      - supports-color
+      - tsx
+      - yaml
+
+  tsup@8.5.1(jiti@2.7.0)(postcss@8.5.14)(tsx@4.21.0)(typescript@6.0.3)(yaml@2.8.4):
+    dependencies:
+      bundle-require: 5.1.0(esbuild@0.27.7)
+      cac: 6.7.14
+      chokidar: 4.0.3
+      consola: 3.4.2
+      debug: 4.4.3
+      esbuild: 0.27.7
+      fix-dts-default-cjs-exports: 1.0.1
+      joycon: 3.1.1
+      picocolors: 1.1.1
+      postcss-load-config: 6.0.1(jiti@2.7.0)(postcss@8.5.14)(tsx@4.21.0)(yaml@2.8.4)
+      resolve-from: 5.0.0
+      rollup: 4.60.4
+      source-map: 0.7.6
+      sucrase: 3.35.1
+      tinyexec: 0.3.2
+      tinyglobby: 0.2.16
+      tree-kill: 1.2.2
+    optionalDependencies:
+      postcss: 8.5.14
+      typescript: 6.0.3
     transitivePeerDependencies:
       - jiti
       - supports-color
