@@ -9,7 +9,7 @@ const nextConfig = {
   // Corrige o aviso de rotas tipadas
   typedRoutes: true,
   // Corrige o aviso de tracing no monorepo
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  outputFileTracingRoot: path.join(__dirname, "../../../"),
   experimental: {
     externalDir: true,
   },
