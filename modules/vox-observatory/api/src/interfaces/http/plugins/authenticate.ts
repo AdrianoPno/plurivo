@@ -48,7 +48,7 @@ export const authenticatePlugin = fp(async (app: FastifyInstance) => {
       const token = authHeader.split(" ")[1];
 
       try {
-        const decodedToken = await adminAuth.verifyIdToken(token);
+        const decodedToken = await adminAuth.verifyIdToken(token, true);
         const userDoc = await db.collection("users").doc(decodedToken.uid).get();
 
         if (!userDoc.exists) {

@@ -1,6 +1,6 @@
 import { User } from "@/domain/entities/User.js";
 import { UserRepository } from "@/domain/repositories/UserRepository.js";
-import { DocumentNotFoundException } from "@shared/firebase/admin.js";
+import { AppError } from "@shared/utils/app-error.js";
 
 export class GetUserProfile {
   constructor(private userRepository: UserRepository) {}
@@ -9,7 +9,7 @@ export class GetUserProfile {
     const user = await this.userRepository.findByUid(uid);
 
     if (!user) {
-      throw new DocumentNotFoundException(`User with UID ${uid} not found.`);
+      throw new AppError("Usuario sem perfil no Vox Observatory.", 403);
     }
 
     return user;

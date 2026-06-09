@@ -27,9 +27,15 @@ import {
 import { Button } from "@shared/ui/button";
 import { Card } from "@shared/ui/card";
 
-function getModuleUrl(module: ModuleConfig, token: string | null) {
+function getModuleUrl(module: ModuleConfig) {
   const baseUrl = new URL(module.url);
   baseUrl.pathname = "/dashboard";
+
+  return baseUrl.toString();
+}
+
+function getModuleUrlWithToken(module: ModuleConfig, token: string | null) {
+  const baseUrl = new URL(getModuleUrl(module));
 
   if (token) {
     baseUrl.hash = new URLSearchParams({
@@ -47,9 +53,19 @@ function ModuleCard({
   module: ModuleConfig;
   token: string | null;
 }) {
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    window.open(
+      getModuleUrlWithToken(module, token),
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
+
   return (
     <Link
-      href={getModuleUrl(module, token)}
+      href={getModuleUrl(module)}
+      onClick={handleClick}
       target="_blank"
       rel="noopener noreferrer"
       className="group relative flex min-h-[230px] flex-col overflow-hidden rounded-3xl border border-border/70 bg-card p-7 text-card-foreground shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"

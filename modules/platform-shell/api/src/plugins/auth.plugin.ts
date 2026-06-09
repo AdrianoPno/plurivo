@@ -20,7 +20,7 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
       const token = authHeader.split(" ")[1];
 
       try {
-        const decodedToken = await adminAuth.verifyIdToken(token);
+        const decodedToken = await adminAuth.verifyIdToken(token, true);
 
         const userDoc = await firestore
           .collection("users")

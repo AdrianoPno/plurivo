@@ -11,10 +11,14 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const voxApiUrl =
+    process.env.NEXT_PUBLIC_VOX_OBSERVATORY_API_URL ||
+    MODULE_URLS.voxObservatory.api;
+
   return (
     <QueryProvider>
       <SsoTokenHandoff>
-        <AuthProvider profileUrl={`${MODULE_URLS.voxObservatory.api}/users/me`}>
+        <AuthProvider profileUrl={`${voxApiUrl}/users/me`}>
           <PrivateRoute redirectTo={`${MODULE_URLS.platformShell.web}/login`}>
             <div className="flex min-h-screen bg-background text-foreground">
               <Sidebar />

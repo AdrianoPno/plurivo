@@ -61,7 +61,7 @@ export function AuthProvider({ children, profileUrl }: AuthProviderProps) {
               ? errorData.message
               : "Token invalido ou usuario nao autorizado.";
 
-          if (response.status === 403) {
+          if (response.status === 403 || response.status === 404) {
             setUser(null);
             setAuthError(message);
             return;

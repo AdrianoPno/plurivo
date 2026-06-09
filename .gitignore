@@ -46,3 +46,6 @@ firebase-key.json
 
 # Secrets
 serviceAccountKey.json
+
+# Local deployment notes
+DEPLOY_ENV_LOCAL.md
