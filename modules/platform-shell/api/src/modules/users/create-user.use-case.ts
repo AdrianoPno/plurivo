@@ -53,9 +53,9 @@ export class CreateUserUseCase {
         email,
         role,
         permissions: permissions || [],
-        unidadeId: finalUnidadeId,
         ativo: true,
         createdAt: new Date(),
+        ...(finalUnidadeId ? { unidadeId: finalUnidadeId } : {}),
       };
 
       await this.userRepository.save(newUser);
