@@ -24,7 +24,7 @@ export function SsoTokenHandoff({ children }: { children: ReactNode }) {
       window.history.replaceState(null, "", nextUrl);
     }
 
-    setIsReady(true);
+    setIsReady(!token || localStorage.getItem(TOKEN_KEY) === token);
   }, []);
 
   if (!isReady) {
