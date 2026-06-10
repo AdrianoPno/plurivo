@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 
 import { useAuth } from "./auth-context.js";
@@ -24,7 +25,7 @@ export function PrivateRoute({
         return;
       }
 
-      router.replace(redirectTo);
+      router.replace(redirectTo as Route);
     }
   }, [isLoading, user, authError, redirectTo, router]);
 

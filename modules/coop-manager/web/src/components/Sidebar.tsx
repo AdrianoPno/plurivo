@@ -1,14 +1,28 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { Building2, LayoutGrid, LogOut, Settings, Users } from "lucide-react";
+import {
+  Building2,
+  LayoutGrid,
+  LogOut,
+  Settings,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 
 import { useAuth } from "@shared/auth";
 import { Button } from "@shared/ui/button";
 import { cn } from "@shared/utils/cn";
 
-const navigation = [
+type NavigationItem = {
+  name: string;
+  href: Route;
+  icon: LucideIcon;
+};
+
+const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
   { name: "Cooperados", href: "/dashboard/cooperados", icon: Users },
   { name: "Unidades", href: "/dashboard/unidades", icon: Building2 },
