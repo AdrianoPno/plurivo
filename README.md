@@ -16,7 +16,7 @@ O ponto central da arquitetura atual e:
 | --- | --- | --- | --- |
 | Platform Shell | `http://localhost:3001` | `http://localhost:3000/api` | Login central, portal, usuarios e permissao de acesso aos modulos. |
 | Vox Observatory | `http://localhost:3003` | `http://localhost:3002` | Pesquisas, inteligencia e observatorio de dados. |
-| Coop Manager | `http://localhost:3005` | `http://localhost:3004/api` | Cooperados, unidades, usuarios e indicadores operacionais. |
+| Coop Manager | `http://localhost:3005` | `http://localhost:3004/api` | Cooperados, unidades, cargos, vagas, usuarios e indicadores operacionais. |
 
 ## Stack
 
@@ -100,7 +100,7 @@ pnpm typecheck
 pnpm build
 ```
 
-Observacao: alguns pacotes ainda precisam ter scripts de build/typecheck padronizados. Ver a secao "Revisao atual".
+Observacao: alguns pacotes ainda precisam ter scripts de `lint` padronizados. Ver a secao "Revisao atual".
 
 ## Autenticacao e SSO
 
@@ -151,6 +151,46 @@ Usar sempre:
 - `isModuleId`
 
 Evitar strings soltas como `"vox-observatory"` ou URLs hardcoded espalhadas pelo codigo.
+
+## Funcionalidades atuais
+
+### Platform Shell
+
+- Login central com Firebase Auth.
+- Portal de acesso aos modulos habilitados para o usuario.
+- Cadastro e edicao de usuarios por perfil administrativo.
+- Controle de `role`, status, unidade e permissoes por modulo.
+- Handoff seguro do `platform-token` para os modulos.
+
+### Coop Manager
+
+- Dashboard operacional com indicadores por escopo de acesso.
+- Cadastro, edicao, listagem e exclusao de unidades.
+- Cadastro, edicao, listagem e exclusao de cooperados.
+- Cadastro, edicao, listagem e exclusao de cargos.
+- Controle de vagas por cargo, com ocupacao calculada por cooperados ativos.
+- Seed automatico dos cargos padrao quando a colecao ainda esta vazia.
+- Validacao de CPF, datas, campos obrigatorios e normalizacao de texto.
+- Escopo por unidade para usuarios que nao sao `SUPER`.
+
+Cargos padrao:
+
+| Cargo | Limite de vagas |
+| --- | ---: |
+| Presidente | 1 |
+| Diretor Administrativo | 1 |
+| Diretor Financeiro | 1 |
+| Coordenador de Mobilizacao | 1 |
+| Coordenador de Producao | 1 |
+| Coordenador de Administracao | 1 |
+| Conselho Fiscal | 3 |
+| Operacao | 100 |
+
+### Vox Observatory
+
+- Dashboard do observatorio.
+- Pesquisas, analises e telas internas protegidas por SSO.
+- Validacao do token no backend e redirecionamento para login central quando necessario.
 
 ## Design System
 
@@ -298,12 +338,74 @@ Prioridades do projeto:
 Arquivos locais de segredo esperados:
 
 ```txt
+.env
 firebase-key.json
 modules/*/api/.env.local
 modules/*/web/.env.local
 ```
 
 Esses arquivos devem existir apenas no ambiente local ou em secrets do provedor de deploy.
+
+## Variaveis e deploy
+
+O projeto usa dois tipos de variaveis:
+
+- `NEXT_PUBLIC_*`: variaveis publicas embutidas no bundle dos apps Next. Quando mudar uma delas, faca novo deploy na Vercel.
+- Variaveis backend-only: usadas nas APIs no Render, como `FIREBASE_KEY_PATH`, `FIREBASE_STORAGE_BUCKET` e `CORS_ORIGINS`.
+
+URLs atuais de producao:
+
+| Servico | URL |
+| --- | --- |
+| Platform Web | `https://recicleiros-platform-web.vercel.app` |
+| Platform API | `https://recicleiros-api-shell.onrender.com/api` |
+| Vox Web | `https://vox-observatory-web.vercel.app` |
+| Vox API | `https://recicleiros-api-vox.onrender.com` |
+| Coop Web | `https://coop-manager-web.vercel.app` |
+| Coop API | `https://recicleiros-api-coop.onrender.com/api` |
+
+Variaveis principais para Vercel Web:
+
+```txt
+NEXT_PUBLIC_FIREBASE_API_KEY
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+NEXT_PUBLIC_FIREBASE_PROJECT_ID
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+NEXT_PUBLIC_FIREBASE_APP_ID
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+NEXT_PUBLIC_PLATFORM_SHELL_WEB_URL
+NEXT_PUBLIC_PLATFORM_SHELL_API_URL
+NEXT_PUBLIC_VOX_OBSERVATORY_WEB_URL
+NEXT_PUBLIC_VOX_OBSERVATORY_API_URL
+NEXT_PUBLIC_COOP_MANAGER_WEB_URL
+NEXT_PUBLIC_COOP_MANAGER_API_URL
+```
+
+Variaveis principais para Render API:
+
+```txt
+CORS_ORIGINS
+FIREBASE_KEY_PATH
+FIREBASE_STORAGE_BUCKET
+GOOGLE_APPLICATION_CREDENTIALS
+NEXT_PUBLIC_PLATFORM_SHELL_WEB_URL
+NEXT_PUBLIC_PLATFORM_SHELL_API_URL
+NEXT_PUBLIC_VOX_OBSERVATORY_WEB_URL
+NEXT_PUBLIC_VOX_OBSERVATORY_API_URL
+NEXT_PUBLIC_COOP_MANAGER_WEB_URL
+NEXT_PUBLIC_COOP_MANAGER_API_URL
+```
+
+No Render, o `PORT` e injetado automaticamente. Nao fixe `PORT` em producao.
+
+Configuracao recomendada na Vercel:
+
+- Apps web: Framework Preset `Next.js`.
+- Root Directory do Coop Web: `modules/coop-manager/web`.
+- Root Directory do Vox Web: `modules/vox-observatory/web`.
+- Root Directory do Platform Web: `modules/platform-shell/web`.
+- Build Command pode ficar no padrao do pacote ou usar `pnpm build` dentro do root do app.
 
 ## Revisao atual do projeto
 
@@ -316,6 +418,9 @@ Estado positivo:
 - Primeira base de Design System compartilhado ja existe em `shared/design`.
 - Coop e Platform ja estao mais alinhados visualmente com tokens.
 - Vox esta funcional e e a base visual mais madura para evolucao fina.
+- Coop Manager ja possui fluxos operacionais para unidades, cooperados e cargos.
+- Coop Manager ja valida CPF, datas e disponibilidade de vagas por cargo no backend.
+- Variaveis locais de deploy foram documentadas em arquivo privado e `.env` esta ignorado pelo Git.
 
 Pontos de atencao:
 
@@ -324,6 +429,7 @@ Pontos de atencao:
 - Coop API tem mistura de estilos: algumas partes seguem Clean Architecture, outras ainda usam service/controller mais direto.
 - Vox API esta mais organizada em camadas, mas ainda precisa revisao fina de autorizacao por acao.
 - O template de novos modulos existe, mas ainda precisa ser atualizado para o padrao SSO + Design System atual.
+- A gestao de cargos do Coop esta funcional, mas ainda pode evoluir para historico de ocupacao, auditoria e movimentacoes.
 
 Melhorias recomendadas, em ordem:
 
@@ -332,8 +438,9 @@ Melhorias recomendadas, em ordem:
 3. Migrar telas internas restantes do Vox para os componentes/tokens compartilhados.
 4. Consolidar tabelas do Coop usando `shared/ui/table` ou `shared/ui/data-table`.
 5. Revisar RBAC por endpoint e criar testes de autorizacao.
-6. Atualizar `template-new-modules` para servir como scaffold oficial.
-7. Adicionar CI com `pnpm typecheck`, `pnpm build` e checagem de secrets.
+6. Evoluir Coop Manager com historico/auditoria para mudancas de cargo, unidade e status.
+7. Atualizar `template-new-modules` para servir como scaffold oficial.
+8. Adicionar CI com `pnpm typecheck`, `pnpm build` e checagem de secrets.
 
 ## Checklist para novas alteracoes
 

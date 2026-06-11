@@ -1,71 +1,109 @@
-# Módulo Coop-Manager (Web Frontend)
+# Coop Manager Web
 
-Currently, two official plugins are available:
+Frontend Next.js do modulo Coop Manager.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Este app faz parte do monorepo Recicleiros Platform e deve ser acessado pelo fluxo de SSO do `platform-shell`. Ele nao possui login proprio.
 
-## React Compiler
+## Responsabilidades
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Dashboard operacional do modulo de cooperados.
+- Cadastro e manutencao de cooperados.
+- Cadastro e manutencao de unidades.
+- Cadastro e manutencao de cargos e limites de vagas.
+- Exibicao de vagas disponiveis por cargo ao cadastrar ou editar cooperado.
+- Consumo do token central `platform-token` via `shared/auth`.
 
-## Expanding the ESLint configuration
+## Rodando localmente
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Na raiz do monorepo:
 
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+pnpm install
+pnpm dev:coop:web
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+O app roda em:
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
-
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```txt
+http://localhost:3005
 ```
+
+Para o fluxo completo, rode tambem:
+
+```bash
+pnpm dev:platform
+pnpm dev:coop:api
+```
+
+## Variaveis de ambiente
+
+Arquivo local recomendado:
+
+```txt
+modules/coop-manager/web/.env.local
+```
+
+Variaveis principais:
+
+```txt
+NEXT_PUBLIC_COOP_MANAGER_WEB_URL=http://localhost:3005
+NEXT_PUBLIC_COOP_MANAGER_API_URL=http://localhost:3004/api
+NEXT_PUBLIC_PLATFORM_SHELL_WEB_URL=http://localhost:3001
+
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
+```
+
+Em producao, essas variaveis devem ser configuradas na Vercel. Toda alteracao em `NEXT_PUBLIC_*` exige novo deploy.
+
+## Build
+
+```bash
+pnpm --filter=coop-manager-web build
+```
+
+## Deploy na Vercel
+
+Configuracao recomendada:
+
+- Framework Preset: `Next.js`
+- Root Directory: `modules/coop-manager/web`
+- Install Command: `pnpm install`
+- Build Command: `pnpm build`
+- Node.js: 20.x ou versao suportada pelo projeto
+
+URL atual de producao:
+
+```txt
+https://coop-manager-web.vercel.app
+```
+
+## Padroes obrigatorios
+
+- Autenticacao via `shared/auth`.
+- Layout protegido por `PrivateRoute`.
+- URLs vindas de `shared/constants/modules`.
+- Componentes preferencialmente vindos de `shared/ui`.
+- Tokens de tema vindos de `shared/design`.
+- Sem `AuthContext`, `useAuth`, `AuthProvider` ou `PrivateRoute` locais.
+
+## API esperada
+
+O app consome a API do Coop Manager por:
+
+```txt
+NEXT_PUBLIC_COOP_MANAGER_API_URL
+```
+
+Rotas principais:
+
+- `/auth/me`
+- `/dashboard`
+- `/cooperados`
+- `/unidades`
+- `/cargos`
