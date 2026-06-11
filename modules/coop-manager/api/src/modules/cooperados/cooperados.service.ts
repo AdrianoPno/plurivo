@@ -17,6 +17,12 @@ interface AuthUser {
   unidadeId?: string;
 }
 
+function removeUndefinedValues<T extends Record<string, unknown>>(data: T): T {
+  return Object.fromEntries(
+    Object.entries(data).filter(([, value]) => value !== undefined),
+  ) as T;
+}
+
 export class CooperadosService {
   private collection = db.collection("cooperados");
   private cargosService = new CargosService();
@@ -61,12 +67,12 @@ export class CooperadosService {
       throw new AppError("Acesso negado. Permissão insuficiente.", 403);
     }
 
-    const newDoc: Omit<ICooperado, "id"> = {
+    const newDoc = removeUndefinedValues({
       ...data,
       unidadeId: unidadeIdParaCriacao,
       criadoEm: new Date(),
       atualizadoEm: new Date(),
-    };
+    }) as Omit<ICooperado, "id">;
 
     if (newDoc.status === "ATIVO") {
       await this.cargosService.assertCargoHasAvailableSlot(
@@ -113,10 +119,10 @@ export class CooperadosService {
       );
     }
 
-    await docRef.update({
+    await docRef.update(removeUndefinedValues({
       ...updateData,
       atualizadoEm: new Date(),
-    });
+    }));
   }
 
   async getById(id: string, user: AuthUser): Promise<ICooperado> {

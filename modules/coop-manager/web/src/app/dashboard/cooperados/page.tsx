@@ -82,6 +82,19 @@ interface CooperadoFormData {
 
 const today = new Date().toISOString().slice(0, 10);
 
+const onlyDigits = (value: string) => value.replace(/\D/g, "");
+
+const formatCpf = (value: string) => {
+  const digits = onlyDigits(value).slice(0, 11);
+
+  return digits
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
+};
+
+const normalizeText = (value: string) => value.trim().replace(/\s+/g, " ");
+
 const initialFormData: CooperadoFormData = {
   ID_COOPERADO: "",
   nome: "",
@@ -194,6 +207,11 @@ export default function CooperadosPage() {
   function buildPayload() {
     const payload: Record<string, unknown> = {
       ...formData,
+      ID_COOPERADO: normalizeText(formData.ID_COOPERADO),
+      nome: normalizeText(formData.nome),
+      cpf: onlyDigits(formData.cpf),
+      etnia: normalizeText(formData.etnia),
+      escolaridade: normalizeText(formData.escolaridade),
       dataSaida: formData.dataSaida || null,
     };
 
@@ -322,7 +340,7 @@ export default function CooperadosPage() {
                 cooperados.map((item) => (
                   <tr key={item.id} className="border-t border-border">
                     <td className="px-6 py-4 font-medium">{item.nome}</td>
-                    <td className="px-6 py-4">{item.cpf}</td>
+                    <td className="px-6 py-4">{formatCpf(item.cpf)}</td>
                     <td className="px-6 py-4">{item.cargo}</td>
                     <td className="px-6 py-4">
                       {item.unidadeId
@@ -403,6 +421,12 @@ export default function CooperadosPage() {
                       nome: event.target.value,
                     }))
                   }
+                  onBlur={() =>
+                    setFormData((current) => ({
+                      ...current,
+                      nome: normalizeText(current.nome),
+                    }))
+                  }
                   required
                 />
               </Field>
@@ -413,9 +437,12 @@ export default function CooperadosPage() {
                   onChange={(event) =>
                     setFormData((current) => ({
                       ...current,
-                      cpf: event.target.value,
+                      cpf: formatCpf(event.target.value),
                     }))
                   }
+                  inputMode="numeric"
+                  maxLength={14}
+                  placeholder="000.000.000-00"
                   required
                 />
               </Field>
