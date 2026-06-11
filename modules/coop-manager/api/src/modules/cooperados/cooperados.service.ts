@@ -22,9 +22,9 @@ export class CooperadosService {
     let query: FirebaseFirestore.Query = this.collection;
 
     // Multi-tenant: ADMIN vê apenas o seu. SUPER vê tudo.
-    if (user.role === "ADMIN") {
+    if (user.role !== "SUPER") {
       if (!user.unidadeId) {
-        throw new AppError("Usuário admin sem unidade associada.", 400);
+        throw new AppError("Usuario sem unidade associada.", 400);
       }
       query = query.where("unidadeId", "==", user.unidadeId);
     }
@@ -48,11 +48,11 @@ export class CooperadosService {
           400,
         );
       }
-    } else if (user.role === "ADMIN") {
+    } else if (user.role === "ADMIN" || user.role === "USER") {
       // Para ADMIN, a unidadeId é extraída do seu token.
       unidadeIdParaCriacao = user.unidadeId;
       if (!unidadeIdParaCriacao) {
-        throw new AppError("Usuário admin sem unidade associada.", 400);
+        throw new AppError("Usuario sem unidade associada.", 400);
       }
     } else {
       throw new AppError("Acesso negado. Permissão insuficiente.", 403);
@@ -80,7 +80,7 @@ export class CooperadosService {
     if (!doc.exists) throw new AppError("Cooperado não encontrado.", 404);
 
     // Bloqueio Multi-tenant
-    if (user.role === "ADMIN" && doc.data()?.unidadeId !== user.unidadeId) {
+    if (user.role !== "SUPER" && doc.data()?.unidadeId !== user.unidadeId) {
       throw new AppError("Acesso negado: registro de outra unidade.", 403);
     }
 
@@ -96,7 +96,7 @@ export class CooperadosService {
 
     const cooperadoData = doc.data();
 
-    if (user.role === "ADMIN" && cooperadoData?.unidadeId !== user.unidadeId) {
+    if (user.role !== "SUPER" && cooperadoData?.unidadeId !== user.unidadeId) {
       throw new AppError("Cooperado não encontrado nesta unidade.", 404);
     }
 
@@ -109,7 +109,7 @@ export class CooperadosService {
 
     if (!doc.exists) throw new AppError("Cooperado não encontrado.", 404);
 
-    if (user.role === "ADMIN" && doc.data()?.unidadeId !== user.unidadeId) {
+    if (user.role !== "SUPER" && doc.data()?.unidadeId !== user.unidadeId) {
       throw new AppError("Acesso negado.", 403);
     }
 

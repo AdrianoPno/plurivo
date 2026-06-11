@@ -33,7 +33,7 @@ export default async function cooperadosRoutes(
         summary: "Lista todos os cooperados",
         tags: ["Cooperados"],
       },
-      preHandler: [app.checkRoles(["SUPER", "ADMIN"])],
+      preHandler: [app.checkRoles(["SUPER", "ADMIN", "USER", "VIEWER"])],
     },
     (req, reply) => controller.index(req, reply),
   );
@@ -46,7 +46,7 @@ export default async function cooperadosRoutes(
         summary: "Busca um cooperado por ID",
         tags: ["Cooperados"],
       },
-      preHandler: [app.checkRoles(["SUPER", "ADMIN"])],
+      preHandler: [app.checkRoles(["SUPER", "ADMIN", "USER", "VIEWER"])],
     },
     (req, reply) => controller.show(req, reply),
   );
@@ -59,7 +59,7 @@ export default async function cooperadosRoutes(
         summary: "Cria um novo cooperado",
         tags: ["Cooperados"],
       },
-      preHandler: [app.checkRoles(["SUPER", "ADMIN"])],
+      preHandler: [app.checkRoles(["SUPER", "ADMIN", "USER"])],
     },
     (req, reply) => controller.store(req, reply),
   );
@@ -72,7 +72,7 @@ export default async function cooperadosRoutes(
         summary: "Atualiza um cooperado",
         tags: ["Cooperados"],
       },
-      preHandler: [app.checkRoles(["SUPER", "ADMIN"])],
+      preHandler: [app.checkRoles(["SUPER", "ADMIN", "USER"])],
     },
     (req, reply) => controller.update(req, reply),
   );

@@ -39,7 +39,7 @@ export default async function unidadesRoutes(
         summary: "Lista todas as unidades",
         tags: ["Unidades"],
       },
-      preHandler: [app.checkRoles(["SUPER", "ADMIN"])],
+      preHandler: [app.checkRoles(["SUPER", "ADMIN", "USER", "VIEWER"])],
     },
     (req, reply) => controller.index(req, reply),
   );
@@ -52,7 +52,7 @@ export default async function unidadesRoutes(
         summary: "Detalha uma unidade",
         tags: ["Unidades"],
       },
-      preHandler: [app.checkRoles(["SUPER", "ADMIN"])],
+      preHandler: [app.checkRoles(["SUPER", "ADMIN", "USER", "VIEWER"])],
     },
     (req, reply) => controller.show(req, reply),
   );
@@ -70,5 +70,29 @@ export default async function unidadesRoutes(
     (req, reply) => controller.store(req, reply),
   );
 
-  // ... Repetir o padrão para PATCH e DELETE
+  typedApp.put(
+    "/:id",
+    {
+      schema: {
+        ...updateUnidadeSchema,
+        summary: "Atualiza uma unidade",
+        tags: ["Unidades"],
+      },
+      preHandler: [app.checkRoles(["SUPER"])],
+    },
+    (req, reply) => controller.update(req, reply),
+  );
+
+  typedApp.delete(
+    "/:id",
+    {
+      schema: {
+        ...deleteUnidadeSchema,
+        summary: "Exclui uma unidade",
+        tags: ["Unidades"],
+      },
+      preHandler: [app.checkRoles(["SUPER"])],
+    },
+    (req, reply) => controller.delete(req, reply),
+  );
 }
