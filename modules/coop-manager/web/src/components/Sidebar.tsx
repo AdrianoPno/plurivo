@@ -5,6 +5,7 @@ import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import {
   Building2,
+  BriefcaseBusiness,
   LayoutGrid,
   LogOut,
   Settings,
@@ -25,6 +26,7 @@ type NavigationItem = {
 const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
   { name: "Cooperados", href: "/dashboard/cooperados", icon: Users },
+  { name: "Cargos", href: "/dashboard/cooperados/cargos", icon: BriefcaseBusiness },
   { name: "Unidades", href: "/dashboard/unidades", icon: Building2 },
   { name: "Usuarios", href: "/dashboard/usuarios", icon: Settings },
 ];

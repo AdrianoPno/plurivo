@@ -1,11 +1,13 @@
 import { firestore as db } from "@shared/firebase/admin.js";
 import { AppError } from "@shared/utils/app-error.js";
-import { UserRole, ModulePermission } from "@shared/types/user";
+
+import { CargosService } from "../cargos/cargos.service.js";
+import { UserRole, ModulePermission } from "@shared/types/user.js";
 import {
   ICooperado,
   ICreateCooperadoDTO,
   IUpdateCooperadoDTO,
-} from "./cooperado.types";
+} from "./cooperado.types.js";
 
 // Alinhado com o que discutimos para o Auth
 interface AuthUser {
@@ -17,6 +19,7 @@ interface AuthUser {
 
 export class CooperadosService {
   private collection = db.collection("cooperados");
+  private cargosService = new CargosService();
 
   async list(user: AuthUser): Promise<ICooperado[]> {
     let query: FirebaseFirestore.Query = this.collection;
@@ -65,6 +68,13 @@ export class CooperadosService {
       atualizadoEm: new Date(),
     };
 
+    if (newDoc.status === "ATIVO") {
+      await this.cargosService.assertCargoHasAvailableSlot(
+        newDoc.cargo,
+        unidadeIdParaCriacao,
+      );
+    }
+
     const docRef = await this.collection.add(newDoc);
     return docRef.id;
   }
@@ -84,8 +94,27 @@ export class CooperadosService {
       throw new AppError("Acesso negado: registro de outra unidade.", 403);
     }
 
+    const currentData = doc.data() as ICooperado;
+    const updateData = { ...data };
+
+    if (user.role !== "SUPER") {
+      delete updateData.unidadeId;
+    }
+
+    const nextCargo = updateData.cargo ?? currentData.cargo;
+    const nextStatus = updateData.status ?? currentData.status;
+    const nextUnidadeId = updateData.unidadeId ?? currentData.unidadeId;
+
+    if (nextStatus === "ATIVO") {
+      await this.cargosService.assertCargoHasAvailableSlot(
+        nextCargo,
+        nextUnidadeId,
+        id,
+      );
+    }
+
     await docRef.update({
-      ...data,
+      ...updateData,
       atualizadoEm: new Date(),
     });
   }

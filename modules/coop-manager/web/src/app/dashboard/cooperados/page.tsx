@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
-import { Edit, Plus, Trash2 } from "lucide-react";
+import { BriefcaseBusiness, Edit, Plus, Trash2 } from "lucide-react";
 
 import api from "@/lib/api";
 import { useAuth } from "@shared/auth";
@@ -54,6 +55,15 @@ interface Unidade {
   status: "ATIVO" | "INATIVO";
 }
 
+interface Cargo {
+  id: string;
+  nome: string;
+  limiteVagas: number;
+  ocupadas: number;
+  disponiveis: number;
+  ativo: boolean;
+}
+
 interface CooperadoFormData {
   ID_COOPERADO: string;
   nome: string;
@@ -92,6 +102,7 @@ export default function CooperadosPage() {
   const { user } = useAuth();
   const [cooperados, setCooperados] = useState<Cooperado[]>([]);
   const [unidades, setUnidades] = useState<Unidade[]>([]);
+  const [cargos, setCargos] = useState<Cargo[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -117,17 +128,27 @@ export default function CooperadosPage() {
     [unidades],
   );
 
+  async function loadCargos(unidadeId?: string) {
+    const response = await api.get<{ data: Cargo[] }>("/cargos", {
+      params: unidadeId ? { unidadeId } : undefined,
+    });
+    setCargos(response.data.data || []);
+  }
+
   async function loadData() {
     setLoading(true);
 
     try {
-      const [cooperadosResponse, unidadesResponse] = await Promise.all([
+      const [cooperadosResponse, unidadesResponse, cargosResponse] =
+        await Promise.all([
         api.get<{ data: Cooperado[] }>("/cooperados"),
         api.get<{ data: Unidade[] }>("/unidades"),
+        api.get<{ data: Cargo[] }>("/cargos"),
       ]);
 
       setCooperados(cooperadosResponse.data.data || []);
       setUnidades(unidadesResponse.data.data || []);
+      setCargos(cargosResponse.data.data || []);
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || "Falha ao carregar cooperados.",
@@ -145,6 +166,7 @@ export default function CooperadosPage() {
   function openCreateDialog() {
     setEditingCooperado(null);
     setFormData(initialFormData);
+    loadCargos().catch(() => undefined);
     setDialogOpen(true);
   }
 
@@ -165,6 +187,7 @@ export default function CooperadosPage() {
       dataSaida: cooperado.dataSaida || "",
       unidadeId: cooperado.unidadeId || "",
     });
+    loadCargos(cooperado.unidadeId).catch(() => undefined);
     setDialogOpen(true);
   }
 
@@ -245,12 +268,21 @@ export default function CooperadosPage() {
             </p>
           </div>
 
-          {canWrite && (
-            <Button onClick={openCreateDialog}>
-              <Plus className="mr-2 size-4" />
-              Adicionar cooperado
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline">
+              <Link href="/dashboard/cooperados/cargos">
+                <BriefcaseBusiness className="mr-2 size-4" />
+                Cargos
+              </Link>
             </Button>
-          )}
+
+            {canWrite && (
+              <Button onClick={openCreateDialog}>
+                <Plus className="mr-2 size-4" />
+                Adicionar cooperado
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -450,16 +482,37 @@ export default function CooperadosPage() {
               </Field>
 
               <Field label="Cargo ou funcao">
-                <Input
+                <Select
                   value={formData.cargo}
-                  onChange={(event) =>
+                  onValueChange={(value) =>
                     setFormData((current) => ({
                       ...current,
-                      cargo: event.target.value,
+                      cargo: value,
                     }))
                   }
-                  required
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o cargo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cargos.map((cargo) => {
+                      const isCurrent = editingCooperado?.cargo === cargo.nome;
+                      const disabled =
+                        cargo.ativo === false ||
+                        (cargo.disponiveis <= 0 && !isCurrent);
+
+                      return (
+                        <SelectItem
+                          key={cargo.id}
+                          value={cargo.nome}
+                          disabled={disabled}
+                        >
+                          {cargo.nome} - {cargo.disponiveis}/{cargo.limiteVagas} vagas
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
               </Field>
 
               <Field label="Tipo de vinculo">
@@ -534,12 +587,14 @@ export default function CooperadosPage() {
                 <Field label="Unidade">
                   <Select
                     value={formData.unidadeId}
-                    onValueChange={(value) =>
+                    onValueChange={(value) => {
                       setFormData((current) => ({
                         ...current,
                         unidadeId: value,
-                      }))
-                    }
+                        cargo: "",
+                      }));
+                      loadCargos(value).catch(() => undefined);
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione a unidade" />
