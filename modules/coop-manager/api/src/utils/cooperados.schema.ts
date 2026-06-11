@@ -39,45 +39,55 @@ const isValidCpf = (value: string) => {
   return digit1 === Number(cpf[9]) && digit2 === Number(cpf[10]);
 };
 
-const cooperadoBodyBase = z
-  .object({
-    ID_COOPERADO: requiredText("Matricula e obrigatoria."),
-    nome: requiredText("Nome e obrigatorio.").pipe(
-      z.string().min(2, "Nome deve ter pelo menos 2 caracteres."),
-    ),
-    cpf: z
-      .string()
-      .transform(onlyDigits)
-      .pipe(z.string().length(11, "CPF deve ter 11 digitos."))
-      .refine(isValidCpf, "CPF invalido."),
-    dataNascimento: dateSchema,
-    sexo: z.enum(["Masculino", "Feminino", "Outro"]),
-    etnia: requiredText("Etnia e obrigatoria."),
-    escolaridade: requiredText("Escolaridade e obrigatoria."),
-    cargo: requiredText("O cargo/funcao e obrigatorio."),
-    tipoVinculo: z.enum(["COOP", "RPA"]),
-    status: z.enum(["ATIVO", "INATIVO", "PENDENTE"]),
-    dataEntrada: dateSchema,
-    dataSaida: dateSchema.nullable().optional(),
-    unidadeId: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.dataSaida && data.dataSaida < data.dataEntrada) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["dataSaida"],
-        message: "Data de saida nao pode ser anterior a data de entrada.",
-      });
-    }
-  });
+const cooperadoObjectSchema = z.object({
+  ID_COOPERADO: requiredText("Matricula e obrigatoria."),
+  nome: requiredText("Nome e obrigatorio.").pipe(
+    z.string().min(2, "Nome deve ter pelo menos 2 caracteres."),
+  ),
+  cpf: z
+    .string()
+    .transform(onlyDigits)
+    .pipe(z.string().length(11, "CPF deve ter 11 digitos."))
+    .refine(isValidCpf, "CPF invalido."),
+  dataNascimento: dateSchema,
+  sexo: z.enum(["Masculino", "Feminino", "Outro"]),
+  etnia: requiredText("Etnia e obrigatoria."),
+  escolaridade: requiredText("Escolaridade e obrigatoria."),
+  cargo: requiredText("O cargo/funcao e obrigatorio."),
+  tipoVinculo: z.enum(["COOP", "RPA"]),
+  status: z.enum(["ATIVO", "INATIVO", "PENDENTE"]),
+  dataEntrada: dateSchema,
+  dataSaida: dateSchema.nullable().optional(),
+  unidadeId: z.string().optional(),
+});
+
+const validateCooperadoDates = (
+  data: { dataEntrada?: string; dataSaida?: string | null },
+  ctx: z.RefinementCtx,
+) => {
+  if (data.dataEntrada && data.dataSaida && data.dataSaida < data.dataEntrada) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["dataSaida"],
+      message: "Data de saida nao pode ser anterior a data de entrada.",
+    });
+  }
+};
+
+const createCooperadoBodySchema =
+  cooperadoObjectSchema.superRefine(validateCooperadoDates);
+
+const updateCooperadoBodySchema = cooperadoObjectSchema
+  .partial()
+  .superRefine(validateCooperadoDates);
 
 export const createCooperadoSchema = {
-  body: cooperadoBodyBase,
+  body: createCooperadoBodySchema,
 };
 
 export const updateCooperadoSchema = {
   params,
-  body: cooperadoBodyBase.partial(),
+  body: updateCooperadoBodySchema,
 };
 
 export const getCooperadoSchema = {
