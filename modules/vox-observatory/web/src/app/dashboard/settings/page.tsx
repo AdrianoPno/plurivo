@@ -1,33 +1,84 @@
-import { Settings } from "lucide-react";
+"use client";
 
-import { ProfileForm } from "./profile-form";
+import { BarChart3, BotMessageSquare, Library } from "lucide-react";
+
+import { useAuth } from "@shared/auth";
+import { MODULE_IDS, MODULE_URLS } from "@shared/constants/modules";
+import { ModuleSettingsPage } from "@shared/ui/module-settings-page";
+
+const permissionCapabilities = {
+  SUPER: [
+    "Acessar todos os modulos e telas da plataforma.",
+    "Gerenciar usuarios, permissoes e acessos pela Platform.",
+    "Visualizar e operar todas as pesquisas do Vox.",
+  ],
+  ADMIN: [
+    "Criar, editar e acompanhar pesquisas.",
+    "Visualizar analytics e indicadores do observatorio.",
+    "Acessar configuracoes operacionais do Vox.",
+  ],
+  USER: [
+    "Acessar pesquisas permitidas para sua conta.",
+    "Acompanhar informacoes operacionais do modulo.",
+    "Usar recursos liberados pelo administrador.",
+  ],
+  VIEWER: [
+    "Visualizar biblioteca e dados liberados.",
+    "Consultar analytics quando permitido.",
+    "Sem permissao para criar, editar ou excluir registros.",
+  ],
+};
+
+const preferences = [
+  {
+    label: "Pagina inicial",
+    value: "Biblioteca de pesquisas",
+  },
+  {
+    label: "Densidade visual",
+    value: "Confortavel",
+  },
+  {
+    label: "Analises",
+    value: "Indicadores consolidados do observatorio",
+  },
+];
+
+const adminActions = [
+  {
+    label: "Biblioteca",
+    href: "/dashboard",
+    description: "Consultar e organizar as pesquisas disponiveis.",
+    icon: Library,
+  },
+  {
+    label: "Analytics",
+    href: "/dashboard/analytics",
+    description: "Acompanhar indicadores e distribuicoes das pesquisas.",
+    icon: BarChart3,
+  },
+];
 
 export default function SettingsPage() {
+  const { user } = useAuth();
+  const voxApiUrl =
+    process.env.NEXT_PUBLIC_VOX_OBSERVATORY_API_URL ||
+    MODULE_URLS.voxObservatory.api;
+
   return (
-    <main className="space-y-8 p-6 md:p-10">
-      <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[hsl(var(--primary))] p-8 text-white shadow-2xl shadow-black/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_35%)]" />
-
-        <div className="relative z-10 max-w-2xl space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-sm backdrop-blur-sm">
-            <Settings className="size-4" />
-            Configurações
-          </div>
-
-          <div className="space-y-3">
-            <h1 className="text-4xl font-bold tracking-tight">
-              Preferências da conta
-            </h1>
-
-            <p className="text-base leading-relaxed text-white/75">
-              Gerencie seu perfil, permissões e preferências de uso do Vox
-              Observatory.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <ProfileForm />
+    <main className="p-6 md:p-10">
+      <ModuleSettingsPage
+        user={user}
+        moduleId={MODULE_IDS.VOX_OBSERVATORY}
+        moduleName="Vox Observatory"
+        moduleDescription="Preferencias, permissoes e informacoes de suporte do observatorio de pesquisas."
+        moduleIcon={BotMessageSquare}
+        moduleApiUrl={voxApiUrl}
+        accessDescription="Veja qual e o seu nivel de acesso dentro do Vox e quais acoes estao liberadas para sua conta."
+        permissionCapabilities={permissionCapabilities}
+        preferences={preferences}
+        adminActions={adminActions}
+      />
     </main>
   );
 }

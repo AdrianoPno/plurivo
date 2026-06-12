@@ -9,6 +9,7 @@ import {
   LayoutGrid,
   LogOut,
   Settings,
+  UserCog,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -19,16 +20,21 @@ import { cn } from "@shared/utils/cn";
 
 type NavigationItem = {
   name: string;
-  href: Route;
+  href: string;
   icon: LucideIcon;
 };
 
 const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
   { name: "Cooperados", href: "/dashboard/cooperados", icon: Users },
-  { name: "Cargos", href: "/dashboard/cooperados/cargos", icon: BriefcaseBusiness },
+  {
+    name: "Cargos",
+    href: "/dashboard/cooperados/cargos",
+    icon: BriefcaseBusiness,
+  },
   { name: "Unidades", href: "/dashboard/unidades", icon: Building2 },
-  { name: "Usuarios", href: "/dashboard/usuarios", icon: Settings },
+  { name: "Usuarios", href: "/dashboard/usuarios", icon: UserCog },
+  { name: "Configuracoes", href: "/dashboard/settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -71,7 +77,7 @@ export function Sidebar() {
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
+                  href={item.href as Route}
                   className={cn(
                     "group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-all duration-200",
                     isActive
