@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Building2,
+  KeyRound,
   LogOut,
   ShieldCheck,
   Sparkles,
@@ -141,6 +142,13 @@ function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button asChild variant="outline">
+              <Link href="/account">
+                <KeyRound className="mr-2 h-4 w-4" />
+                Minha conta
+              </Link>
+            </Button>
+
             {(user?.role === "SUPER" || user?.role === "ADMIN") && (
               <Button asChild variant="outline">
                 <Link href="/users">
