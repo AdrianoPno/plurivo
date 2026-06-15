@@ -40,7 +40,20 @@ export const statusOptions = [
   { value: "pausada", label: "Pausada" },
 ] as const;
 
-const numberField = (message: string) => z.coerce.number().nonnegative(message);
+const currencyField = (message: string) =>
+  z.preprocess((value) => {
+    if (typeof value === "string") {
+      const normalizedValue = value.trim().replace(",", ".");
+
+      if (!normalizedValue) {
+        return 0;
+      }
+
+      return Number(normalizedValue);
+    }
+
+    return value;
+  }, z.number().nonnegative(message));
 
 const formSchema = z
   .object({
@@ -71,9 +84,9 @@ const formSchema = z
 
     location: z.string().min(1, "A localização é obrigatória."),
 
-    estimatedCost: numberField("O custo estimado deve ser positivo."),
+    estimatedCost: currencyField("O custo estimado deve ser positivo."),
 
-    actualCost: numberField("O custo real deve ser positivo."),
+    actualCost: currencyField("O custo real deve ser positivo."),
 
     tags: z.string().min(1, "Adicione pelo menos uma tag."),
 
@@ -128,8 +141,8 @@ const defaultValues: FormValues = {
   actualEndDate: "",
   targetAudience: "",
   location: "",
-  estimatedCost: 0,
-  actualCost: 0,
+  estimatedCost: "",
+  actualCost: "",
   tags: "",
   insights: "",
   artifacts: [],
@@ -182,8 +195,8 @@ export function CreateResearchForm({
         actualEndDate: formatDateToInputValue(initialData.actualEndDate),
         targetAudience: initialData.targetAudience ?? "",
         location: initialData.location ?? "",
-        estimatedCost: initialData.estimatedCost ?? 0,
-        actualCost: initialData.actualCost ?? 0,
+        estimatedCost: String(initialData.estimatedCost ?? ""),
+        actualCost: String(initialData.actualCost ?? ""),
         tags: initialData.tags?.join(", ") ?? "",
         insights: initialData.insights ?? "",
         artifacts: initialData.artifacts ?? [],
@@ -240,7 +253,7 @@ export function CreateResearchForm({
       location: values.location,
       estimatedCost: values.estimatedCost,
       actualCost: values.actualCost,
-      insights: values.insights?.trim() || undefined,
+      ...(values.insights?.trim() ? { insights: values.insights.trim() } : {}),
       tags: values.tags
         .split(",")
         .map((tag) => tag.trim())

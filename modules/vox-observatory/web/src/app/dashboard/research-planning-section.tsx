@@ -132,24 +132,21 @@ export function ResearchPlanningSection({
               <FormLabel>Custo estimado (R$)</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   placeholder="0,00"
                   disabled={isDisabled}
-                  value={field.value ?? ""}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    // allow empty string for clearing the input
-                    if (v === "") {
-                      field.onChange(undefined);
-                      return;
+                  value={String(field.value ?? "")}
+                  onChange={(event) => {
+                    const value = event.target.value;
+
+                    if (/^\d*([,.]\d{0,2})?$/.test(value)) {
+                      field.onChange(value);
                     }
-                    const num = Number(v);
-                    field.onChange(Number.isNaN(num) ? undefined : num);
                   }}
                   onBlur={field.onBlur}
                   name={field.name}
+                  ref={field.ref}
                 />
               </FormControl>
               <FormMessage />

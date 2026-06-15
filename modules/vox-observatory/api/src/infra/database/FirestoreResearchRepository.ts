@@ -40,6 +40,42 @@ export class FirestoreResearchRepository implements ResearchRepository {
       .replace(/[\u0300-\u036f]/g, "");
   }
 
+  private removeUndefinedValues<T extends Record<string, unknown>>(data: T) {
+    return Object.fromEntries(
+      Object.entries(data)
+        .filter(([, value]) => value !== undefined)
+        .map(([key, value]) => {
+          if (Array.isArray(value)) {
+            return [
+              key,
+              value.map((item) =>
+                item &&
+                typeof item === "object" &&
+                !(item instanceof Date) &&
+                !(item instanceof Timestamp)
+                  ? this.removeUndefinedValues(item as Record<string, unknown>)
+                  : item,
+              ),
+            ];
+          }
+
+          if (
+            value &&
+            typeof value === "object" &&
+            !(value instanceof Date) &&
+            !(value instanceof Timestamp)
+          ) {
+            return [
+              key,
+              this.removeUndefinedValues(value as Record<string, unknown>),
+            ];
+          }
+
+          return [key, value];
+        }),
+    ) as Partial<T>;
+  }
+
   async save(research: Research): Promise<Research> {
     const data = this.mapToDatabase(research.props);
 
@@ -169,7 +205,7 @@ export class FirestoreResearchRepository implements ResearchRepository {
         : null;
     }
 
-    await docRef.update(dataToUpdate);
+    await docRef.update(this.removeUndefinedValues(dataToUpdate));
   }
 
   async delete(id: string): Promise<void> {
@@ -183,7 +219,7 @@ export class FirestoreResearchRepository implements ResearchRepository {
   }
 
   private mapToDatabase(props: ResearchProps) {
-    return {
+    return this.removeUndefinedValues({
       ...props,
       titleNormalized: this.normalizeString(props.title),
       startDate: Timestamp.fromDate(props.startDate),
@@ -195,7 +231,7 @@ export class FirestoreResearchRepository implements ResearchRepository {
         ? Timestamp.fromDate(props.createdAt)
         : Timestamp.now(),
       updatedAt: Timestamp.now(), // Ensure updatedAt is always set on creation/save
-    };
+    });
   }
 
   private mapFromDatabase(data: FirestoreResearchData): ResearchProps {
