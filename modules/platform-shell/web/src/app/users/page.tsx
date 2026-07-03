@@ -26,10 +26,28 @@ function UsersPageContent() {
   const [editingUser, setEditingUser] = useState<IUser | null>(null);
 
   const { data: usersList = [], isLoading } = useQuery({
-    queryKey: ["users", user?.unidadeId],
+    queryKey: ["users", user?.tenantId, user?.unidadeId],
     queryFn: apiClient.getUsers,
     enabled: !!user,
   });
+
+  const { data: allTenants = [] } = useQuery({
+    queryKey: ["tenants"],
+    queryFn: apiClient.getTenants,
+    enabled: user?.role === "SUPER",
+  });
+
+  const { data: currentTenant = null } = useQuery({
+    queryKey: ["tenant", "current"],
+    queryFn: apiClient.getCurrentTenant,
+    enabled: !!user && user.role !== "SUPER",
+  });
+
+  const tenants = user?.role === "SUPER"
+    ? allTenants
+    : currentTenant
+      ? [currentTenant]
+      : [];
 
   const deleteMutation = useMutation({
     mutationFn: apiClient.deleteUser,
@@ -100,7 +118,7 @@ function UsersPageContent() {
   const columns = getColumns({
     onEdit: handleOpenForm,
     onDelete: handleDeleteUser,
-  });
+  }, tenants);
 
   if (user?.role !== "SUPER" && user?.role !== "ADMIN") {
     return (
@@ -212,6 +230,9 @@ function UsersPageContent() {
           }
         }}
         initialData={editingUser}
+        tenants={tenants}
+        isSuper={user?.role === "SUPER"}
+        defaultTenantId={user?.tenantId}
         onSubmit={handleSubmitUser}
       />
     </main>

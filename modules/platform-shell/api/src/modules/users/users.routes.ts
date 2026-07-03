@@ -10,6 +10,7 @@ import { UsersController } from "./controllers/users.controller.js";
 import { CreateUserUseCase } from "./create-user.use-case.js";
 import { DeleteUserUseCase } from "./delete-user.use-case.js";
 import { FirestoreUserRepository } from "./repositories/firestore-user.repository.js";
+import { FirestoreTenantRepository } from "../tenants/firestore-tenant.repository.js";
 import { GetUserUseCase } from "./get-user.use-case.js";
 import { ListUsersUseCase } from "./list-users.use-case.js";
 import { UpdateUserUseCase } from "./update-user.use-case.js";
@@ -26,12 +27,13 @@ export default async function usersRoutes(app: FastifyInstance) {
   app.setSerializerCompiler(serializerCompiler);
 
   const userRepository = new FirestoreUserRepository();
+  const tenantRepository = new FirestoreTenantRepository();
 
   const controller = new UsersController(
     new ListUsersUseCase(userRepository),
     new GetUserUseCase(userRepository),
-    new CreateUserUseCase(userRepository),
-    new UpdateUserUseCase(userRepository),
+    new CreateUserUseCase(userRepository, tenantRepository),
+    new UpdateUserUseCase(userRepository, tenantRepository),
     new DeleteUserUseCase(userRepository),
   );
 

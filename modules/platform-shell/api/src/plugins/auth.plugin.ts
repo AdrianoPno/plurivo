@@ -43,6 +43,13 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
           });
         }
 
+        if (userData.role !== "SUPER" && !userData.tenantId) {
+          return reply.status(403).send({
+            success: false,
+            message: "Usuario sem organizacao vinculada.",
+          });
+        }
+
         if (userData.tenantId) {
           const tenantDoc = await firestore
             .collection("tenants")

@@ -1,40 +1,42 @@
 import { AppError } from "@shared/utils/app-error.js";
-import { UserRole } from "@shared/types/user.js";
+import type { UserRole } from "@shared/types/user.js";
 import { adminAuth } from "../../config/firebase.js";
-import { IUserRepository } from "./repositories/user.repository.js";
+import type { IUserRepository } from "./repositories/user.repository.js";
 
 interface AuthUser {
+  uid: string;
   role: UserRole;
+  tenantId?: string;
   unidadeId?: string;
 }
 
 export class DeleteUserUseCase {
-  constructor(private userRepository: IUserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(uid: string, currentUser: AuthUser): Promise<void> {
-    const userData = await this.userRepository.getById(uid);
+    if (uid === currentUser.uid) throw new AppError("Voce nao pode excluir sua propria conta.", 400);
 
-    if (!userData) {
-      throw new AppError("Usuário não encontrado.", 404);
-    }
+    const user = await this.userRepository.getById(uid);
+    if (!user) throw new AppError("Usuario nao encontrado.", 404);
 
-    if (
-      currentUser.role === "ADMIN" &&
-      userData.unidadeId !== currentUser.unidadeId
-    ) {
-      throw new AppError("Acesso negado.", 403);
+    if (currentUser.role !== "SUPER") {
+      if (!currentUser.tenantId || user.tenantId !== currentUser.tenantId) {
+        throw new AppError("Acesso negado: usuario de outra organizacao.", 403);
+      }
+      if (currentUser.unidadeId && user.unidadeId !== currentUser.unidadeId) {
+        throw new AppError("Acesso negado: usuario fora da sua unidade.", 403);
+      }
+      if (user.role === "SUPER" || user.role === "ADMIN") {
+        throw new AppError("Administrador nao pode excluir contas administrativas.", 403);
+      }
     }
 
     await this.userRepository.delete(uid);
-
     try {
       await adminAuth.deleteUser(uid);
-    } catch (error: any) {
-      if (error.code !== "auth/user-not-found") {
-        throw new AppError(
-          "Falha ao remover as credenciais de acesso do usuário.",
-          500,
-        );
+    } catch (error: unknown) {
+      if ((error as { code?: string }).code !== "auth/user-not-found") {
+        throw new AppError("Falha ao remover as credenciais do usuario.", 500);
       }
     }
   }

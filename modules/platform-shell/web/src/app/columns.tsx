@@ -4,6 +4,7 @@ import { MoreHorizontal } from "lucide-react";
 
 import { MODULE_CONFIGS } from "@shared/constants/modules";
 import type { IUser } from "@shared/types/user";
+import type { Tenant } from "@shared/types/tenant";
 import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
 import type { Column } from "@shared/ui/data-table";
@@ -48,6 +49,7 @@ function UserActions({ user, onEdit, onDelete }: UserActionsProps) {
 
 export const getColumns = (
   actions: Omit<UserActionsProps, "user">,
+  tenants: Tenant[] = [],
 ): Column<IUser>[] => [
   {
     key: "nome",
@@ -61,6 +63,14 @@ export const getColumns = (
     key: "role",
     title: "Permissao global",
     render: (_, user) => <Badge variant="outline">{user.role}</Badge>,
+  },
+  {
+    key: "tenantId",
+    title: "Organizacao",
+    render: (_, user) => {
+      if (user.role === "SUPER") return <Badge variant="outline">Plataforma</Badge>;
+      return tenants.find((tenant) => tenant.id === user.tenantId)?.branding.displayName || "Nao vinculada";
+    },
   },
   {
     key: "permissions",

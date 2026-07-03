@@ -12,6 +12,7 @@ export interface ICreateUserPayload {
   email: string;
   role: UserRole;
   password?: string;
+  tenantId?: string;
   unidadeId?: string;
   permissions: ModulePermission[];
 }

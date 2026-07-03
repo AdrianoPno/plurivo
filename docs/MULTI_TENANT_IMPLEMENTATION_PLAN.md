@@ -21,14 +21,14 @@ Transformar a plataforma em um produto SaaS no qual cada organizacao possui iden
 - [x] Expor rotas administrativas apenas para `SUPER`.
 - [x] Incluir `tenantId` no perfil autenticado e no contrato de usuario.
 - [x] Criar tela de administracao de organizacoes.
-- [ ] Associar administradores e usuarios a uma organizacao.
+- [x] Associar administradores e usuarios a uma organizacao.
 
 ## Fase 2 - Autorizacao e migracao
 
 - [ ] Criar tenant inicial para a instalacao existente.
 - [ ] Migrar usuarios existentes para esse tenant.
-- [ ] Exigir tenant para todo usuario que nao seja `SUPER`.
-- [ ] Impedir alteracao de tenant por administradores comuns.
+- [x] Exigir tenant para todo usuario que nao seja `SUPER`.
+- [x] Impedir alteracao de tenant por administradores comuns.
 - [x] Validar status do tenant durante a autenticacao.
 - [ ] Validar se o modulo solicitado esta ativo para o tenant.
 

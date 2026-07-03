@@ -6,14 +6,18 @@ export class FirestoreUserRepository implements IUserRepository {
   private collection = db.collection("users");
   private unidadesCollection = db.collection("unidades");
 
-  async list(unidadeId?: string): Promise<IUser[]> {
+  async list(scope?: { tenantId?: string; unidadeId?: string }): Promise<IUser[]> {
     let query: FirebaseFirestore.Query = this.collection;
 
-    if (unidadeId) {
-      query = query.where("unidadeId", "==", unidadeId);
+    if (scope?.tenantId) {
+      query = query.where("tenantId", "==", scope.tenantId);
     }
 
-    const snapshot = await query.orderBy("nome", "asc").get();
+    if (scope?.unidadeId) {
+      query = query.where("unidadeId", "==", scope.unidadeId);
+    }
+
+    const snapshot = await query.get();
 
     const unidadesSnapshot = await this.unidadesCollection.get();
     const unidadesMap = new Map(
@@ -30,7 +34,7 @@ export class FirestoreUserRepository implements IUserRepository {
           ? data.createdAt.toDate()
           : data?.createdAt,
       } as IUser;
-    });
+    }).sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
   }
 
   async getById(id: string): Promise<IUser | null> {
