@@ -23,6 +23,17 @@ export class TenantsController {
     return reply.send({ success: true, data: await this.getTenant.execute(request.params.id) });
   }
 
+  async current(request: FastifyRequest, reply: FastifyReply) {
+    if (!request.user.tenantId) {
+      return reply.send({ success: true, data: null });
+    }
+
+    return reply.send({
+      success: true,
+      data: await this.getTenant.execute(request.user.tenantId),
+    });
+  }
+
   async store(request: FastifyRequest<{ Body: CreateTenantInput }>, reply: FastifyReply) {
     const tenant = await this.createTenant.execute(request.body);
     return reply.status(201).send({ success: true, data: tenant });

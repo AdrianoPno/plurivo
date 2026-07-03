@@ -1,8 +1,15 @@
 import { MODULE_IDS } from "@shared/constants/modules.js";
+import { TENANT_THEME_PRESETS } from "@shared/design/tenant-themes.js";
 import { z } from "zod";
 
 const brandingSchema = z.object({
   displayName: z.string().trim().min(2).max(80),
+  themePreset: z.enum(
+    Object.keys(TENANT_THEME_PRESETS) as [
+      keyof typeof TENANT_THEME_PRESETS,
+      ...(keyof typeof TENANT_THEME_PRESETS)[],
+    ],
+  ),
   logoUrl: z.string().url().optional(),
   primaryColor: z
     .string()

@@ -8,6 +8,7 @@ import {
   KeyRound,
   LogOut,
   ShieldCheck,
+  Settings2,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -16,6 +17,7 @@ import { PrivateRoute } from "@shared/auth/private-route.js";
 import { useAuth } from "@shared/auth/auth-context.js";
 import { MODULE_CONFIGS } from "@shared/constants/modules";
 import type { ModuleConfig } from "@shared/constants/modules";
+import { useTenant } from "@shared/tenant";
 
 import {
   AppContainer,
@@ -92,6 +94,7 @@ function ModuleCard({
 
 function Dashboard() {
   const { user, token, logout } = useAuth();
+  const { tenant } = useTenant();
 
   const availableModules = useMemo(() => {
     if (!user) return [];
@@ -104,8 +107,12 @@ function Dashboard() {
       (permission) => permission.moduleId,
     );
 
-    return MODULE_CONFIGS.filter((module) => userModuleIds.includes(module.id));
-  }, [user]);
+    return MODULE_CONFIGS.filter(
+      (module) =>
+        userModuleIds.includes(module.id) &&
+        (!tenant || tenant.activeModules.includes(module.id)),
+    );
+  }, [tenant, user]);
 
   return (
     <AppShell>
@@ -118,7 +125,7 @@ function Dashboard() {
 
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Portal de Módulos
+                {tenant?.branding.displayName || "Portal de Modulos"}
               </h1>
 
               {user && (
@@ -158,6 +165,15 @@ function Dashboard() {
               </Button>
             )}
 
+            {user?.role === "SUPER" && (
+              <Button asChild variant="outline">
+                <Link href="/admin/organizations">
+                  <Settings2 className="mr-2 h-4 w-4" />
+                  Organizacoes
+                </Link>
+              </Button>
+            )}
+
             <Button onClick={logout} variant="destructive">
               <LogOut className="mr-2 h-4 w-4" />
               Sair
@@ -182,7 +198,7 @@ function Dashboard() {
 
             <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
               Acesse rapidamente os módulos disponíveis para sua conta e
-              continue sua operação dentro da plataforma Recicleiros.
+              continue sua operacao dentro de uma plataforma segura e integrada.
             </p>
           </div>
 

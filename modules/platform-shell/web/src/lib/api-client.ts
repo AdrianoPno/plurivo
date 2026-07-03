@@ -1,6 +1,11 @@
 import { MODULE_URLS } from "@shared/constants/modules";
 import type { IUser, ModulePermission, UserRole } from "@shared/types/user.js";
 import { AppError } from "@shared/utils/app-error.js";
+import type {
+  CreateTenantInput,
+  Tenant,
+  UpdateTenantInput,
+} from "@shared/types/tenant.js";
 
 export interface ICreateUserPayload {
   nome: string;
@@ -98,4 +103,44 @@ export const deleteUser = async (id: string): Promise<void> => {
   });
 
   return handleResponse(response);
+};
+
+export const getTenants = async (): Promise<Tenant[]> => {
+  const response = await fetch(`${getApiUrl()}/tenants`, {
+    headers: getHeaders(),
+  });
+  return handleResponse<Tenant[]>(response);
+};
+
+export const getCurrentTenant = async (): Promise<Tenant | null> => {
+  const response = await fetch(`${getApiUrl()}/tenants/current`, {
+    headers: getHeaders(),
+  });
+  return handleResponse<Tenant | null>(response);
+};
+
+export const createTenant = async (
+  data: CreateTenantInput,
+): Promise<Tenant> => {
+  const response = await fetch(`${getApiUrl()}/tenants`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  return handleResponse<Tenant>(response);
+};
+
+export const updateTenant = async ({
+  id,
+  data,
+}: {
+  id: string;
+  data: UpdateTenantInput;
+}): Promise<Tenant> => {
+  const response = await fetch(`${getApiUrl()}/tenants/${id}`, {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  return handleResponse<Tenant>(response);
 };

@@ -5,6 +5,7 @@ import type {
   UpdateTenantInput,
 } from "@shared/types/tenant.js";
 import type { TenantRepository } from "./tenant.repository.js";
+import { DEFAULT_TENANT_THEME } from "@shared/design/tenant-themes.js";
 
 function toDate(value: unknown): Date {
   if (value && typeof value === "object" && "toDate" in value) {
@@ -22,7 +23,10 @@ export class FirestoreTenantRepository implements TenantRepository {
       id,
       slug: data.slug,
       legalName: data.legalName,
-      branding: data.branding,
+      branding: {
+        ...data.branding,
+        themePreset: data.branding?.themePreset ?? DEFAULT_TENANT_THEME,
+      },
       activeModules: data.activeModules ?? [],
       status: data.status,
       createdAt: toDate(data.createdAt),

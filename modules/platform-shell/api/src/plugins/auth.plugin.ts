@@ -43,6 +43,20 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
           });
         }
 
+        if (userData.tenantId) {
+          const tenantDoc = await firestore
+            .collection("tenants")
+            .doc(userData.tenantId)
+            .get();
+
+          if (!tenantDoc.exists || tenantDoc.data()?.status !== "ACTIVE") {
+            return reply.status(403).send({
+              success: false,
+              message: "Organizacao inativa ou nao encontrada.",
+            });
+          }
+        }
+
         request.user = {
           uid: decodedToken.uid,
           email: decodedToken.email,

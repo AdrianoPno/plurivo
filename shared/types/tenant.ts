@@ -1,9 +1,11 @@
 import type { ModuleId } from "../constants/modules";
+import type { TenantThemePreset } from "../design/tenant-themes";
 
 export type TenantStatus = "ACTIVE" | "INACTIVE";
 
 export interface TenantBranding {
   displayName: string;
+  themePreset: TenantThemePreset;
   logoUrl?: string;
   primaryColor?: string;
 }

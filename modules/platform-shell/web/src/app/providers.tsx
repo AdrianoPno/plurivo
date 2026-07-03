@@ -4,6 +4,7 @@ import { useState, ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@shared/auth/auth-provider.js";
 import { MODULE_URLS } from "@shared/constants/modules";
+import { TenantProvider } from "@shared/tenant";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -26,7 +27,9 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider profileUrl={`${MODULE_URLS.platformShell.api}/auth/me`}>
-        {children}
+        <TenantProvider tenantUrl={`${MODULE_URLS.platformShell.api}/tenants/current`}>
+          {children}
+        </TenantProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

@@ -20,6 +20,11 @@ export default async function tenantsRoutes(app: FastifyInstance) {
   );
 
   app.addHook("preHandler", app.authenticate);
+
+  app.get("/current", { schema: { tags: ["Tenants"], security: [{ bearerAuth: [] }] } }, (request, reply) =>
+    controller.current(request, reply),
+  );
+
   app.addHook("preHandler", app.checkRoles(["SUPER"]));
 
   app.get("/", { schema: { tags: ["Tenants"], security: [{ bearerAuth: [] }] } }, (request, reply) =>
