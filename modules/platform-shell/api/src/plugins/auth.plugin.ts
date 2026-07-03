@@ -47,6 +47,7 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
           uid: decodedToken.uid,
           email: decodedToken.email,
           nome: userData.nome,
+          tenantId: userData.tenantId,
           role: userData.role as UserRole,
           permissions: (userData.permissions || []) as ModulePermission[],
           ativo: userData.ativo !== false,

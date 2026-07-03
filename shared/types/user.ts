@@ -12,6 +12,7 @@ export interface IUser {
   uid: string;
   nome: string;
   email?: string;
+  tenantId?: string;
   unidadeId?: string;
   unidadeNome?: string;
   role: UserRole; // Global role

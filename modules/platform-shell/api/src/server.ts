@@ -58,6 +58,7 @@ async function bootstrap() {
           name: "Users",
           description: "Endpoints de gerenciamento de usuários",
         },
+        { name: "Tenants", description: "Organizacoes clientes da plataforma" },
       ],
     },
     // CORREÇÃO DO ERRO 500: Ensina o Swagger a ler schemas do Zod

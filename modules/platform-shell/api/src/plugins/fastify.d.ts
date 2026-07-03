@@ -19,6 +19,7 @@ declare module "fastify" {
       uid: string;
       email?: string;
       nome?: string;
+      tenantId?: string;
       role: UserRole;
       permissions: ModulePermission[];
       ativo: boolean;

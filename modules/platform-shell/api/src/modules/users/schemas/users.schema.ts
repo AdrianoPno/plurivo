@@ -15,6 +15,7 @@ const userResponseSchema = z.object({
   email: z.string().email(),
   role: UserRoleEnum,
   ativo: z.boolean(),
+  tenantId: z.string().optional().nullable(),
   unidadeId: z.string().optional().nullable(),
   permissions: z.array(permissionSchema),
   createdAt: z.string().optional(),
@@ -46,6 +47,7 @@ export const createUserSchema = {
       role: UserRoleEnum,
       permissions: z.array(permissionSchema).default([]),
       unidadeId: z.string().optional(),
+      tenantId: z.string().optional(),
     }),
     response: {
       201: z.object({
@@ -68,6 +70,7 @@ export const updateUserSchema = {
     body: z.object({
       nome: z.string().optional(),
       unidadeId: z.string().optional(),
+      tenantId: z.string().optional(),
       role: UserRoleEnum.optional(),
       ativo: z.boolean().optional(),
       permissions: z.array(permissionSchema).optional(),

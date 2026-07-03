@@ -49,6 +49,7 @@ export class UsersController {
         email: user.email,
         role: user.role,
         ativo: user.ativo ?? true,
+        tenantId: user.tenantId || null,
         unidadeId: user.unidadeId || null, // Normaliza undefined para null para casar com o schema
         permissions: user.permissions || [],
         // Converte o Timestamp do Firebase para string ISO se necessário
@@ -117,6 +118,7 @@ export class UsersController {
         email: updatedUser.email,
         role: updatedUser.role || body.role,
         ativo: updatedUser.ativo !== undefined ? updatedUser.ativo : body.ativo,
+        tenantId: updatedUser.tenantId || null,
         unidadeId: updatedUser.unidadeId || null,
         permissions: updatedUser.permissions || body.permissions || [],
         createdAt: parseDate(updatedUser.createdAt),

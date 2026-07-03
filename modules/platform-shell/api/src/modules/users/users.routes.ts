@@ -71,7 +71,11 @@ export default async function usersRoutes(app: FastifyInstance) {
         summary: "Buscar usuário por ID",
       },
     },
-    (req, reply) => controller.show(req, reply),
+    (req, reply) =>
+      controller.show(
+        req as Parameters<UsersController["show"]>[0],
+        reply,
+      ),
   );
 
   // Cria Usuário
@@ -84,7 +88,11 @@ export default async function usersRoutes(app: FastifyInstance) {
         summary: "Criar novo usuário",
       },
     },
-    (req, reply) => controller.store(req, reply),
+    (req, reply) =>
+      controller.store(
+        req as Parameters<UsersController["store"]>[0],
+        reply,
+      ),
   );
 
   // Atualiza Usuário
@@ -97,7 +105,11 @@ export default async function usersRoutes(app: FastifyInstance) {
         summary: "Atualizar dados do usuário",
       },
     },
-    (req, reply) => controller.update(req, reply),
+    (req, reply) =>
+      controller.update(
+        req as Parameters<UsersController["update"]>[0],
+        reply,
+      ),
   );
 
   // Deleta Usuário
@@ -110,6 +122,10 @@ export default async function usersRoutes(app: FastifyInstance) {
         summary: "Remover usuário do sistema",
       },
     },
-    (req, reply) => controller.delete(req, reply),
+    (req, reply) =>
+      controller.delete(
+        req as Parameters<UsersController["delete"]>[0],
+        reply,
+      ),
   );
 }

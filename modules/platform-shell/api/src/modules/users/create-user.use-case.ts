@@ -7,6 +7,7 @@ import { ICreateUserDTO, IUser } from "./types/usuario.types.js";
 
 interface AuthUser {
   role: UserRole;
+  tenantId?: string;
   unidadeId?: string;
 }
 
@@ -55,6 +56,9 @@ export class CreateUserUseCase {
         permissions: permissions || [],
         ativo: true,
         createdAt: new Date(),
+        ...((currentUser.role === "SUPER" ? data.tenantId : currentUser.tenantId)
+          ? { tenantId: currentUser.role === "SUPER" ? data.tenantId : currentUser.tenantId }
+          : {}),
         ...(finalUnidadeId ? { unidadeId: finalUnidadeId } : {}),
       };
 

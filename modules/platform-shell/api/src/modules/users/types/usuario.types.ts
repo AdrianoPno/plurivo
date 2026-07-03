@@ -35,6 +35,7 @@ export interface IUser {
   uid: string; // UID vindo do Firebase Auth
   nome: string;
   email: string;
+  tenantId?: string;
   unidadeId?: string; // Chave mestra para o isolamento multi-tenant (opcional para SUPER)
   unidadeNome?: string; // Nome da unidade, populado pelo back-end para exibição no front-end
   role: UserRole;
@@ -79,6 +80,7 @@ export interface ICreateUserDTO {
   role: UserRole;
   password: string;
   permissions: ModulePermission[];
+  tenantId?: string;
   unidadeId?: string; // Opcional, a lógica de serviço decide
 }
 
