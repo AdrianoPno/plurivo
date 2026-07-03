@@ -212,7 +212,7 @@ export default function AnalyticsPage() {
                 Inteligência operacional
               </h1>
               <p className="text-base leading-relaxed text-white/75">
-                Acompanhe volume, status e investimento das pesquisas do Vox
+                Acompanhe volume, status e investimento das pesquisas
                 Observatory.
               </p>
             </div>

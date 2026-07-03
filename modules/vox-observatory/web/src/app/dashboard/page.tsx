@@ -188,8 +188,8 @@ export default function LibraryPage() {
               </h1>
 
               <p className="text-base leading-relaxed text-white/75">
-                Centralize pesquisas, insights estratégicos e análises do Vox
-                Observatory em uma única plataforma.
+                Centralize pesquisas, descobertas e analises da organizacao em
+                uma unica plataforma.
               </p>
             </div>
           </div>

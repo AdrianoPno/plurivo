@@ -74,15 +74,15 @@ export interface ModuleConfig {
 export const MODULE_CONFIGS: ModuleConfig[] = [
   {
     id: MODULE_IDS.COOP_MANAGER,
-    name: "Coop Manager",
-    description: "Gerenciamento de cooperados e unidades operacionais.",
+    name: "Pessoas e Unidades",
+    description: "Gestao de pessoas, cargos, vagas e unidades operacionais.",
     url: MODULE_URLS.coopManager.web,
     Icon: Users,
   },
   {
     id: MODULE_IDS.VOX_OBSERVATORY,
-    name: "Vox Observatory",
-    description: "Inteligência de pesquisa e laboratório de dados.",
+    name: "Pesquisas e Insights",
+    description: "Pesquisas, descobertas, indicadores e inteligencia organizacional.",
     url: MODULE_URLS.voxObservatory.web,
     Icon: Factory,
   },

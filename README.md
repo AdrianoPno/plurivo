@@ -15,8 +15,8 @@ O ponto central da arquitetura atual e:
 | Modulo | Web | API | Responsabilidade |
 | --- | --- | --- | --- |
 | Platform Shell | `http://localhost:3001` | `http://localhost:3000/api` | Login central, portal, usuarios e permissao de acesso aos modulos. |
-| Vox Observatory | `http://localhost:3003` | `http://localhost:3002` | Pesquisas, inteligencia e observatorio de dados. |
-| Coop Manager | `http://localhost:3005` | `http://localhost:3004/api` | Cooperados, unidades, cargos, vagas, usuarios e indicadores operacionais. |
+| Pesquisas e Insights (`vox-observatory`) | `http://localhost:3003` | `http://localhost:3002` | Pesquisas, descobertas, indicadores e inteligencia organizacional. |
+| Pessoas e Unidades (`coop-manager`) | `http://localhost:3005` | `http://localhost:3004/api` | Pessoas, unidades, cargos, vagas, usuarios e indicadores operacionais. |
 
 ## Stack
 
@@ -162,7 +162,7 @@ Evitar strings soltas como `"vox-observatory"` ou URLs hardcoded espalhadas pelo
 - Controle de `role`, status, unidade e permissoes por modulo.
 - Handoff seguro do `platform-token` para os modulos.
 
-### Coop Manager
+### Pessoas e Unidades (`coop-manager`)
 
 - Dashboard operacional com indicadores por escopo de acesso.
 - Cadastro, edicao, listagem e exclusao de unidades.
@@ -186,7 +186,7 @@ Cargos padrao:
 | Conselho Fiscal | 3 |
 | Operacao | 100 |
 
-### Vox Observatory
+### Pesquisas e Insights (`vox-observatory`)
 
 - Dashboard do observatorio.
 - Pesquisas, analises e telas internas protegidas por SSO.

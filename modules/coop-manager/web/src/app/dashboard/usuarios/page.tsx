@@ -33,9 +33,10 @@ export default function UsuariosPage() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-[32px] border border-border bg-card p-8 text-card-foreground shadow-sm">
-        <h1 className="text-3xl font-semibold text-foreground">Usuários</h1>
-        <p className="mt-3 text-muted-foreground">
+      <div className="relative overflow-hidden rounded-[32px] border border-border bg-[hsl(var(--primary))] p-8 text-primary-foreground shadow-2xl shadow-black/10">
+        <p className="text-sm font-medium text-primary-foreground/70">Pessoas e Unidades</p>
+        <h1 className="mt-4 text-4xl font-bold tracking-tight text-primary-foreground">Usuários</h1>
+        <p className="mt-3 text-primary-foreground/75">
           Controle os perfis que acessam o sistema e as funções atribuídas.
         </p>
       </div>

@@ -5,6 +5,7 @@ import { GlobalSpinner } from "@/components/ui/global-spinner";
 import { MODULE_URLS } from "@shared/constants/modules";
 import { AuthProvider, PrivateRoute } from "@shared/auth";
 import { Toaster } from "@shared/ui/sonner";
+import { TenantProvider } from "@shared/tenant";
 
 export default function DashboardLayout({
   children,
@@ -19,6 +20,7 @@ export default function DashboardLayout({
     <QueryProvider>
       <SsoTokenHandoff>
         <AuthProvider profileUrl={`${voxApiUrl}/users/me`}>
+          <TenantProvider tenantUrl={`${MODULE_URLS.platformShell.api}/tenants/current`}>
           <PrivateRoute redirectTo={`${MODULE_URLS.platformShell.web}/login`}>
             <div className="flex min-h-screen bg-background text-foreground">
               <Sidebar />
@@ -38,6 +40,7 @@ export default function DashboardLayout({
               }}
             />
           </PrivateRoute>
+          </TenantProvider>
         </AuthProvider>
       </SsoTokenHandoff>
     </QueryProvider>

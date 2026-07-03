@@ -12,7 +12,7 @@ export function TenantProvider({ children, tenantUrl }: { children: ReactNode; t
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!user || !token || !user.tenantId) {
+    if (!user || !token) {
       setTenant(null);
       return;
     }

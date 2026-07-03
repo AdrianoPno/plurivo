@@ -85,11 +85,11 @@ export default function SettingsPage() {
     <ModuleSettingsPage
       user={user}
       moduleId={MODULE_IDS.COOP_MANAGER}
-      moduleName="Coop Manager"
+      moduleName="Pessoas e Unidades"
       moduleDescription="Preferencias, permissoes e informacoes de suporte da gestao de cooperados."
       moduleIcon={LayoutGrid}
       moduleApiUrl={coopApiUrl}
-      accessDescription="Veja qual e o seu nivel de acesso dentro do Coop e qual escopo operacional esta liberado para sua conta."
+      accessDescription="Veja seu nivel de acesso e o escopo operacional liberado para sua conta."
       permissionCapabilities={permissionCapabilities}
       preferences={preferences}
       adminActions={adminActions}

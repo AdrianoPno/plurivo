@@ -10,12 +10,12 @@ const permissionCapabilities = {
   SUPER: [
     "Acessar todos os modulos e telas da plataforma.",
     "Gerenciar usuarios, permissoes e acessos pela Platform.",
-    "Visualizar e operar todas as pesquisas do Vox.",
+    "Visualizar e operar todas as pesquisas da organizacao.",
   ],
   ADMIN: [
     "Criar, editar e acompanhar pesquisas.",
     "Visualizar analytics e indicadores do observatorio.",
-    "Acessar configuracoes operacionais do Vox.",
+    "Acessar configuracoes operacionais do modulo.",
   ],
   USER: [
     "Acessar pesquisas permitidas para sua conta.",
@@ -70,11 +70,11 @@ export default function SettingsPage() {
       <ModuleSettingsPage
         user={user}
         moduleId={MODULE_IDS.VOX_OBSERVATORY}
-        moduleName="Vox Observatory"
+        moduleName="Pesquisas e Insights"
         moduleDescription="Preferencias, permissoes e informacoes de suporte do observatorio de pesquisas."
         moduleIcon={BotMessageSquare}
         moduleApiUrl={voxApiUrl}
-        accessDescription="Veja qual e o seu nivel de acesso dentro do Vox e quais acoes estao liberadas para sua conta."
+        accessDescription="Veja seu nivel de acesso e quais acoes estao liberadas para sua conta."
         permissionCapabilities={permissionCapabilities}
         preferences={preferences}
         adminActions={adminActions}

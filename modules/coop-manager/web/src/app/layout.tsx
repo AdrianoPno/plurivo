@@ -10,8 +10,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Coop Manager",
-  description: "Gestao de cooperados, unidades e usuarios",
+  title: "Pessoas e Unidades",
+  description: "Gestao de pessoas, cargos, vagas e unidades operacionais",
 };
 
 export default function RootLayout({

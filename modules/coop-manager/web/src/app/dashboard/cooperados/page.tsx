@@ -272,16 +272,16 @@ export default function CooperadosPage() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-[32px] border border-border bg-card p-8 text-card-foreground shadow-sm">
+      <div className="relative overflow-hidden rounded-[32px] border border-border bg-[hsl(var(--primary))] p-8 text-primary-foreground shadow-2xl shadow-black/10">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.28em] text-primary">
+            <p className="text-sm font-medium text-primary-foreground/70">
               Cooperados
             </p>
-            <h1 className="mt-4 text-3xl font-semibold text-foreground">
+            <h1 className="mt-4 text-4xl font-bold tracking-tight text-primary-foreground">
               Gestao de cooperados
             </h1>
-            <p className="mt-3 max-w-2xl text-muted-foreground">
+            <p className="mt-3 max-w-2xl text-primary-foreground/75">
               Cadastre, edite e acompanhe o vinculo operacional dos cooperados.
             </p>
           </div>
@@ -295,7 +295,7 @@ export default function CooperadosPage() {
             </Button>
 
             {canWrite && (
-              <Button onClick={openCreateDialog}>
+              <Button onClick={openCreateDialog} className="bg-white text-[hsl(var(--primary))] hover:bg-white/90">
                 <Plus className="mr-2 size-4" />
                 Adicionar cooperado
               </Button>

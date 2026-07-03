@@ -32,7 +32,7 @@ Transformar a plataforma em um produto SaaS no qual cada organizacao possui iden
 - [x] Validar status do tenant durante a autenticacao.
 - [ ] Validar se o modulo solicitado esta ativo para o tenant.
 
-## Fase 3 - Isolamento no Coop Manager
+## Fase 3 - Isolamento em Pessoas e Unidades (`coop-manager`)
 
 - [ ] Adicionar `tenantId` a unidades, cooperados e cargos.
 - [ ] Filtrar todas as consultas pelo tenant autenticado.
@@ -40,7 +40,7 @@ Transformar a plataforma em um produto SaaS no qual cada organizacao possui iden
 - [ ] Criar indices compostos necessarios no Firestore.
 - [ ] Testar tentativa de acesso cruzado entre organizacoes.
 
-## Fase 4 - Isolamento no Vox Observatory
+## Fase 4 - Isolamento em Pesquisas e Insights (`vox-observatory`)
 
 - [ ] Adicionar `tenantId` a pesquisas e perfis locais.
 - [ ] Filtrar todas as consultas pelo tenant autenticado.
