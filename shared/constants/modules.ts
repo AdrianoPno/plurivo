@@ -79,6 +79,7 @@ export interface ModuleConfig {
   name: string;
   description: string;
   url: string;
+  healthUrl: string;
   Icon: ElementType;
 }
 
@@ -91,6 +92,7 @@ export const MODULE_CONFIGS: ModuleConfig[] = [
     name: "Pessoas e Unidades",
     description: "Gestao de pessoas, cargos, vagas e unidades operacionais.",
     url: MODULE_URLS.coopManager.web,
+    healthUrl: `${MODULE_URLS.coopManager.api.replace(/\/$/, "")}/health`,
     Icon: Users,
   },
   {
@@ -98,6 +100,12 @@ export const MODULE_CONFIGS: ModuleConfig[] = [
     name: "Pesquisas e Insights",
     description: "Pesquisas, descobertas, indicadores e inteligencia organizacional.",
     url: MODULE_URLS.voxObservatory.web,
+    healthUrl: `${MODULE_URLS.voxObservatory.api.replace(/\/$/, "")}/health`,
     Icon: Factory,
   },
 ];
+
+export const PLURIVO_HEALTH_URL = `${MODULE_URLS.platformShell.api.replace(
+  /\/$/,
+  "",
+)}/health`;

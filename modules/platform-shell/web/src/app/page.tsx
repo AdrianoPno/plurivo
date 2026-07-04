@@ -15,7 +15,10 @@ import {
 
 import { PrivateRoute } from "@shared/auth/private-route.js";
 import { useAuth } from "@shared/auth/auth-context.js";
-import { MODULE_CONFIGS } from "@shared/constants/modules";
+import {
+  MODULE_CONFIGS,
+  PLURIVO_HEALTH_URL,
+} from "@shared/constants/modules";
 import type { ModuleConfig } from "@shared/constants/modules";
 import { useTenant } from "@shared/tenant";
 
@@ -29,6 +32,7 @@ import {
 } from "@shared/ui/app-layout";
 import { Button } from "@shared/ui/button";
 import { Card } from "@shared/ui/card";
+import { ServiceStatus } from "@shared/ui/service-status";
 
 function getModuleUrl(module: ModuleConfig) {
   const baseUrl = new URL(module.url);
@@ -69,8 +73,15 @@ function ModuleCard({
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-accent/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:ring-primary">
-        <module.Icon className="h-7 w-7" />
+      <div className="relative flex items-start justify-between gap-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:ring-primary">
+          <module.Icon className="h-7 w-7" />
+        </div>
+
+        <ServiceStatus
+          healthUrl={module.healthUrl}
+          serviceName={module.name}
+        />
       </div>
 
       <div className="relative mt-7 flex-1">
@@ -143,6 +154,11 @@ function Dashboard() {
                     <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                     {user.role}
                   </span>
+
+                  <ServiceStatus
+                    healthUrl={PLURIVO_HEALTH_URL}
+                    serviceName="Plurivo API"
+                  />
                 </div>
               )}
             </div>
