@@ -1,11 +1,11 @@
 export const APP = {
-  NAME: "VOX Platform",
+  NAME: "Plurivo",
 
-  DESCRIPTION: "Plataforma modular corporativa da Recicleiros",
+  DESCRIPTION: "Gestao modular que evolui com a sua operacao",
 
   VERSION: "1.0.0",
 
-  COMPANY: "Recicleiros",
+  COMPANY: "Plurivo",
 
   DEFAULT_LANGUAGE: "pt-BR",
 
@@ -13,7 +13,7 @@ export const APP = {
 
   SUPPORT_EMAIL: "drisays@gmail.com",
 
-  STORAGE_PREFIX: "vox",
+  STORAGE_PREFIX: "plurivo",
 
   PAGINATION: {
     DEFAULT_PAGE: 1,

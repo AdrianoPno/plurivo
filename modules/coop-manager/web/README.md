@@ -2,7 +2,7 @@
 
 Frontend Next.js do modulo Coop Manager.
 
-Este app faz parte do monorepo Recicleiros Platform e deve ser acessado pelo fluxo de SSO do `platform-shell`. Ele nao possui login proprio.
+Este app faz parte do monorepo Plurivo e deve ser acessado pelo fluxo de SSO do `platform-shell`. Ele nao possui login proprio.
 
 ## Responsabilidades
 

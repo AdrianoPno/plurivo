@@ -26,7 +26,7 @@ const adminAuth = getAuth();
 const db = getFirestore();
 
 const SUPER_USER = {
-  email: "admin@recicleiros.com.br",
+  email: "admin@plurivo.local",
   password: "Mudar@Senha123!",
   displayName: "Administrador Root",
 };

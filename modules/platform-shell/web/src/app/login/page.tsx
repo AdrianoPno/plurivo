@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Recycle } from "lucide-react";
+import { Blocks } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { LoginForm } from "@/components/login-form";
@@ -32,16 +32,15 @@ export default function LoginPage() {
         <div className="mx-auto grid w-full max-w-7xl items-center gap-10 px-6 py-12 lg:grid-cols-[1fr_28rem]">
           <div className="max-w-2xl">
             <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-primary text-primary-foreground shadow-sm">
-              <Recycle className="h-7 w-7" />
+              <Blocks className="h-7 w-7" />
             </div>
 
             <h1 className="mt-8 text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-              Plataforma Recicleiros
+              Plurivo
             </h1>
 
             <p className="mt-5 text-base leading-7 text-muted-foreground md:text-lg">
-              Acesse o portal central para entrar nos modulos disponiveis para
-              sua conta.
+              Gestao modular que evolui com a sua operacao.
             </p>
           </div>
 

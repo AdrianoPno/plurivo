@@ -1,5 +1,5 @@
 export const env = {
-  appName: process.env.NEXT_PUBLIC_APP_NAME ?? "VOX Platform",
+  appName: process.env.NEXT_PUBLIC_APP_NAME ?? "Plurivo",
 
   firebaseApiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   firebaseAuthDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

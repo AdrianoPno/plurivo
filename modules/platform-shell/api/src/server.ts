@@ -38,7 +38,7 @@ async function bootstrap() {
   await app.register(swagger, {
     openapi: {
       info: {
-        title: "Recicleiros - Platform Shell API",
+        title: "Plurivo - Platform Shell API",
         description:
           "API do módulo principal da plataforma, responsável pela orquestração de autenticação e usuários.",
         version: "1.0.0",

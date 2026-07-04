@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Plataforma Recicleiros",
-  description: "Portal de acesso aos módulos da plataforma.",
+  title: "Plurivo",
+  description: "Gestao modular que evolui com a sua operacao.",
 };
 
 export default function RootLayout({

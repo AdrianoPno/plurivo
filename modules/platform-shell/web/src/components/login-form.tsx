@@ -89,7 +89,7 @@ export function LoginForm() {
           onChange={(event) => setEmail(event.target.value)}
           required
           disabled={isLoading}
-          placeholder="voce@recicleiros.org.br"
+          placeholder="voce@empresa.com.br"
         />
       </div>
 

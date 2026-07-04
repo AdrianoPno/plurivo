@@ -1,6 +1,6 @@
-# Recicleiros Platform
+# Plurivo
 
-Monorepo da plataforma Recicleiros, organizado em modulos independentes com uma base compartilhada de autenticacao, tipos, constantes, componentes UI e tokens visuais.
+Plataforma SaaS modular para gestao operacional, organizada em modulos independentes com uma base compartilhada de autenticacao, tipos, constantes, componentes UI e tokens visuais.
 
 O ponto central da arquitetura atual e:
 
