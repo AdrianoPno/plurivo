@@ -5,6 +5,9 @@
     "modules/*/api"
   ],
   "packageManager": "pnpm@10.33.3",
+  "engines": {
+    "node": ">=20.20.0 <21"
+  },
   "scripts": {
     "dev:platform:api": "pnpm --filter ./modules/platform-shell/api dev",
     "dev:platform:web": "pnpm --filter ./modules/platform-shell/web dev",
