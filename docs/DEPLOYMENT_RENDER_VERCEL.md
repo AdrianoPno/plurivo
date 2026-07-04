@@ -23,7 +23,9 @@ Se o provedor atribuir uma URL diferente, use a URL efetivamente exibida no pain
 - Branch de producao recomendada: `main`
 - Auto-Deploy: habilitado depois de validar o primeiro deploy
 
-Variaveis comuns para as tres APIs:
+### O que cadastrar em cada servico
+
+Em **cada um dos tres servicos** (`plurivo-api`, `plurivo-research-api` e `plurivo-people-api`), abra `Environment` e cadastre exatamente:
 
 ```env
 NODE_VERSION=20.20.2
@@ -31,11 +33,48 @@ GOOGLE_APPLICATION_CREDENTIALS=/etc/secrets/firebase-key.json
 CORS_ORIGINS=https://plurivo-web.vercel.app,https://plurivo-research-web.vercel.app,https://plurivo-people-web.vercel.app
 ```
 
-No Render, crie um Secret File chamado `firebase-key.json` com o conteudo da conta de servico Firebase. Nao cadastre o JSON como variavel publica e nao o envie ao Git.
+Resumo por servico:
+
+| Servico Render | `NODE_VERSION` | `GOOGLE_APPLICATION_CREDENTIALS` | `CORS_ORIGINS` |
+| --- | --- | --- | --- |
+| `plurivo-api` | `20.20.2` | `/etc/secrets/firebase-key.json` | URLs dos tres frontends |
+| `plurivo-research-api` | `20.20.2` | `/etc/secrets/firebase-key.json` | URLs dos tres frontends |
+| `plurivo-people-api` | `20.20.2` | `/etc/secrets/firebase-key.json` | URLs dos tres frontends |
+
+Depois, em **cada servico**, abra `Environment > Secret Files` e crie:
+
+```text
+Filename: firebase-key.json
+Contents: conteudo completo do JSON da conta de servico Firebase
+```
+
+O nome do Secret File e o caminho de `GOOGLE_APPLICATION_CREDENTIALS` precisam corresponder. Nao cole o JSON diretamente em uma variavel, nao use prefixo `NEXT_PUBLIC_` e nao envie esse arquivo ao Git.
+
+### CORS durante a migracao
+
+Enquanto os frontends antigos ainda estiverem ativos, use temporariamente este valor nos tres servicos:
+
+```env
+CORS_ORIGINS=https://recicleiros-platform-web.vercel.app,https://vox-observatory-web.vercel.app,https://coop-manager-web.vercel.app,https://plurivo-web.vercel.app,https://plurivo-research-web.vercel.app,https://plurivo-people-web.vercel.app
+```
+
+Quando os tres frontends Plurivo estiverem publicados e testados, remova as URLs antigas e mantenha apenas:
+
+```env
+CORS_ORIGINS=https://plurivo-web.vercel.app,https://plurivo-research-web.vercel.app,https://plurivo-people-web.vercel.app
+```
 
 O Render injeta `PORT` automaticamente. Nao configure `PORT` em producao.
 
 As APIs nao precisam conhecer a propria URL. Variaveis `NEXT_PUBLIC_*` pertencem somente aos frontends na Vercel.
+
+Portanto, **nao cadastre no Render**:
+
+```text
+NEXT_PUBLIC_PLURIVO_API_URL
+NEXT_PUBLIC_RESEARCH_API_URL
+NEXT_PUBLIC_PEOPLE_API_URL
+```
 
 ## Plurivo API no Render
 
@@ -62,13 +101,13 @@ https://plurivo-api.onrender.com/api/health
 Build Command:
 
 ```bash
-corepack enable && pnpm install --frozen-lockfile && pnpm --filter=vox-observatory-api... build
+corepack enable && pnpm install --frozen-lockfile && pnpm --filter=./modules/vox-observatory/api... build
 ```
 
 Start Command:
 
 ```bash
-pnpm --filter=vox-observatory-api start
+pnpm --filter=./modules/vox-observatory/api start
 ```
 
 Health check:
