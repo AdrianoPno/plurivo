@@ -4,6 +4,7 @@ import { MODULE_URLS } from "@shared/constants/modules";
 
 const api = axios.create({
   baseURL:
+    process.env.NEXT_PUBLIC_RESEARCH_API_URL ||
     process.env.NEXT_PUBLIC_VOX_OBSERVATORY_API_URL ||
     MODULE_URLS.voxObservatory.api,
 });

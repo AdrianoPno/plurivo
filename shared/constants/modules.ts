@@ -8,25 +8,39 @@ import { Factory, Users } from "lucide-react";
 export const MODULE_URLS = {
   platformShell: {
     web:
-      process.env.NEXT_PUBLIC_PLATFORM_SHELL_WEB_URL || "http://localhost:3001",
+      process.env.NEXT_PUBLIC_PLURIVO_WEB_URL ||
+      process.env.PLURIVO_WEB_URL ||
+      process.env.NEXT_PUBLIC_PLATFORM_SHELL_WEB_URL ||
+      "http://localhost:3001",
     api:
+      process.env.NEXT_PUBLIC_PLURIVO_API_URL ||
+      process.env.PLURIVO_API_URL ||
       process.env.NEXT_PUBLIC_PLATFORM_SHELL_API_URL ||
       "http://localhost:3000/api",
   },
 
   voxObservatory: {
     web:
+      process.env.NEXT_PUBLIC_RESEARCH_WEB_URL ||
+      process.env.RESEARCH_WEB_URL ||
       process.env.NEXT_PUBLIC_VOX_OBSERVATORY_WEB_URL ||
       "http://localhost:3003",
     api:
+      process.env.NEXT_PUBLIC_RESEARCH_API_URL ||
+      process.env.RESEARCH_API_URL ||
       process.env.NEXT_PUBLIC_VOX_OBSERVATORY_API_URL ||
       "http://localhost:3002",
   },
 
   coopManager: {
     web:
-      process.env.NEXT_PUBLIC_COOP_MANAGER_WEB_URL || "http://localhost:3005",
+      process.env.NEXT_PUBLIC_PEOPLE_WEB_URL ||
+      process.env.PEOPLE_WEB_URL ||
+      process.env.NEXT_PUBLIC_COOP_MANAGER_WEB_URL ||
+      "http://localhost:3005",
     api:
+      process.env.NEXT_PUBLIC_PEOPLE_API_URL ||
+      process.env.PEOPLE_API_URL ||
       process.env.NEXT_PUBLIC_COOP_MANAGER_API_URL ||
       "http://localhost:3004/api",
   },

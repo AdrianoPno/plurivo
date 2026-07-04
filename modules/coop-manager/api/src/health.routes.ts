@@ -14,7 +14,7 @@ export default async function healthRoutes(app: FastifyInstance) {
     async (_req, reply) => {
       return reply.status(200).send({
         status: "active",
-        message: "Coop Manager API está ativa",
+        message: "People API esta ativa",
         uptime: process.uptime(),
       });
     },

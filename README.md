@@ -348,64 +348,12 @@ Esses arquivos devem existir apenas no ambiente local ou em secrets do provedor 
 
 ## Variaveis e deploy
 
-O projeto usa dois tipos de variaveis:
+A configuracao atual usa os nomes Plurivo, Research e People. Consulte o guia completo de servicos, comandos, variaveis e ordem de migracao em [Deploy no Render e Vercel](docs/DEPLOYMENT_RENDER_VERCEL.md).
 
-- `NEXT_PUBLIC_*`: variaveis publicas embutidas no bundle dos apps Next. Quando mudar uma delas, faca novo deploy na Vercel.
-- Variaveis backend-only: usadas nas APIs no Render, como `FIREBASE_KEY_PATH`, `FIREBASE_STORAGE_BUCKET` e `CORS_ORIGINS`.
-
-URLs atuais de producao:
-
-| Servico | URL |
-| --- | --- |
-| Platform Web | `https://recicleiros-platform-web.vercel.app` |
-| Platform API | `https://recicleiros-api-shell.onrender.com/api` |
-| Vox Web | `https://vox-observatory-web.vercel.app` |
-| Vox API | `https://recicleiros-api-vox.onrender.com` |
-| Coop Web | `https://coop-manager-web.vercel.app` |
-| Coop API | `https://recicleiros-api-coop.onrender.com/api` |
-
-Variaveis principais para Vercel Web:
-
-```txt
-NEXT_PUBLIC_FIREBASE_API_KEY
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-NEXT_PUBLIC_FIREBASE_PROJECT_ID
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-NEXT_PUBLIC_FIREBASE_APP_ID
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
-NEXT_PUBLIC_PLATFORM_SHELL_WEB_URL
-NEXT_PUBLIC_PLATFORM_SHELL_API_URL
-NEXT_PUBLIC_VOX_OBSERVATORY_WEB_URL
-NEXT_PUBLIC_VOX_OBSERVATORY_API_URL
-NEXT_PUBLIC_COOP_MANAGER_WEB_URL
-NEXT_PUBLIC_COOP_MANAGER_API_URL
-```
-
-Variaveis principais para Render API:
-
-```txt
-CORS_ORIGINS
-FIREBASE_KEY_PATH
-FIREBASE_STORAGE_BUCKET
-GOOGLE_APPLICATION_CREDENTIALS
-NEXT_PUBLIC_PLATFORM_SHELL_WEB_URL
-NEXT_PUBLIC_PLATFORM_SHELL_API_URL
-NEXT_PUBLIC_VOX_OBSERVATORY_WEB_URL
-NEXT_PUBLIC_VOX_OBSERVATORY_API_URL
-NEXT_PUBLIC_COOP_MANAGER_WEB_URL
-NEXT_PUBLIC_COOP_MANAGER_API_URL
-```
-
-No Render, o `PORT` e injetado automaticamente. Nao fixe `PORT` em producao.
-
-Configuracao recomendada na Vercel:
-
-- Apps web: Framework Preset `Next.js`.
-- Root Directory do Coop Web: `modules/coop-manager/web`.
-- Root Directory do Vox Web: `modules/vox-observatory/web`.
-- Root Directory do Platform Web: `modules/platform-shell/web`.
-- Build Command pode ficar no padrao do pacote ou usar `pnpm build` dentro do root do app.
+- `NEXT_PUBLIC_*` e usado somente nos frontends da Vercel.
+- APIs no Render usam `NODE_VERSION`, `CORS_ORIGINS` e `GOOGLE_APPLICATION_CREDENTIALS`.
+- O Render injeta `PORT` automaticamente.
+- Variaveis antigas continuam aceitas apenas como fallback temporario.
 
 ## Revisao atual do projeto
 

@@ -46,9 +46,10 @@ modules/coop-manager/web/.env.local
 Variaveis principais:
 
 ```txt
-NEXT_PUBLIC_COOP_MANAGER_WEB_URL=http://localhost:3005
-NEXT_PUBLIC_COOP_MANAGER_API_URL=http://localhost:3004/api
-NEXT_PUBLIC_PLATFORM_SHELL_WEB_URL=http://localhost:3001
+NEXT_PUBLIC_PEOPLE_WEB_URL=http://localhost:3005
+NEXT_PUBLIC_PEOPLE_API_URL=http://localhost:3004/api
+NEXT_PUBLIC_PLURIVO_WEB_URL=http://localhost:3001
+NEXT_PUBLIC_PLURIVO_API_URL=http://localhost:3000/api
 
 NEXT_PUBLIC_FIREBASE_API_KEY=
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
@@ -77,10 +78,10 @@ Configuracao recomendada:
 - Build Command: `pnpm build`
 - Node.js: 20.x ou versao suportada pelo projeto
 
-URL atual de producao:
+URL planejada de producao:
 
 ```txt
-https://coop-manager-web.vercel.app
+https://plurivo-people-web.vercel.app
 ```
 
 ## Padroes obrigatorios
@@ -94,10 +95,10 @@ https://coop-manager-web.vercel.app
 
 ## API esperada
 
-O app consome a API do Coop Manager por:
+O app consome a People API por:
 
 ```txt
-NEXT_PUBLIC_COOP_MANAGER_API_URL
+NEXT_PUBLIC_PEOPLE_API_URL
 ```
 
 Rotas principais:

@@ -22,7 +22,7 @@ export async function healthRoutes(fastify: FastifyInstance) {
     },
     async () => ({
       status: "active",
-      message: "Vox Observatory API está ativa",
+      message: "Research API esta ativa",
       uptime: process.uptime(),
     }),
   );

@@ -4,7 +4,9 @@ import { MODULE_URLS } from "@shared/constants/modules";
 
 const api = axios.create({
   baseURL:
-    process.env.NEXT_PUBLIC_COOP_MANAGER_API_URL || MODULE_URLS.coopManager.api,
+    process.env.NEXT_PUBLIC_PEOPLE_API_URL ||
+    process.env.NEXT_PUBLIC_COOP_MANAGER_API_URL ||
+    MODULE_URLS.coopManager.api,
 });
 
 api.interceptors.request.use((config) => {

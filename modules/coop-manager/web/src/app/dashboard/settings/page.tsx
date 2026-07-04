@@ -79,7 +79,9 @@ const adminActions = [
 export default function SettingsPage() {
   const { user } = useAuth();
   const coopApiUrl =
-    process.env.NEXT_PUBLIC_COOP_MANAGER_API_URL || MODULE_URLS.coopManager.api;
+    process.env.NEXT_PUBLIC_PEOPLE_API_URL ||
+    process.env.NEXT_PUBLIC_COOP_MANAGER_API_URL ||
+    MODULE_URLS.coopManager.api;
 
   return (
     <ModuleSettingsPage

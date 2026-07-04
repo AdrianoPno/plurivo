@@ -11,8 +11,8 @@ import {
 } from "fastify-type-provider-zod";
 import routes from "./routes.js";
 import { authPlugin } from "./plugins/auth.plugin.js";
-import { MODULE_URLS } from "@shared/constants/modules.js";
 import { errorHandler } from "@shared/utils/error-handler.js";
+import { getAllowedOrigins } from "@shared/config/cors-origins.js";
 
 const app = Fastify({
   logger: {
@@ -79,14 +79,8 @@ async function bootstrap() {
 
   await app.register(helmet, { contentSecurityPolicy: false });
 
-  const allowedOrigins = [
-    MODULE_URLS.platformShell.web,
-    MODULE_URLS.voxObservatory.web,
-    MODULE_URLS.coopManager.web,
-  ];
-
   await app.register(cors, {
-    origin: allowedOrigins,
+    origin: getAllowedOrigins(),
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });

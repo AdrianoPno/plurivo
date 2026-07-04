@@ -8,7 +8,7 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
-import { MODULE_URLS } from "@shared/constants/modules.js";
+import { getAllowedOrigins } from "@shared/config/cors-origins.js";
 import { authenticatePlugin } from "./interfaces/http/plugins/authenticate.js";
 import { researchRoutes } from "./interfaces/http/routes/research.routes.js";
 import { userRoutes } from "./interfaces/http/routes/user.routes.js";
@@ -38,14 +38,8 @@ async function bootstrap() {
     },
   );
 
-  const allowedOrigins = [
-    MODULE_URLS.platformShell.web,
-    MODULE_URLS.voxObservatory.web,
-    MODULE_URLS.coopManager.web,
-  ];
-
   await app.register(cors, {
-    origin: allowedOrigins,
+    origin: getAllowedOrigins(),
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });

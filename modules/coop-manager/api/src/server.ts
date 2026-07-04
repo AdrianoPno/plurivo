@@ -7,7 +7,7 @@ import {
   validatorCompiler,
 } from "fastify-type-provider-zod";
 
-import { MODULE_URLS } from "@shared/constants/modules.js";
+import { getAllowedOrigins } from "@shared/config/cors-origins.js";
 import { errorHandler } from "@shared/utils/error-handler.js";
 
 import { setupSwagger } from "./config/swagger.js";
@@ -29,11 +29,7 @@ async function bootstrap() {
   });
 
   await app.register(cors, {
-    origin: [
-      MODULE_URLS.platformShell.web,
-      MODULE_URLS.voxObservatory.web,
-      MODULE_URLS.coopManager.web,
-    ],
+    origin: getAllowedOrigins(),
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });

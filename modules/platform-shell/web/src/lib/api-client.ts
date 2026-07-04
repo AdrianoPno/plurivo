@@ -22,6 +22,7 @@ export type IUpdateUserPayload = Partial<
 >;
 
 const getApiUrl = () =>
+  process.env.NEXT_PUBLIC_PLURIVO_API_URL ??
   process.env.NEXT_PUBLIC_PLATFORM_SHELL_API_URL ??
   MODULE_URLS.platformShell.api;
 
